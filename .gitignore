@@ -1,0 +1,57 @@
+# Build outputs
+Debug/
+Release/
+x64/
+x86/
+bin/
+obj/
+*.obj
+*.exe
+*.dll
+*.pdb
+*.ilk
+*.log
+*.tlog
+*.idb
+*.exp
+*.lib
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.opendb
+ipch/
+*.aps
+
+# Compiled shaders (regenerated on build)
+*.cso
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Backup files
+*.bak
+*.tmp
+*~
+
+# Third-party libraries (not our source code)
+ImGui/
+DirectXTK/
+
+# Assets (binary files)
+Assets/
+
+# Documentation and tools
+Documents/
+Tools/
+
+# Other project files
+Photonics/
+*.ico
+*.rc
+settings.manifest
