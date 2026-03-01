@@ -23,13 +23,7 @@ void MainMenuScene::Initialize(DX::DeviceResources* deviceResources)
     m_background = std::make_unique<MenuBackground>(deviceResources);
     m_background->Initialize();
     m_background->SetShaderType(MenuBackground::ShaderType::Wave);
-    m_background->SetColorTint(1.0f, 1.0f, 1.0f);
-
-    //m_background->SetSpeed(0.5f);           // Slow animation
-    //m_background->SetPatternScale(10.0f);    // Fewer rings
-    //m_background->SetWarpIntensity(1.0f);   // Less distortion
-    //m_background->SetBrightness(0.015f);    // Dimmer lines
-    //m_background->SetChromaticOffset(0.1f); // Less RGB split
+    m_background->SetColorTint(0.8f, 0.5f, 0.8f);
 
     m_audioManager = std::make_unique<AudioManager>();
     m_audioManager->initialize();

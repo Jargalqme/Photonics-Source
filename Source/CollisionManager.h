@@ -7,6 +7,7 @@
 #include "CollisionSystem.h"
 #include <vector>
 #include <memory>
+#include <unordered_set>
 
 class CollisionManager
 {
@@ -18,7 +19,9 @@ public:
 		Core* coreBlue,
 		DeathBeamPool* deathBeams,
 		BeamWeapon* beamWeapon,
-		bool isOnBeat
+		bool isOnBeat,
+		const Vector3& cameraPosition,
+		const Vector3& cameraForward
 	);
 private:
 	void CheckEnemyVsCores(
@@ -31,6 +34,12 @@ private:
 	void CheckBeamVsEnemies(
 		std::vector<std::unique_ptr<Enemy>>& enemies,
 		BeamWeapon* beamWeapon,
-		DeathBeamPool* deathBeams
+		DeathBeamPool* deathBeams,
+		const Vector3& cameraPosition,
+		const Vector3& cameraForward
 	);
+	
+	// Track enemies already hit during current shot
+	std::unordered_set<Enemy*> m_hitEnemiesThisShot;
+	bool m_wasCollisionActive = false;
 };

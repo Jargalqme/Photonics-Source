@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include <DirectXCollision.h>
 
-// Groups our functions together
 namespace CollisionSystem
 {
 	// Sphere vs Sphere
@@ -10,7 +9,7 @@ namespace CollisionSystem
 		const DirectX::BoundingSphere& a,
 		const DirectX::BoundingSphere& b);
 
-	// Ray vs Sphere (for BeamWeapon)
+	// Ray vs Sphere
 	// Returns true if ray hits sphere
 	// outDistance = how far along ray the hit occurred
 	bool CheckRaySphere(

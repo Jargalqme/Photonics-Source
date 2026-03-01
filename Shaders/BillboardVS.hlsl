@@ -2,26 +2,26 @@
 {
     matrix ViewProjection;
     float3 WorldPosition;
-    float BillboardSize;
+    float  BillboardSize;
     float3 CameraRight;
-    float FrameOffsetU;
+    float  FrameOffsetU;
     float3 CameraUp;
-    float FrameOffsetV;
-    float FrameSizeU;
-    float FrameSizeV;
+    float  FrameOffsetV;
+    float  FrameSizeU;
+    float  FrameSizeV;
     float2 Padding;
 };
 
 struct VSInput
 {
     float3 position : POSITION;
-    float2 uv : TEXCOORD0;
+    float2 uv       : TEXCOORD0;
 };
 
 struct PSInput
 {
     float4 position : SV_POSITION;
-    float2 uv : TEXCOORD0;
+    float2 uv       : TEXCOORD0;
 };
 
 PSInput main(VSInput input)
@@ -30,7 +30,7 @@ PSInput main(VSInput input)
 
     float3 worldPos = WorldPosition
           + CameraRight * (input.position.x * BillboardSize)
-          + CameraUp * (input.position.y * BillboardSize);
+          + CameraUp    * (input.position.y * BillboardSize);
 
     output.position = mul(float4(worldPos, 1.0), ViewProjection);
 

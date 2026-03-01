@@ -1,5 +1,5 @@
-﻿#include "pch.h"
-#include "LightCycle.h"
+#include "pch.h"
+#include "Player.h"
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
@@ -33,7 +33,7 @@ LightCycle::LightCycle(DX::DeviceResources* deviceResources)
 
 void LightCycle::Initialize()
 {
-    BuildBB_8();
+    BuildWeapon();
 }
 
 void LightCycle::Update(float deltaTime)
@@ -115,14 +115,14 @@ void LightCycle::OnDeviceLost()
 
 void LightCycle::Accelerate(float deltaTime)
 {
-	m_speed += m_acceleration * deltaTime;
-	if (m_speed > m_maxSpeed) m_speed = m_maxSpeed;
+    m_speed += m_acceleration * deltaTime;
+    if (m_speed > m_maxSpeed) m_speed = m_maxSpeed;
 }
 
 void LightCycle::Brake(float deltaTime)
 {
-	m_speed -= m_brakeForce * deltaTime;
-	if (m_speed < -m_maxSpeed * 0.3f) m_speed = -m_maxSpeed * 0.3f; // Reverse is slower
+    m_speed -= m_brakeForce * deltaTime;
+    if (m_speed < -m_maxSpeed * 0.3f) m_speed = -m_maxSpeed * 0.3f; // Reverse is slower
 }
 
 void LightCycle::Turn(float direction, float deltaTime)
@@ -164,7 +164,7 @@ void LightCycle::Reset()
 
 Vector3 LightCycle::GetForward() const
 {
-	return Vector3(std::sin(m_transform.rotation.y), 0.0f, std::cos(m_transform.rotation.y));
+    return Vector3(std::sin(m_transform.rotation.y), 0.0f, std::cos(m_transform.rotation.y));
 }
 
 void LightCycle::MoveInDirection(const Vector3& moveDirection, const Vector3& facingDirection, float deltaTime)
@@ -180,20 +180,29 @@ void LightCycle::MoveInDirection(const Vector3& moveDirection, const Vector3& fa
         }
     }
 
-    // FACING: Always face camera direction
-    Vector3 faceDir = facingDirection;
-    faceDir.y = 0.0f;  // Keep on horizontal plane
-
-    if (faceDir.LengthSquared() > 0.001f)
-    {
-        faceDir.Normalize();
-        // Set rotation directly to face camera direction
-        m_transform.rotation.y = atan2f(faceDir.x, faceDir.z);
-    }
-
     // MOVEMENT: Move in WASD direction
     Vector3 moveDir = moveDirection;
     moveDir.y = 0.0f;  // Keep on XZ plane
+
+    // FACING: Face movement direction when moving, camera direction when stationary
+    if (moveDir.LengthSquared() > 0.001f)
+    {
+        // Moving: face the direction of travel
+        Vector3 faceDir = moveDir;
+        faceDir.Normalize();
+        m_transform.rotation.y = atan2f(faceDir.x, faceDir.z);
+    }
+    //else
+    //{
+    //    // Stationary (e.g. shooting): face camera direction
+    //    Vector3 faceDir = facingDirection;
+    //    faceDir.y = 0.0f;
+    //    if (faceDir.LengthSquared() > 0.001f)
+    //    {
+    //        faceDir.Normalize();
+    //        m_transform.rotation.y = atan2f(faceDir.x, faceDir.z);
+    //    }
+    //}
 
     if (moveDir.LengthSquared() > 0.001f)
     {
@@ -286,45 +295,65 @@ void LightCycle::UpdateIdle(float deltaTime)
     // NO rotation change - player keeps facing same direction
 }
 
-void LightCycle::BuildBB_8()
+void LightCycle::BuildWeapon()
 {
     auto ctx = m_deviceResources->GetD3DDeviceContext();
     m_parts.clear();
 
-    // BB-S PHANTOM Colors (Stealth theme)
-    //Color bodyColor = Color(0.1f, 0.1f, 0.17f);      // Dark blue-gray
-    Color bodyColor = Color(1.0f, 1.0f, 1.0f);
-    Color accentColor = Color(0.27f, 0.0f, 1.0f);    // Purple
-    Color glowColor = Color(0.4f, 0.0f, 1.0f);       // Purple glow
-    Color darkColor = Color(0.02f, 0.02f, 0.04f);    // Near black
-    Color eyeColor = Color(1.0f, 0.0f, 1.0f);        // Magenta eye
+    // Pulse Rifle colors
+    Color bodyColor  = Color(0.16f, 0.16f, 0.25f);   // Dark blue-gray metal
+    Color darkColor  = Color(0.10f, 0.10f, 0.16f);   // Darker stock/grip
+    Color glowColor  = Color(0.0f, 0.94f, 1.0f);     // Cyan energy glow
+    Color greenColor = Color(0.0f, 1.0f, 0.53f);     // Green charge indicator
 
-    // === MAIN BODY (Icosahedron - faceted sphere) ===
-    // Using sphere as base, DirectXTK has CreateIcosahedron
-    m_parts.push_back(MeshPart::CreateIcosahedron(ctx,
-        0.7f,  // size
-        Vector3(0, 0, 0),
+    // === MAIN BARREL — long cylinder ===
+    m_parts.push_back(MeshPart::CreateCylinder(ctx,
+        2.2f, 0.12f,                          // height, radius
+        Vector3(0.0f, 0.0f, 0.1f),            // position (centered forward)
+        Vector3(XM_PIDIV2, 0.0f, 0.0f),       // rotation (lay flat along Z)
         bodyColor));
 
-    // === STEALTH RING ===
-    m_parts.push_back(MeshPart::CreateTorus(ctx,
-        2.0f, 0.04f,  // diameter, thickness
-        Vector3(0, 0, 0),
-        Vector3(0, -XM_PIDIV2, 0),  // horizontal
+    // === REAR STOCK — shorter cylinder ===
+    m_parts.push_back(MeshPart::CreateCylinder(ctx,
+        0.8f, 0.10f,
+        Vector3(0.0f, 0.0f, -1.1f),
+        Vector3(XM_PIDIV2, 0.0f, 0.0f),
+        darkColor));
+
+    // === MUZZLE CONE — emitter tip ===
+    m_parts.push_back(MeshPart::CreateCone(ctx,
+        0.5f, 0.2f,                           // height, radius
+        Vector3(0.0f, 0.0f, 1.45f),
+        Vector3(XM_PIDIV2, 0.0f, 0.0f),
         glowColor));
 
-    // === SENSOR HEAD (Octahedron) ===
-    m_parts.push_back(MeshPart::CreateOctahedron(ctx,
-        0.5f,  // size
-        Vector3(0, 1.2f, 0),
-        bodyColor));
+    // === GRIP / RECEIVER — box ===
+    m_parts.push_back(MeshPart::CreateBox(ctx,
+        XMFLOAT3(0.14f, 0.45f, 0.2f),
+        Vector3(0.0f, -0.32f, -0.3f),
+        Vector3(0.15f, 0.0f, 0.0f),           // slight angle
+        darkColor));
 
-    // === SINGLE EYE ===
+    // === ENERGY RING — front torus ===
+    m_parts.push_back(MeshPart::CreateTorus(ctx,
+        0.64f, 0.025f,                        // diameter, thickness
+        Vector3(0.0f, 0.0f, 0.5f),
+        Vector3(XM_PIDIV2, 0.0f, 0.0f),
+        glowColor));
+
+    // === ENERGY RING — rear torus ===
+    m_parts.push_back(MeshPart::CreateTorus(ctx,
+        0.56f, 0.025f,
+        Vector3(0.0f, 0.0f, 0.9f),
+        Vector3(XM_PIDIV2, 0.0f, 0.0f),
+        glowColor));
+
+    // === CHARGE INDICATOR — small sphere ===
     m_parts.push_back(MeshPart::CreateSphere(ctx,
-        0.24f,  // diameter
-        Vector3(0, 1.2f, 0.65f),
-        eyeColor));
+        0.12f,                                 // diameter
+        Vector3(0.0f, 0.16f, -0.1f),
+        greenColor));
 
-    // Update bounding sphere
-    m_boundingSphere.Radius = 0.6f;
+    // Update bounding sphere for collision
+    m_boundingSphere.Radius = 1.5f;
 }

@@ -1,20 +1,20 @@
 cbuffer MenuConstants : register(b0)
 {
-    float Time;
+    float  Time;
     float2 Resolution;
-    float Speed;
-    float PatternScale;
-    float WarpIntensity;
-    float Brightness;
-    float ChromaticOffset;
+    float  Speed;
+    float  PatternScale;
+    float  WarpIntensity;
+    float  Brightness;
+    float  ChromaticOffset;
     float3 ColorTint;
-    float Padding;
+    float  Padding;
 };
 
 struct PSInput
 {
     float4 position : SV_POSITION;
-    float2 uv : TEXCOORD0;
+    float2 uv       : TEXCOORD0;
 };
 
 float4 main(PSInput input) : SV_TARGET

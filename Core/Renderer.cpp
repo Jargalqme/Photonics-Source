@@ -102,7 +102,7 @@ void Renderer::BeginScene()
     auto context = m_deviceResources->GetD3DDeviceContext();
     auto depthStencil = m_deviceResources->GetDepthStencilView();
 
-    // Clear color (dark Tron blue)
+    // Scene color
     static const float clearColor[4] = { 0.02f, 0.08f, 0.12f, 1.0f };
 
     // Get RTV as local variable (important)

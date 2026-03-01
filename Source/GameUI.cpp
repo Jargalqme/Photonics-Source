@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
 #include "GameUI.h"
 #include "MusicManager.h"
-#include "LightCycle.h"
+#include "Player.h"
 #include "Core.h"
 #include "EnemyTroops.h"
 #include "BeamWeapon.h"
@@ -44,10 +44,10 @@ void GameUI::update(float deltaTime)
 
 void GameUI::render()
 {
-	drawBeatBar();
+	//drawBeatBar();
 	drawMinimap();
 	drawHealthBars();
-    drawBoostIndicator();
+    //drawBoostIndicator();
     drawSongProgress();
     drawCrosshair();
 }

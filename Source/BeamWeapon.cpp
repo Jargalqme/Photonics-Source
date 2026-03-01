@@ -14,43 +14,14 @@ void BeamWeapon::initialize()
 {
     auto device = m_deviceResources->GetD3DDevice();
 
-    // 1. CREATE GEOMETRY (Vertex + Index Buffers)
-    Vertex vertices[4] =
-    {
-        { XMFLOAT3(0,0,0), XMFLOAT2(0.0f, 0.0f) },  // 0: 左, 上
-        { XMFLOAT3(0,0,0), XMFLOAT2(0.0f, 1.0f) },  // 1: 左, 下
-        { XMFLOAT3(0,0,0), XMFLOAT2(1.0f, 0.0f) },  // 2: 右, 上
-        { XMFLOAT3(0,0,0), XMFLOAT2(1.0f, 1.0f) },  // 3: 右, 下
-    };
-    uint16_t indices[6] = {
-        0, 1, 2,  //　三角１
-        2, 1, 3   //　三角２
-    };
-
-    // Vertex buffer
-    D3D11_BUFFER_DESC vbDesc = {};
-    vbDesc.ByteWidth = sizeof(vertices);
-    vbDesc.Usage = D3D11_USAGE_DEFAULT;
-    vbDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    D3D11_SUBRESOURCE_DATA vbData = { vertices };
-    DX::ThrowIfFailed(device->CreateBuffer(&vbDesc, &vbData, m_vertexBuffer.ReleaseAndGetAddressOf()));
-
-    // Index buffer
-    D3D11_BUFFER_DESC ibDesc = {};
-    ibDesc.ByteWidth = sizeof(indices);
-    ibDesc.Usage = D3D11_USAGE_DEFAULT;
-    ibDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    D3D11_SUBRESOURCE_DATA ibData = { indices };
-    DX::ThrowIfFailed(device->CreateBuffer(&ibDesc, &ibData, m_indexBuffer.ReleaseAndGetAddressOf()));
-
-    // 2. CREATE CONSTANT BUFFER
+    // CREATE CONSTANT BUFFER
     D3D11_BUFFER_DESC cbDesc = {};
     cbDesc.ByteWidth = sizeof(ConstantBuffer);
     cbDesc.Usage = D3D11_USAGE_DEFAULT;
     cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     DX::ThrowIfFailed(device->CreateBuffer(&cbDesc, nullptr, m_constantBuffer.ReleaseAndGetAddressOf()));
 
-    // 3. LOAD SHADERS
+    // LOAD SHADERS
     Microsoft::WRL::ComPtr<ID3DBlob> vsBlob;
     DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"BeamVS.cso").c_str(), vsBlob.GetAddressOf()));
     DX::ThrowIfFailed(device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, m_vertexShader.ReleaseAndGetAddressOf()));
@@ -59,14 +30,7 @@ void BeamWeapon::initialize()
     DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"BeamPS.cso").c_str(), psBlob.GetAddressOf()));
     DX::ThrowIfFailed(device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, m_pixelShader.ReleaseAndGetAddressOf()));
 
-    // Input layout
-    D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-    };
-    DX::ThrowIfFailed(device->CreateInputLayout(inputDesc, 2, vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), m_inputLayout.ReleaseAndGetAddressOf()));
-
-    // 4. CREATE RENDER STATES
+    // CREATE RENDER STATES
     // Blend state (additive)
     D3D11_BLEND_DESC blendDesc = {};
     blendDesc.RenderTarget[0].BlendEnable = TRUE;
@@ -107,6 +71,14 @@ void BeamWeapon::update(float deltaTime)
             m_cooldownTimer = 0.0f;
     }
 
+    // update collision timer
+    if (m_collisionLife > 0.0f)
+    {
+        m_collisionLife -= deltaTime;
+        if (m_collisionLife < 0.0f)
+            m_collisionLife = 0.0f;
+    }
+
     // update beam lifetime
     if (m_isActive)
     {
@@ -133,6 +105,9 @@ void BeamWeapon::fire(const Vector3& startPosition, const Vector3& direction)
     m_life = m_maxLife + 0.1f;
     m_isActive = true;
 
+    // reset collision window
+    m_collisionLife = m_collisionDuration;
+
     // start cooldown
     m_cooldownTimer = m_cooldown;
 }
@@ -155,7 +130,7 @@ void BeamWeapon::render(
 
     // Update constant buffer
     ConstantBuffer cb = {};
-    cb.viewProjection = (view * projection).Transpose();  // HLSL expects column-major
+    cb.viewProjection = (view * projection).Transpose();  // HLSL expects column-majorx
     cb.beamStart = m_start;
     cb.beamWidth = m_width;
     cb.beamEnd = m_end;
@@ -167,13 +142,8 @@ void BeamWeapon::render(
     context->UpdateSubresource(m_constantBuffer.Get(), 0, nullptr, &cb, 0, 0);
 
     // Set pipeline state
-    context->IASetInputLayout(m_inputLayout.Get());
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-    UINT stride = sizeof(Vertex);
-    UINT offset = 0;
-    context->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
-    context->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
+    context->IASetInputLayout(nullptr); // Fetch Shader を無効化
 
     context->VSSetShader(m_vertexShader.Get(), nullptr, 0);
     context->PSSetShader(m_pixelShader.Get(), nullptr, 0);
@@ -186,7 +156,7 @@ void BeamWeapon::render(
     context->OMSetDepthStencilState(m_depthStencilState.Get(), 0);
     context->RSSetState(m_rasterizerState.Get());
 
-    context->DrawIndexed(6, 0, 0);
+    context->Draw(6, 0);
 
     // Reset states (same pattern as your Track)
     context->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF);
@@ -196,12 +166,9 @@ void BeamWeapon::render(
 
 void BeamWeapon::finalize()
 {
-    m_vertexBuffer.Reset();
-    m_indexBuffer.Reset();
     m_constantBuffer.Reset();
     m_vertexShader.Reset();
     m_pixelShader.Reset();
-    m_inputLayout.Reset();
     m_blendState.Reset();
     m_depthStencilState.Reset();
     m_rasterizerState.Reset();

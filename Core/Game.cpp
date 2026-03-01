@@ -55,7 +55,7 @@ void Game::Initialize(HWND window, int width, int height)
     m_sceneManager->AddScene("GameOver", std::move(gameOverScene));
 
     // Start with main menu
-    m_sceneManager->TransitionTo("GameScene");
+    m_sceneManager->TransitionTo("MainMenu");
 
     // TODO: Change the timer settings if you want something other than the default variable timestep mode.
     // e.g. for 60 FPS fixed timestep update logic, call:

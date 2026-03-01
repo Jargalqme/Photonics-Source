@@ -2,42 +2,43 @@ cbuffer BeamConstants : register(b0)
 {
     matrix ViewProjection;
     float3 BeamStart;
-    float BeamWidth;
+    float  BeamWidth;
     float3 BeamEnd;
-    float BeamLife;
+    float  BeamLife;
     float4 BeamColor;
     float3 CameraPosition;
-    float Time;
-};
-
-struct VSInput
-{
-    float3 position : POSITION; // Vertex position in object space.
-    float2 uv : TEXCOORD0;      // Texture coordinates
+    float  Time;
 };
 
 struct PSInput
 {
-    float4 position : SV_POSITION; // SV_ System-Value Semantics
-    float2 uv : TEXCOORD0;
+    float4 position : SV_POSITION; // System_Value Semantics
+    float2 uv       : TEXCOORD0;
     float3 worldPos : TEXCOORD1;
 };
 
-PSInput main(VSInput input)
+// 6 vertices = 2 triangles forming a quad
+static const float2 quadUVs[6] =
+{
+    float2(0, 0), float2(0, 1), float2(1, 0), // triangle 1
+    float2(1, 0), float2(0, 1), float2(1, 1)  // triangle 2
+};
+
+PSInput main(uint id : SV_VertexID)
 {
     PSInput output;
-    
-    
-    float3 beamPos = lerp(BeamStart, BeamEnd, input.uv.x);
-    float3 beamDir = normalize(BeamEnd - BeamStart);
+    float2 uv = quadUVs[id];
+
+    float3 beamPos  = lerp(BeamStart, BeamEnd, uv.x);
+    float3 beamDir  = normalize(BeamEnd - BeamStart);
     float3 toCamera = normalize(CameraPosition - beamPos);
-    float3 right = normalize(cross(beamDir, toCamera));
-    float offset = (input.uv.y - 0.5) * BeamWidth;
+    float3 right    = normalize(cross(beamDir, toCamera));
+
+    float offset = (uv.y - 0.5) * BeamWidth;
     float3 worldPos = beamPos + right * offset;
-    
-    
+
     output.position = mul(float4(worldPos, 1.0), ViewProjection);
-    output.uv = input.uv;
+    output.uv = uv;
     output.worldPos = worldPos;
     return output;
 }

@@ -22,9 +22,9 @@ public:
 	float* GetColorMaskPtr() { return &m_colorMask.x; }
 
 	// Convenience for core death
-	void DisableRed()   { m_colorMask.x = 1.0f; }
-	void DisableGreen() { m_colorMask.y = 1.0f; }
-	void DisableBlue()  { m_colorMask.z = 1.0f; }
+	void DisableRed()   { m_colorMask.x = 0.5f; }
+	void DisableGreen() { m_colorMask.y = 0.5f; }
+	void DisableBlue()  { m_colorMask.z = 0.5f; }
 	void ResetMask()    { m_colorMask = DirectX::SimpleMath::Vector3(1, 1, 1); }
 
 private:

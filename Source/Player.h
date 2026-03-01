@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "DeviceResources.h"
 #include "GeometricPrimitive.h"
 #include "Effects.h"
@@ -63,7 +63,7 @@ public:
 	const DirectX::BoundingSphere& GetBoundingSphere() const { return m_boundingSphere; }
 
 private:
-	void BuildBB_8();
+	void BuildWeapon();
 	DX::DeviceResources* m_deviceResources;
 
 	// Rendering - composite model built from MeshParts

@@ -138,14 +138,12 @@
     <ClInclude Include="Source\EnemyTroops.h">
       <Filter>Entity</Filter>
     </ClInclude>
-    <ClInclude Include="Source\LightCycle.h">
-      <Filter>Entity</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Transform.h" />
     <ClInclude Include="Source\DebugUI.h" />
     <ClInclude Include="Source\BeamWeapon.h" />
     <ClInclude Include="Source\AnimatedBillboard.h" />
     <ClInclude Include="Source\EnemySpawn.h" />
+    <ClInclude Include="Source\Player.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Camera.cpp" />
@@ -159,9 +157,6 @@
       <Filter>Scene</Filter>
     </ClCompile>
     <ClCompile Include="Source\SceneManager.cpp">
-      <Filter>Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Scene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
     <ClCompile Include="Source\VictoryScene.cpp">
@@ -245,9 +240,6 @@
     <ClCompile Include="Source\EnemyTroops.cpp">
       <Filter>Entity</Filter>
     </ClCompile>
-    <ClCompile Include="Source\LightCycle.cpp">
-      <Filter>Entity</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Main.cpp">
       <Filter>Core</Filter>
     </ClCompile>
@@ -255,6 +247,7 @@
     <ClCompile Include="Source\BeamWeapon.cpp" />
     <ClCompile Include="Source\AnimatedBillboard.cpp" />
     <ClCompile Include="Source\EnemySpawn.cpp" />
+    <ClCompile Include="Source\Player.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

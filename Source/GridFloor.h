@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include "DeviceResources.h"
 
-
 class GridFloor
 {
 public:
@@ -36,7 +35,7 @@ private:
     // コンスタントバッファ
     struct ConstantBuffer
     {
-        DirectX::SimpleMath::Matrix worldViewProjection;
+        DirectX::SimpleMath::Matrix  worldViewProjection;
         DirectX::SimpleMath::Vector4 gridParams;   // x=lineWidthX, y=lineWidthY, z=scale
         DirectX::SimpleMath::Vector4 lineColor;
         DirectX::SimpleMath::Vector4 baseColor;
@@ -53,12 +52,12 @@ private:
     float m_beatPulse = 0.0f; // 0 = on beat, 0.5 = mid-beat, 1.0 = next beat
 
     // Colors
-    DirectX::SimpleMath::Color m_lineColor{ 1.0f, 0.0f, 0.85f, 1.0f };
-    DirectX::SimpleMath::Color m_baseColor{ 0.40f, 0.0f, 0.27f, 1.0f };
+    DirectX::SimpleMath::Color m_lineColor{ 1.0f, 0.0f, 1.0f, 1.0f };
+    DirectX::SimpleMath::Color m_baseColor{ 0.25f, 0.30f, 0.4f, 1.0f };
     DirectX::SimpleMath::Color m_finalColor{ 0.0f, 0.0f, 0.0f, 0.0f };
 
-
-    DirectX::SimpleMath::Matrix m_worldFloor = Matrix::Identity;
+    // Gridfloor
+    DirectX::SimpleMath::Matrix m_worldFloor = Matrix::Identity * Matrix::CreateTranslation(0, -1.0f, 0);
     DirectX::SimpleMath::Matrix m_worldBack = Matrix::Identity * Matrix::CreateRotationX(-XM_PIDIV2) * Matrix::CreateTranslation(0, 199.5f, -200.0f);
     DirectX::SimpleMath::Matrix m_worldFront = Matrix::Identity * Matrix::CreateRotationX(XM_PIDIV2) * Matrix::CreateTranslation(0, 199.5f, 200.0f);
     DirectX::SimpleMath::Matrix m_worldLeft = Matrix::Identity * Matrix::CreateRotationZ(XM_PIDIV2) * Matrix::CreateTranslation(-200.0f, 199.5f, 0);

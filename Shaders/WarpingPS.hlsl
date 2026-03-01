@@ -1,14 +1,14 @@
 cbuffer MenuConstants : register(b0)
 {
-    float Time;
+    float  Time;
     float2 Resolution;
-    float Speed;
-    float PatternScale;
-    float WarpIntensity;
-    float Brightness;
-    float ChromaticOffset;
+    float  Speed;
+    float  PatternScale;
+    float  WarpIntensity;
+    float  Brightness;
+    float  ChromaticOffset;
     float3 ColorTint;
-    float Padding;
+    float  Padding;
 };
 
 struct PSInput

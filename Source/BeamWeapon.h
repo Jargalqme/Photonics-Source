@@ -20,10 +20,12 @@ public:
     void setMaxRange(float range) { m_maxRange = range; }
     void setDuration(float duration) { m_maxLife = duration; }
     void setCooldown(float cooldown) { m_cooldown = cooldown; }
+    void setCollisionDuration(float duration) { m_collisionDuration = duration; }
 
     // Getters
     bool isActive() const { return m_isActive; }
     bool canFire() const { return m_cooldownTimer <= 0.0f; }
+    bool isCollisionActive() const { return m_collisionLife > 0.0f; }
     float getCooldownProgress() const;
     Vector3 getStart() const { return m_start; }
     Vector3 getEnd() const { return m_end; }
@@ -39,12 +41,6 @@ public:
     void fire(const DirectX::SimpleMath::Vector3& startPosition, const DirectX::SimpleMath::Vector3& direction);
 
 private:
-    // Vertex structure
-    struct Vertex
-    {
-        DirectX::XMFLOAT3 position;
-        DirectX::XMFLOAT2 uv;
-    };
 
     // Constant buffer
     struct ConstantBuffer
@@ -75,17 +71,16 @@ private:
     float m_life = 0.0f;
     float m_time = 0.0f;
     float m_cooldownTimer = 0.0f;
+    float m_collisionLife = 0.0f;
+    float m_collisionDuration = 0.1f;
 
     // Color
     DirectX::SimpleMath::Color m_color{ 1.0f, 0.0f, 0.0f, 1.0f };
 
     // GPU Resources
-    Microsoft::WRL::ComPtr<ID3D11Buffer> m_vertexBuffer;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> m_indexBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer> m_constantBuffer;
     Microsoft::WRL::ComPtr<ID3D11VertexShader> m_vertexShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pixelShader;
-    Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
     Microsoft::WRL::ComPtr<ID3D11BlendState> m_blendState;
     Microsoft::WRL::ComPtr<ID3D11DepthStencilState> m_depthStencilState;
     Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_rasterizerState;

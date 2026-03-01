@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
 #include "DebugUI.h"
 #include "Camera.h"
-#include "LightCycle.h"
+#include "Player.h"
 #include "GridFloor.h"
 #include "Terrain.h"
 #include "ProjectilePool.h"
@@ -20,7 +20,7 @@ void DebugUI::render()
 	ImGui::Text("Cursor: %s (Tab to toggle)", m_showCursor ? "VISIBLE" : "HIDDEN");
 
 	// Camera Mode
-	ImGui::Text("Camera: %s (F1/F2 to switch)", m_camera->GetModeName());
+	ImGui::Text("Camera: %s (F1/F2 to switch)", m_camera->getModeName());
 	ImGui::Separator();
 
 	// LightCycle
@@ -61,20 +61,20 @@ void DebugUI::render()
 		ImGui::ColorEdit4("Base Color", m_gridFloor->getBaseColorPtr());
 	}
 
-	if (ImGui::CollapsingHeader("Terrain"))
-	{
-		bool rebuild = false;
+	//if (ImGui::CollapsingHeader("Terrain"))
+	//{
+	//	bool rebuild = false;
 
-		rebuild |= ImGui::SliderFloat("Inner Radius", m_terrain->GetInnerRadiusPtr(), 50.0f, 200.0f);
-		rebuild |= ImGui::SliderFloat("Outer Radius", m_terrain->GetOuterRadiusPtr(), 150.0f, 400.0f);
-		rebuild |= ImGui::SliderFloat("Height Scale", m_terrain->GetHeightScalePtr(), 10.0f, 100.0f);
+	//	rebuild |= ImGui::SliderFloat("Inner Radius", m_terrain->GetInnerRadiusPtr(), 50.0f, 200.0f);
+	//	rebuild |= ImGui::SliderFloat("Outer Radius", m_terrain->GetOuterRadiusPtr(), 150.0f, 400.0f);
+	//	rebuild |= ImGui::SliderFloat("Height Scale", m_terrain->GetHeightScalePtr(), 10.0f, 100.0f);
 
-		if (ImGui::ColorEdit4("Terrain Color", m_terrain->GetColorPtr()))
-			rebuild = true;
+	//	if (ImGui::ColorEdit4("Terrain Color", m_terrain->GetColorPtr()))
+	//		rebuild = true;
 
-		if (rebuild)
-			m_terrain->Rebuild();
-	}
+	//	if (rebuild)
+	//		m_terrain->Rebuild();
+	//}
 
 	// Audio & Music
 	if (ImGui::CollapsingHeader("Audio & Music"))

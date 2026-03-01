@@ -25,7 +25,7 @@ void GameScene::Initialize(DX::DeviceResources* deviceResources)
 	// Set up projection
 	auto size = m_deviceResources->GetOutputSize();
 	float aspectRatio = float(size.right) / float(size.bottom);
-	m_camera->SetProjectionParameters(45.0f, aspectRatio, 0.1f, 1000.0f);
+	m_camera->setProjectionParameters(45.0f, aspectRatio, 0.1f, 1000.0f);
 
 	// Initialize game objects
 	m_gridFloor = std::make_unique<GridFloor>(m_deviceResources);
@@ -38,8 +38,8 @@ void GameScene::Initialize(DX::DeviceResources* deviceResources)
 	m_lightCycle->Initialize();
 
 	// Start with follow camera mode
-	m_camera->SetFollowTarget(m_lightCycle->GetPositionPtr(), m_lightCycle->GetRotationPtr());
-	m_camera->SetMode(CameraMode::Follow);
+	m_camera->setFollowTarget(m_lightCycle->GetPositionPtr(), m_lightCycle->GetRotationPtr());
+	m_camera->setMode(CameraMode::Follow);
 
 	m_tower = std::make_unique<Tower>(m_deviceResources);
 	m_tower->Initialize();
@@ -79,8 +79,8 @@ void GameScene::Initialize(DX::DeviceResources* deviceResources)
 	m_beamWeapon->initialize();
 
 	m_animatedBillboard = std::make_unique<AnimatedBillboard>(m_deviceResources);
-	m_animatedBillboard->setPosition(Vector3(0.0f, 20.0f, 0.0f));
-	m_animatedBillboard->setSize(30.0f);
+	m_animatedBillboard->setPosition(Vector3(0.0f, 90.0f, 700.0f));
+	m_animatedBillboard->setSize(900.0f);
 	m_animatedBillboard->setFrameRate(60.0f);
 	m_animatedBillboard->initialize();
 
@@ -234,7 +234,7 @@ void GameScene::Cleanup()
 	m_collisionManager.reset();
 	m_debugUI.reset();
 	m_beamWeapon.reset();
-	m_animatedBillboard.reset();
+	//m_animatedBillboard.reset();
 }
 
 void GameScene::Update(float deltaTime, InputManager* input)
@@ -303,28 +303,28 @@ void GameScene::Update(float deltaTime, InputManager* input)
 		m_beamWeapon->update(deltaTime);
 
 		// zoom while holding right mouse
-		m_camera->SetZoom(input->isRightMouseDown());
+		m_camera->setZoom(input->isRightMouseDown());
 
 		if (input->isLeftMousePressed() && m_beamWeapon->canFire())
 		{
 			Vector3 spawnPos = m_lightCycle->GetPosition();
 			spawnPos.y += 1.0f;
 
-			Vector3 cameraPos = m_camera->GetPosition();
-			Vector3 cameraForward = m_camera->GetForward();
-			Vector3 aimPoint = cameraPos + cameraForward * 100.0f;
+			Vector3 cameraPos = m_camera->getPosition();
+			Vector3 cameraForward = m_camera->getForward();
+			Vector3 aimPoint = cameraPos + cameraForward * 150.0f;
 			Vector3 aimDirection = aimPoint - spawnPos;
 			aimDirection.Normalize();
 
 			if (m_audioManager) 
-			//m_audioManager->playSound("shoot");
+			m_audioManager->playSound("shoot");
 			m_beamWeapon->fire(spawnPos, aimDirection);
-			m_camera->TriggerShake(2.0f, 0.1f);
+			m_camera->triggerShake(2.0f, 0.1f);
 		}
 	}
 	// TODO: Billboard based rendering model
-	if (m_animatedBillboard)
-		m_animatedBillboard->update(deltaTime);
+	//if (m_animatedBillboard)
+	//	m_animatedBillboard->update(deltaTime);
 
 	// Update floating shapes rotation
 	for (size_t i = 0; i < m_shapeRotations.size(); i++)
@@ -339,18 +339,18 @@ void GameScene::UpdateCamera(float deltaTime, InputManager* input)
 	// Toggle camera mode
 	if (input->isKeyPressed(Keyboard::Keys::F1))
 	{
-		m_camera->SetMode(CameraMode::Free);
+		m_camera->setMode(CameraMode::Free);
 	}
 	if (input->isKeyPressed(Keyboard::Keys::F2))
 	{
-		m_camera->SetFollowTarget(m_lightCycle->GetPositionPtr(), m_lightCycle->GetRotationPtr());
-		m_camera->SetMode(CameraMode::Follow);
+		m_camera->setFollowTarget(m_lightCycle->GetPositionPtr(), m_lightCycle->GetRotationPtr());
+		m_camera->setMode(CameraMode::Follow);
 	}
 
 	// Update camera (skip when cursor visible)
 	if (!m_showCursor)
 	{
-		m_camera->Update(deltaTime, input);
+		m_camera->update(deltaTime, input);
 	}
 }
 
@@ -358,14 +358,14 @@ void GameScene::UpdateGamePlay(float deltaTime, InputManager* input)
 {
 	if (m_lightCycle)
 	{
-		if (m_camera->GetMode() == CameraMode::Follow)
+		if (m_camera->getMode() == CameraMode::Follow)
 		{
 			// Get camera directions
-			Vector3 cameraForward = m_camera->GetForward();
+			Vector3 cameraForward = m_camera->getForward();
 			cameraForward.y = 0.0f;
 			cameraForward.Normalize();
 
-			Vector3 cameraRight = m_camera->GetRight();
+			Vector3 cameraRight = m_camera->getRight();
 			cameraRight.y = 0.0f;
 			cameraRight.Normalize();
 
@@ -460,7 +460,9 @@ void GameScene::UpdateGamePlay(float deltaTime, InputManager* input)
 		m_coreBlue.get(),
 		m_deathBeams.get(),
 		m_beamWeapon.get(),
-		isOnBeat
+		isOnBeat,
+		m_camera->getPosition(),
+		m_camera->getForward()
 	);
 
 	if (m_tower)
@@ -564,10 +566,13 @@ void GameScene::Render(Renderer* renderer)
 
 	// Render all game objects to the bloom render target
 	if (m_gridFloor)
-		m_gridFloor->render(m_camera->GetViewMatrix(), m_camera->GetProjectionMatrix());
+		m_gridFloor->render(m_camera->getViewMatrix(), m_camera->getProjectionMatrix());
 
-	//if (m_terrain)
-	//	m_terrain->Render(m_camera->GetViewMatrix(), m_camera->GetProjectionMatrix());
+	if (m_terrain)
+		m_terrain->Render(m_camera->getViewMatrix(), m_camera->getProjectionMatrix());
+
+	if (m_lightCycle)
+		m_lightCycle->Render(m_camera->getViewMatrix(), m_camera->getProjectionMatrix());
 
 	// Render floating shapes
 	for (size_t i = 0; i < m_floatingShapes.size(); i++)
@@ -583,41 +588,37 @@ void GameScene::Render(Renderer* renderer)
 			: Color(0.6f, 0.0f, 1.0f, 0.7f);  // Purple
 
 		m_floatingShapes[i]->Draw(world,
-			m_camera->GetViewMatrix(),
-			m_camera->GetProjectionMatrix(),
+			m_camera->getViewMatrix(),
+			m_camera->getProjectionMatrix(),
 			shapeColor);
 	}
 
-	if (m_lightCycle)
-		m_lightCycle->Render(m_camera->GetViewMatrix(), m_camera->GetProjectionMatrix());
-
-	// TODO: Need to create model that supports Boss behaviour
-	//if (m_tower)
-	//	m_tower->Render(m_camera->GetViewMatrix(), m_camera->GetProjectionMatrix());
+	if (m_tower)
+		m_tower->Render(m_camera->getViewMatrix(), m_camera->getProjectionMatrix());
 
 	for (auto& enemy : m_enemies)
 	{
 		if (enemy->IsActive())
-			enemy->Render(m_camera->GetViewMatrix(), m_camera->GetProjectionMatrix());
+			enemy->Render(m_camera->getViewMatrix(), m_camera->getProjectionMatrix());
 	}
 
 	if (m_coreRed)
-		m_coreRed->Render(m_camera->GetViewMatrix(), m_camera->GetProjectionMatrix());
+		m_coreRed->Render(m_camera->getViewMatrix(), m_camera->getProjectionMatrix());
 
 	if (m_coreGreen)
-		m_coreGreen->Render(m_camera->GetViewMatrix(), m_camera->GetProjectionMatrix());
+		m_coreGreen->Render(m_camera->getViewMatrix(), m_camera->getProjectionMatrix());
 
 	if (m_coreBlue)
-		m_coreBlue->Render(m_camera->GetViewMatrix(), m_camera->GetProjectionMatrix());
+		m_coreBlue->Render(m_camera->getViewMatrix(), m_camera->getProjectionMatrix());
 
 	if (m_deathBeams)
-		m_deathBeams->Render(m_camera->GetViewMatrix(), m_camera->GetProjectionMatrix(), m_camera->GetPosition());
+		m_deathBeams->Render(m_camera->getViewMatrix(), m_camera->getProjectionMatrix(), m_camera->getPosition());
 
 	if (m_beamWeapon)
-		m_beamWeapon->render(m_camera->GetViewMatrix(), m_camera->GetProjectionMatrix(), m_camera->GetPosition());
+		m_beamWeapon->render(m_camera->getViewMatrix(), m_camera->getProjectionMatrix(), m_camera->getPosition());
 	
 	//if (m_animatedBillboard)
-	//	m_animatedBillboard->render(m_camera->GetViewMatrix(), m_camera->GetProjectionMatrix(), m_camera->GetPosition());
+		//m_animatedBillboard->render(m_camera->getViewMatrix(), m_camera->getProjectionMatrix(), m_camera->getPosition());
 
 	if (m_gameUI)
 		m_gameUI->render();
@@ -631,7 +632,7 @@ void GameScene::OnWindowSizeChanged(int width, int height)
 	// Update camera aspect ratio
 	if (m_camera)
 	{
-		m_camera->SetProjectionParameters(45.0f, float(width) / float(height), 0.1f, 1000.0f);
+		m_camera->setProjectionParameters(45.0f, float(width) / float(height), 0.1f, 1000.0f);
 	}
 }
 
@@ -659,7 +660,7 @@ void GameScene::OnDeviceLost()
 
 	if (m_deathBeams) m_deathBeams->OnDeviceLost();
 
-	if (m_animatedBillboard) m_animatedBillboard->finalize();
+	//if (m_animatedBillboard) m_animatedBillboard->finalize();
 
 	if (m_beamWeapon) m_beamWeapon->finalize();
 }

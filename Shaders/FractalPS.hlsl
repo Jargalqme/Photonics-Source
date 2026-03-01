@@ -2,21 +2,21 @@
 // Original: https://www.shadertoy.com/view/mtyGWy
 cbuffer MenuConstants : register(b0)
 {
-    float Time; // 4 bytes
-    float2 Resolution; // 8 bytes
-    float Speed; // 4 bytes
-    float PatternScale; // 4 bytes
-    float WarpIntensity; // 4 bytes (unused here)
-    float Brightness; // 4 bytes (unused here)
-    float ChromaticOffset; // 4 bytes (unused here)
-    float3 ColorTint; // 12 bytes - RGB multiplier
-    float VignetteStrength; // 4 bytes
+    float  Time;
+    float2 Resolution;
+    float  Speed;
+    float  PatternScale;
+    float  WarpIntensity;
+    float  Brightness;
+    float  ChromaticOffset;
+    float3 ColorTint;
+    float  VignetteStrength;
 };
 
 struct PSInput
 {
     float4 position : SV_POSITION;
-    float2 uv : TEXCOORD0;
+    float2 uv       : TEXCOORD0;
 };
 
 // Inigo Quilez's cosine palette

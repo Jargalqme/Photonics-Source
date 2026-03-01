@@ -12,56 +12,56 @@ Camera::Camera()
 	, m_roll(0.0f)
 	, m_fov(XMConvertToRadians(45.0f))
 	, m_aspectRatio(16.0f / 9.0f)
-	, m_nearPlane(0.1f)
-	, m_farPlane(1000.0f)
+	, m_nearZ(0.1f)
+	, m_farZ(1000.0f)
 	, m_normalFOV(XMConvertToRadians(45.0f))
 	, m_zoomFOV(XMConvertToRadians(25.0f))
 	, m_currentFOV(XMConvertToRadians(45.0f))
 {
-	UpdateViewMatrix();
-	UpdateProjectionMatrix();
+	updateViewMatrix();
+	updateProjectionMatrix();
 }
 
-void Camera::SetLookAt(const Vector3& target)
+void Camera::setLookAt(const Vector3& target)
 {
 	m_forward = target - m_position;
 	m_forward.Normalize();
 
-	Vector3 worldUp(0.0f, 1.0f, 0.0f);
-	m_right = m_forward.Cross(worldUp);
+	Vector3 worldUp = { 0.0f, 1.0f, 0.0f };
+	m_right = worldUp.Cross(m_forward);
 	m_right.Normalize();
 
-	m_up = m_right.Cross(m_forward);
+	m_up = m_forward.Cross(m_right);
 	m_up.Normalize();
 
 	m_yaw = XMConvertToDegrees(atan2f(m_forward.x, m_forward.z));
 	m_pitch = XMConvertToDegrees(asinf(-m_forward.y));
 }
 
-void Camera::SetRotation(float pitch, float yaw, float roll)
+void Camera::setRotation(float pitch, float yaw, float roll)
 {
 	m_pitch = pitch;
 	m_yaw = yaw;
 	m_roll = roll;
-	UpdateDirectionVectors();
+	updateDirectionVectors();
 }
 
-void Camera::MoveForward(float distance)
+void Camera::moveForward(float distance)
 {
 	m_position += m_forward * distance;
 }
 
-void Camera::MoveRight(float distance)
+void Camera::moveRight(float distance)
 {
 	m_position += m_right * distance;
 }
 
-void Camera::MoveUp(float distance)
+void Camera::moveUp(float distance)
 {
 	m_position += m_up * distance;
 }
 
-void Camera::AddPitch(float degrees)
+void Camera::addPitch(float degrees)
 {
 	m_pitch += degrees;
 
@@ -71,10 +71,10 @@ void Camera::AddPitch(float degrees)
 	if (m_pitch < -89.0f)
 		m_pitch = -89.0f;
 
-	UpdateDirectionVectors();
+	updateDirectionVectors();
 }
 
-void Camera::AddYaw(float degrees)
+void Camera::addYaw(float degrees)
 {
 	m_yaw += degrees;
 
@@ -84,10 +84,10 @@ void Camera::AddYaw(float degrees)
 	if (m_yaw < 0.0f)
 		m_yaw += 360.0f;
 
-	UpdateDirectionVectors();
+	updateDirectionVectors();
 }
 
-void Camera::UpdateDirectionVectors()
+void Camera::updateDirectionVectors()
 {
 	// Convert degrees to radians
 	float pitchRad = XMConvertToRadians(m_pitch);
@@ -97,16 +97,16 @@ void Camera::UpdateDirectionVectors()
 	// Calculate forward vector
 	m_forward.x = sinf(yawRad) * cosf(pitchRad);
 	m_forward.y = -sinf(pitchRad);
-	m_forward.z = -cosf(yawRad) * cosf(pitchRad);
+	m_forward.z = cosf(yawRad) * cosf(pitchRad);
 	m_forward.Normalize();
 
 	// Calculate right vector (assuming world up is Y)
-	Vector3 worldUp(0.0f, 1.0f, 0.0f);
-	m_right = m_forward.Cross(worldUp); // The cross product order matters! opposite order for left-handed
+	Vector3 worldUp = { 0.0f, 1.0f, 0.0f };
+	m_right = worldUp.Cross(m_forward);
 	m_right.Normalize();
 
 	// Calculate up vector
-	m_up = m_right.Cross(m_forward);
+	m_up = m_forward.Cross(m_right);
 	m_up.Normalize();
 
 	// Apply roll if needed
@@ -118,77 +118,52 @@ void Camera::UpdateDirectionVectors()
 	}
 }
 
-void Camera::UpdateViewMatrix()
+void Camera::updateViewMatrix()
 {
-	// Build camera's world matrix
-	Matrix worldMatrix = Matrix::Identity;
+	Vector3 shakeOffset = getShakeOffset();
+	Vector3 eyePos = m_position + shakeOffset;
+	Vector3 target = eyePos + m_forward;
 
-	// Row 0: Camera's Right vector (local X axis)
-	worldMatrix._11 = m_right.x;
-	worldMatrix._12 = m_right.y;
-	worldMatrix._13 = m_right.z;
-	worldMatrix._14 = 0.0f;
-
-	// Row 1: Camera's Up vector (local Y axis)
-	worldMatrix._21 = m_up.x;
-	worldMatrix._22 = m_up.y;
-	worldMatrix._23 = m_up.z;
-	worldMatrix._24 = 0.0f;
-
-	// Row 2: Camera's Forward vector (local Z axis)
-	worldMatrix._31 = -m_forward.x;
-	worldMatrix._32 = -m_forward.y;
-	worldMatrix._33 = -m_forward.z;
-	worldMatrix._34 = 0.0f;
-
-	// Row 3: Camera's Position (translation)
-	Vector3 shakeOffset = GetShakeOffset();
-	worldMatrix._41 = m_position.x + shakeOffset.x;
-	worldMatrix._42 = m_position.y + shakeOffset.y;
-	worldMatrix._43 = m_position.z + shakeOffset.z;
-	worldMatrix._44 = 1.0f;
-
-	// View matrix = inverse of world matrix
-	m_viewMatrix = worldMatrix.Invert();
+	m_viewMatrix = XMMatrixLookAtLH(eyePos, target, m_up);
 }
 
-void Camera::SetProjectionParameters(float fov, float aspectRatio, float nearPlane, float farPlane)
+void Camera::setProjectionParameters(float fov, float aspectRatio, float nearPlane, float farPlane)
 {
 	m_normalFOV = XMConvertToRadians(fov);
 	m_currentFOV = m_normalFOV;
 	m_fov = m_normalFOV;
 	m_aspectRatio = aspectRatio;
-	m_nearPlane = nearPlane;
-	m_farPlane = farPlane;
-	UpdateProjectionMatrix();
+	m_nearZ = nearPlane;
+	m_farZ = farPlane;
+	updateProjectionMatrix();
 }
 
-void Camera::UpdateProjectionMatrix()
+void Camera::updateProjectionMatrix()
 {
-	m_projectionMatrix = Matrix::CreatePerspectiveFieldOfView(
+	m_projectionMatrix = XMMatrixPerspectiveFovLH(
 		m_fov,
-		m_aspectRatio, 
-		m_nearPlane, 
-		m_farPlane
+		m_aspectRatio,
+		m_nearZ,
+		m_farZ
 	);
 }
 
-void Camera::Update(float deltaTime, InputManager* input)
+void Camera::update(float deltaTime, InputManager* input)
 {
 	switch (m_mode) {
 	case CameraMode::Free:
-		UpdateFreeMode(deltaTime, input);
+		updateFreeMode(deltaTime, input);
 		break;
 	case CameraMode::Follow:
-		UpdateFollowMode(deltaTime, input);
+		updateFollowMode(deltaTime, input);
 		break;
 	}
-	UpdateShake(deltaTime);
-	UpdateZoom(deltaTime);
-	UpdateViewMatrix();
+	updateShake(deltaTime);
+	updateZoom(deltaTime);
+	updateViewMatrix();
 }
 
-void Camera::SetMode(CameraMode mode)
+void Camera::setMode(CameraMode mode)
 {
 	m_mode = mode;
 	if (mode == CameraMode::Follow && m_followTargetPos)
@@ -197,7 +172,7 @@ void Camera::SetMode(CameraMode mode)
 	}
 }
 
-const char* Camera::GetModeName() const
+const char* Camera::getModeName() const
 {
 	switch (m_mode) {
 	case CameraMode::Free:   return "Free Camera";
@@ -206,7 +181,7 @@ const char* Camera::GetModeName() const
 	}
 }
 
-void Camera::SetFollowTarget(Vector3* position, float* rotation)
+void Camera::setFollowTarget(Vector3* position, float* rotation)
 {
 	m_followTargetPos = position;
 	m_followTargetRot = rotation;
@@ -217,7 +192,7 @@ void Camera::SetFollowTarget(Vector3* position, float* rotation)
 	}
 }
 
-void Camera::UpdateFreeMode(float deltaTime, InputManager* input)
+void Camera::updateFreeMode(float deltaTime, InputManager* input)
 {
 	float speed = m_moveSpeed * deltaTime;
 
@@ -227,35 +202,35 @@ void Camera::UpdateFreeMode(float deltaTime, InputManager* input)
 
 	// WASD movement
 	if (input->isKeyDown(Keyboard::Keys::W))
-		MoveForward(speed);
+		moveForward(speed);
 	if (input->isKeyDown(Keyboard::Keys::S))
-		MoveForward(-speed);
+		moveForward(-speed);
 	if (input->isKeyDown(Keyboard::Keys::A))
-		MoveRight(-speed);
+		moveRight(-speed);
 	if (input->isKeyDown(Keyboard::Keys::D))
-		MoveRight(speed);
+		moveRight(speed);
 
 	// Vertical movement
 	if (input->isKeyDown(Keyboard::Keys::Space))
-		MoveUp(speed);
+		moveUp(speed);
 	if (input->isKeyDown(Keyboard::Keys::LeftControl))
-		MoveUp(-speed);
+		moveUp(-speed);
 
 	// Mouse look
 	Vector2 look = input->getLookInput();
-	AddYaw(look.x * m_mouseSensitivity);
-	AddPitch(look.y * m_mouseSensitivity);
+	addYaw(look.x * m_mouseSensitivity);
+	addPitch(look.y * m_mouseSensitivity);
 }
 
-void Camera::UpdateFollowMode(float deltaTime, InputManager* input)
+void Camera::updateFollowMode(float deltaTime, InputManager* input)
 {
 	if (!m_followTargetPos)
 		return;
 
 	// FPS-style mouse look
 	Vector2 look = input->getLookInput();
-	AddYaw(look.x * m_mouseSensitivity);
-	AddPitch(look.y * m_mouseSensitivity);
+	addYaw(look.x * m_mouseSensitivity);
+	addPitch(look.y * m_mouseSensitivity);
 
 	// Camera position: orbit around player
 	Vector3 targetPos = *m_followTargetPos;
@@ -267,26 +242,30 @@ void Camera::UpdateFollowMode(float deltaTime, InputManager* input)
 	Vector3 offset;
 	offset.x = -sinf(yawRad) * cosf(pitchRad) * m_followDistance;
 	offset.y = m_followHeight + sinf(pitchRad) * m_followDistance;
-	offset.z = cosf(yawRad) * cosf(pitchRad) * m_followDistance;
+	offset.z = -cosf(yawRad) * cosf(pitchRad) * m_followDistance;
 
 	// ============================================
 	// Right side offset
 	// ============================================
-	float shoulderOffset = 1.5f;  // Adjust this: higher = more to the right
+	float shoulderOffset = 0.0f;  // Adjust this: higher = more to the right
 
 	// Get camera's right direction (perpendicular to forward)
 	Vector3 rightDir;
 	rightDir.x = cosf(yawRad);
-	rightDir.z = sinf(yawRad);
+	rightDir.z = -sinf(yawRad);
 	rightDir.y = 0.0f;
 
 	offset += rightDir * shoulderOffset;
 
-	// Direct position - no smoothing
-	SetPosition(targetPos + offset);
+	// Clamp camera above the ground
+	Vector3 camPos = targetPos + offset;
+	if (camPos.y < 1.0f)
+		camPos.y = 1.0;
+
+	setPosition(camPos);
 }
 
-void Camera::TriggerShake(float intensity, float duration)
+void Camera::triggerShake(float intensity, float duration)
 {
 	// allow new shakes to add to existing ones
 	if (m_shakeTimer < m_shakeDuration)
@@ -304,7 +283,7 @@ void Camera::TriggerShake(float intensity, float duration)
 	}
 }
 
-void Camera::UpdateShake(float deltaTime)
+void Camera::updateShake(float deltaTime)
 {
 	if (m_shakeTimer < m_shakeDuration)
 	{
@@ -324,7 +303,7 @@ void Camera::UpdateShake(float deltaTime)
 	}
 }
 
-Vector3 Camera::GetShakeOffset() const
+Vector3 Camera::getShakeOffset() const
 {
 	if (m_currentShakeIntensity <= 0.01f)
 		return Vector3::Zero;
@@ -337,12 +316,12 @@ Vector3 Camera::GetShakeOffset() const
 	return Vector3(x, y, z);
 }
 
-void Camera::SetZoom(bool zooming)
+void Camera::setZoom(bool zooming)
 {
 	m_isZooming = zooming;
 }
 
-void Camera::UpdateZoom(float deltaTime)
+void Camera::updateZoom(float deltaTime)
 {
 	// target fov based on zoom state
 	float targetFOV = m_isZooming ? m_zoomFOV : m_normalFOV;
@@ -364,6 +343,6 @@ void Camera::UpdateZoom(float deltaTime)
 
 		// update projection with new FOV
 		m_fov = m_currentFOV;
-		UpdateProjectionMatrix();
+		updateProjectionMatrix();
 	}
 }

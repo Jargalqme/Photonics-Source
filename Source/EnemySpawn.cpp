@@ -42,30 +42,20 @@ void EnemySpawn::reset()
 {
 	m_spawnTimer = 0.0f;
 	m_spawnInterval = INITIAL_SPAWN_INTERVAL;
-	m_gameTime;
+	m_gameTime = 0.0f;
 }
 
 void EnemySpawn::attemptSpawn()
 {
-	OutputDebugStringA("attemptSpawn() called\n");  // ADD THIS
-
 	if (!m_enemyPool)
-	{
-		OutputDebugStringA("ERROR: m_enemyPool is null!\n");  // ADD THIS
 		return;
-	}
 
 	// Select a target core (only alive ones)
 	Vector3 targetPos = selectSpawnTarget();
 
 	// Check if we found a valid target
 	if (targetPos == Vector3::Zero)
-	{
-		OutputDebugStringA("ERROR: No alive cores to target!\n");  // ADD THIS
 		return;  // No alive cores
-	}
-
-	OutputDebugStringA("Spawning enemy...\n");  // ADD THIS
 
 	// Get spawn position
 	Vector3 spawnPos = getSpawnPosition();

@@ -65,10 +65,10 @@ void GridFloor::initialize()
     DX::ThrowIfFailed(device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, m_pixelShader.ReleaseAndGetAddressOf()));
 
     // Input layout
-    D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
+    D3D11_INPUT_ELEMENT_DESC layout[] = {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 }
     };
-    DX::ThrowIfFailed(device->CreateInputLayout(inputDesc, 1, vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), m_inputLayout.ReleaseAndGetAddressOf()));
+    DX::ThrowIfFailed(device->CreateInputLayout(layout, 1, vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), m_inputLayout.ReleaseAndGetAddressOf()));
 
     // ============================================================
     // 4. CREATE RENDER STATES
@@ -77,7 +77,7 @@ void GridFloor::initialize()
     D3D11_BLEND_DESC blendDesc = {};
     blendDesc.RenderTarget[0].BlendEnable = TRUE;
     blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-    blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+    blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE; // def: BLEND_INV_SRC_ALPHA
     blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
     blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
     blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
@@ -88,7 +88,7 @@ void GridFloor::initialize()
     // Depth stencil state (read-only depth)
     D3D11_DEPTH_STENCIL_DESC dsDesc = {};
     dsDesc.DepthEnable = TRUE;
-    dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+    dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO; // def: _ALL
     dsDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
     DX::ThrowIfFailed(device->CreateDepthStencilState(&dsDesc, m_depthStencilState.ReleaseAndGetAddressOf()));
 
@@ -96,8 +96,8 @@ void GridFloor::initialize()
     D3D11_RASTERIZER_DESC rsDesc = {};
     rsDesc.FillMode = D3D11_FILL_SOLID;
     rsDesc.CullMode = D3D11_CULL_NONE;
-    rsDesc.DepthBias = -100000;
-    rsDesc.SlopeScaledDepthBias = -2.0f;
+    rsDesc.DepthBias = 0;
+    rsDesc.SlopeScaledDepthBias = 0.0f;
     rsDesc.DepthClipEnable = TRUE;
     DX::ThrowIfFailed(device->CreateRasterizerState(&rsDesc, m_rasterizerState.ReleaseAndGetAddressOf()));
 }
@@ -108,27 +108,27 @@ void GridFloor::update()
     float pulse = 1.0f + cosf(m_beatPulse * 6.28318f) * 0.5f;
 
     // update the final color based on pulse
-    //m_finalColor = Color(
-    //    m_lineColor.R() * pulse,
-    //    m_lineColor.G() * pulse,
-    //    m_lineColor.B() * pulse,
-    //    m_lineColor.A()
-    //);
-
     m_finalColor = Color(
-        m_lineColor.R(),
-        m_lineColor.G(),
-        m_lineColor.B(),
+        m_lineColor.R() * pulse,
+        m_lineColor.G() * pulse,
+        m_lineColor.B() * pulse,
         m_lineColor.A()
     );
+
+    //m_finalColor = Color(
+    //    m_lineColor.R(),
+    //    m_lineColor.G(),
+    //    m_lineColor.B(),
+    //    m_lineColor.A()
+    //);
 }
 
 void GridFloor::render(const Matrix& view, const Matrix& projection) {
     renderPlane(m_worldFloor, view, projection);
-    renderPlane(m_worldBack, view, projection);
-    renderPlane(m_worldFront, view, projection);
-    renderPlane(m_worldLeft, view, projection);
-    renderPlane(m_worldRight, view, projection);
+    //renderPlane(m_worldBack, view, projection);
+    //renderPlane(m_worldFront, view, projection);
+    //renderPlane(m_worldLeft, view, projection);
+    //renderPlane(m_worldRight, view, projection);
 }
 
 void GridFloor::renderPlane(const Matrix& world, const Matrix& view, const Matrix& projection)
@@ -137,11 +137,10 @@ void GridFloor::renderPlane(const Matrix& world, const Matrix& view, const Matri
 
     // Update constant buffer
     ConstantBuffer cb;
-
     cb.worldViewProjection = (world * view * projection).Transpose();
     cb.gridParams = Vector4(m_lineWidthX, m_lineWidthY, m_gridScale, 0.0f);
-    cb.lineColor = Vector4(m_finalColor.R(), m_finalColor.G(), m_finalColor.B(), m_finalColor.A());
-    cb.baseColor = Vector4(m_baseColor.R(), m_baseColor.G(), m_baseColor.B(), m_baseColor.A());
+    cb.lineColor  = Vector4(m_finalColor.R(), m_finalColor.G(), m_finalColor.B(), m_finalColor.A());
+    cb.baseColor  = Vector4(m_baseColor.R(), m_baseColor.G(), m_baseColor.B(), m_baseColor.A());
     context->UpdateSubresource(m_constantBuffer.Get(), 0, nullptr, &cb, 0, 0);
 
     // Set pipeline state

@@ -8,10 +8,12 @@ void CollisionManager::Update(
 	Core* coreBlue,
 	DeathBeamPool* deathBeams,
 	BeamWeapon* beamWeapon,
-	bool isOnBeat)
+	bool isOnBeat,
+	const Vector3& cameraPosition,
+	const Vector3& cameraForward)
 {
 	CheckEnemyVsCores(enemies, coreRed, coreGreen, coreBlue);
-	CheckBeamVsEnemies(enemies, beamWeapon, deathBeams);
+	CheckBeamVsEnemies(enemies, beamWeapon, deathBeams, cameraPosition, cameraForward);
 }
 
 void CollisionManager::CheckEnemyVsCores(
@@ -43,39 +45,48 @@ void CollisionManager::CheckEnemyVsCores(
 }
 
 void CollisionManager::CheckBeamVsEnemies(
-	std::vector<std::unique_ptr<Enemy>>& enemies,
-	BeamWeapon* beamWeapon,
-	DeathBeamPool* deathBeams)
+    std::vector<std::unique_ptr<Enemy>>& enemies,
+    BeamWeapon* beamWeapon,
+    DeathBeamPool* deathBeams,
+    const Vector3& cameraPosition,
+    const Vector3& cameraForward
+)
 {
-	if (!beamWeapon || !beamWeapon->isActive()) return;
+    bool isActive = beamWeapon && beamWeapon->isCollisionActive();
 
-	Vector3 beamStart = beamWeapon->getStart();
-	Vector3 beamDir = beamWeapon->getDirection();
-	float maxRange = beamWeapon->getMaxRange();
+    // Detect new shot (inactive -> active transition) and clear hit set
+    if (isActive && !m_wasCollisionActive)
+        m_hitEnemiesThisShot.clear();
+    m_wasCollisionActive = isActive;
 
-	for (auto& enemy : enemies)
-	{
-		if (!enemy->IsActive()) continue;
+    if (!isActive) return;
 
-		float hitDistance;
-		if (CollisionSystem::CheckRaySphere(
-			beamStart,
-			beamDir,
-			enemy->GetBoundingSphere(),
-			hitDistance))
-		{
-			// Only count hit if within beam range
-			if (hitDistance <= maxRange)
-			{
-				Vector3 deathPos = enemy->GetPosition();
-				enemy->TakeDamage(1.0f);
+    Vector3 rayStart = cameraPosition;
+    Vector3 rayDir = cameraForward;
+    rayDir.Normalize();
 
-				// Trigger death beam if enemy died
-				if (!enemy->IsActive() && deathBeams)
-				{
-					deathBeams->Trigger(deathPos);
-				}
-			}
-		}
-	}
+    float maxRange = beamWeapon->getMaxRange();
+
+    for (auto& enemy : enemies)
+    {
+        if (!enemy->IsActive()) continue;
+        if (m_hitEnemiesThisShot.count(enemy.get())) continue;
+
+        float hitDistance;
+        if (CollisionSystem::CheckRaySphere(
+            rayStart, rayDir,
+            enemy->GetBoundingSphere(),
+            hitDistance))
+        {
+            if (hitDistance <= maxRange)
+            {
+                Vector3 deathPos = enemy->GetPosition();
+                enemy->TakeDamage(10.0f);
+                m_hitEnemiesThisShot.insert(enemy.get());
+
+                if (!enemy->IsActive() && deathBeams)
+                    deathBeams->Trigger(deathPos);
+            }
+        }
+    }
 }

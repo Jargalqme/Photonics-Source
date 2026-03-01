@@ -6,7 +6,7 @@
 #include "EnemyTroops.h"
 #include "EnemySpawn.h"
 #include "Core.h"
-#include "LightCycle.h"
+#include "Player.h"
 #include "DeathBeamPool.h"
 #include "ProjectilePool.h"
 #include "SceneManager.h"

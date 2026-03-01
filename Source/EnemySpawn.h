@@ -38,9 +38,9 @@ private:
 	float m_gameTime;
 
 	// Spawn configuration
-	static constexpr float INITIAL_SPAWN_INTERVAL = 2.0f;
-	static constexpr float MIN_SPAWN_INTERVAL = 0.5f;
-	static constexpr float DIFFICULTY_RAMP_TIME = 60.0f;
+	static constexpr float INITIAL_SPAWN_INTERVAL = 3.0f;
+	static constexpr float MIN_SPAWN_INTERVAL = 1.0f;
+	static constexpr float DIFFICULTY_RAMP_TIME = 90.0f;
 	static constexpr float SPAWN_RADIUS = 30.0f;
 	static constexpr float WAVE_MOVEMENT_CHANCE = 0.4f;
 };
