@@ -15,43 +15,43 @@ MainMenuScene::~MainMenuScene()
 {
 }
 
-void MainMenuScene::Initialize(DX::DeviceResources* deviceResources)
+void MainMenuScene::initialize(DX::DeviceResources* deviceResources)
 {
-	m_deviceResources = deviceResources;
+	Scene::initialize(deviceResources);
 
     // Create background
     m_background = std::make_unique<MenuBackground>(deviceResources);
-    m_background->Initialize();
-    m_background->SetShaderType(MenuBackground::ShaderType::Wave);
-    m_background->SetColorTint(0.8f, 0.5f, 0.8f);
+    m_background->initialize();
+    m_background->setShaderType(MenuBackground::ShaderType::Wave);
+    m_background->setColorTint(0.8f, 0.5f, 0.8f);
 
     m_audioManager = std::make_unique<AudioManager>();
     m_audioManager->initialize();
     m_audioManager->loadMusic("menu", GetAssetPath(L"Audio/menu_music.wav").c_str());
 }
 
-void MainMenuScene::Enter()
+void MainMenuScene::enter()
 {
-    Scene::Enter();
+    Scene::enter();
     m_selectedIndex = 0;
     if (m_audioManager) m_audioManager->playMusic("menu", true);
 }
 
-void MainMenuScene::Exit()
+void MainMenuScene::exit()
 {
-	Scene::Exit();
+	Scene::exit();
     if (m_audioManager) m_audioManager->stopMusic();
 }
 
-void MainMenuScene::Cleanup()
+void MainMenuScene::finalize()
 {
-    // to-do
+    if (m_background) m_background->onDeviceLost();
 }
 
-void MainMenuScene::Update(float deltaTime, InputManager* input)
+void MainMenuScene::update(float deltaTime, InputManager* input)
 {
     if (m_audioManager) m_audioManager->update();
-    if (m_background) m_background->Update(deltaTime);
+    if (m_background) m_background->update(deltaTime);
 
     // NAVIGATION (only when menu visible)
     if (input->isKeyPressed(Keyboard::Keys::Up) || input->isKeyPressed(Keyboard::Keys::W) || input->isGamePadDPadUpPressed())
@@ -74,7 +74,7 @@ void MainMenuScene::Update(float deltaTime, InputManager* input)
         switch (m_selectedIndex)
         {
         case 0:  // START GAME
-            m_sceneManager->TransitionTo("GameScene");
+            m_sceneManager->transitionTo("GameScene");
             break;
         case 1:  // QUIT
             PostQuitMessage(0);
@@ -88,11 +88,11 @@ void MainMenuScene::Update(float deltaTime, InputManager* input)
     }
 }
 
-void MainMenuScene::Render(Renderer* renderer)
+void MainMenuScene::render(Renderer* renderer)
 {
     (void)renderer;
-    if (m_background) m_background->Render();
-    RenderMenu();
+    if (m_background) m_background->render();
+    renderMenu();
 }
 
 void DrawSciFiButton(const char* text, bool isSelected, float width, float centerX)
@@ -151,7 +151,7 @@ void DrawSciFiButton(const char* text, bool isSelected, float width, float cente
     ImGui::Dummy(ImVec2(width, height + 12.0f));
 }
 
-void MainMenuScene::RenderMenu()
+void MainMenuScene::renderMenu()
 {
     ImVec2 windowSize = ImGui::GetIO().DisplaySize;
     float centerX = windowSize.x * 0.5f;
@@ -212,16 +212,3 @@ void MainMenuScene::RenderMenu()
     ImGui::End();
 }
 
-void MainMenuScene::OnDeviceLost()
-{
-    if (m_background) m_background->OnDeviceLost();
-}
-
-void MainMenuScene::OnDeviceRestored()
-{
-    if (m_background)
-    {
-        m_background->Initialize();
-        m_background->SetShaderType(MenuBackground::ShaderType::Wave);
-    }
-}

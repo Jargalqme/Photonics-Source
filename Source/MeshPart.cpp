@@ -11,7 +11,7 @@ MeshPart MeshPart::CreateBox(
     const Color& color)
 {
     MeshPart part;
-    part.mesh = GeometricPrimitive::CreateBox(ctx, size);
+    part.mesh = GeometricPrimitive::CreateBox(ctx, size, false /*rhcoords*/);
     part.localPosition = pos;
     part.localRotation = rot;
     part.color = color;
@@ -117,6 +117,21 @@ MeshPart MeshPart::CreateOctahedron(
 {
     MeshPart part;
     part.mesh = DirectX::GeometricPrimitive::CreateOctahedron(ctx, size);
+    part.localPosition = pos;
+    part.localRotation = Vector3::Zero;
+    part.color = color;
+    return part;
+}
+
+MeshPart MeshPart::CreateGeoSphere(
+    ID3D11DeviceContext* ctx,
+    float diameter,
+    const Vector3& pos,
+    const Color& color,
+    size_t tessellation)
+{
+    MeshPart part;
+    part.mesh = DirectX::GeometricPrimitive::CreateGeoSphere(ctx, diameter, tessellation);
     part.localPosition = pos;
     part.localRotation = Vector3::Zero;
     part.color = color;

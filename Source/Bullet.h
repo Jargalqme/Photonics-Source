@@ -8,15 +8,15 @@ class Bullet
 public:
 	Bullet(DX::DeviceResources* deviceResources);
 
-	void Initialize();
-	void Update(float deltaTime);
-	void Render(const Matrix& view, const Matrix& projection);
-	void OnDeviceLost();
+	void initialize();
+	void update(float deltaTime);
+	void render(const Matrix& view, const Matrix& projection);
+	void onDeviceLost();
 
-	void Fire(const Vector3& from, const Vector3& target);
-	void Deactivate() { m_active = false; }
-	bool IsActive() const { return m_active; }
-	Vector3 GetPosition() const { return m_position; }
+	void fire(const Vector3& from, const Vector3& target);
+	void deactivate() { m_active = false; }
+	bool isActive() const { return m_active; }
+	Vector3 getPosition() const { return m_position; }
 	const DirectX::BoundingSphere& GetBoundingSphere() const { return m_boundingSphere; }
 
 private:

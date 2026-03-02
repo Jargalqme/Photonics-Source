@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <memory>
 #include <unordered_map>
@@ -15,34 +15,28 @@ public:
     SceneManager();
     ~SceneManager();
 
-    void Initialize(DX::DeviceResources* deviceResources);
+    void initialize(DX::DeviceResources* deviceResources);
+    void finalize();
 
     // Scene management
-    void AddScene(const std::string& name, std::unique_ptr<Scene> scene);
-    void RemoveScene(const std::string& name);
-    void SetActiveScene(const std::string& name);
-    void PushScene(const std::string& name);
-    void PopScene();
+    void addScene(const std::string& name, std::unique_ptr<Scene> scene);
+    void removeScene(const std::string& name);
+    void setActiveScene(const std::string& name);
+    void pushScene(const std::string& name);
+    void popScene();
 
     // Fade transition
-    void TransitionTo(const std::string& sceneName, float duration = 0.5f);
-    bool IsTransitioning() const { return m_fadingOut || m_fadingIn; }
+    void transitionTo(const std::string& sceneName, float duration = 0.5f);
+    bool isTransitioning() const { return m_fadingOut || m_fadingIn; }
 
     // Update and render
-    void Update(float deltaTime, InputManager* input);
-    void Render(Renderer* renderer);
-
-    // Window events
-    void OnWindowSizeChanged(int width, int height);
-    void OnDeviceLost();
-    void OnDeviceRestored();
+    void update(float deltaTime, InputManager* input);
+    void render(Renderer* renderer);
 
     // Getters
-    Scene* GetActiveScene() const { return m_activeScene; }
-    Scene* GetScene(const std::string& name) const;
-    bool HasScene(const std::string& name) const;
-
-    void Cleanup();
+    Scene* getActiveScene() const { return m_activeScene; }
+    Scene* getScene(const std::string& name) const;
+    bool hasScene(const std::string& name) const;
 
 private:
     DX::DeviceResources* m_deviceResources;
@@ -57,6 +51,5 @@ private:
     bool m_fadingIn = false;
     std::string m_pendingScene;
 
-    void UpdateTransition(float deltaTime);
+    void updateTransition(float deltaTime);
 };
-

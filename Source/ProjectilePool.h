@@ -10,13 +10,13 @@ public:
     ProjectilePool(DX::DeviceResources* deviceResources);
     ~ProjectilePool() = default;
 
-    void Initialize(size_t poolSize = 100);
-    void Update(float deltaTime);
-    void Render(const DirectX::SimpleMath::Matrix& view,
+    void initialize(size_t poolSize = 100);
+    void update(float deltaTime);
+    void render(const DirectX::SimpleMath::Matrix& view,
         const DirectX::SimpleMath::Matrix& projection);
 
     // Fire a projectile - returns true if one was available
-    bool Spawn(const DirectX::SimpleMath::Vector3& position,
+    bool spawn(const DirectX::SimpleMath::Vector3& position,
         const DirectX::SimpleMath::Vector3& direction,
         float speed = 50.0f,
         float damage = 10.0f);
@@ -27,7 +27,7 @@ public:
     // Stats for debugging
     int GetActiveCount() const;
     int GetPoolSize() const { return static_cast<int>(m_projectiles.size()); }
-    void OnDeviceLost();
+    void onDeviceLost();
 
 private:
     DX::DeviceResources* m_deviceResources;

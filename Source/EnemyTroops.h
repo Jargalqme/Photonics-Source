@@ -12,29 +12,29 @@ class Enemy
 public:
 	Enemy(DX::DeviceResources* deviceResources);
 
-	void Initialize();
-	void Update(float deltaTime);
-	void Render(const Matrix& view, const Matrix& projection);
-	void OnDeviceLost();
+	void initialize();
+	void update(float deltaTime);
+	void render(const Matrix& view, const Matrix& projection);
+	void onDeviceLost();
 
-	void Spawn(EnemyType type, const Vector3& startPos, const Vector3& targetPos);
-	void TakeDamage(float amount);
-	void Deactivate();
+	void spawn(EnemyType type, const Vector3& startPos, const Vector3& targetPos);
+	void takeDamage(float amount);
+	void deactivate();
 
 	// Getters
-	bool IsActive() const { return m_active; }
-	Vector3 GetPosition() const { return m_position; }
-	Vector3 GetTargetPosition() const { return m_targetPosition; }
-	const DirectX::BoundingSphere& GetBoundingSphere() const { return m_boundingSphere; }
+	bool isActive() const { return m_active; }
+	Vector3 getPosition() const { return m_position; }
+	Vector3 getTargetPosition() const { return m_targetPosition; }
+	const DirectX::BoundingSphere& getBoundingSphere() const { return m_boundingSphere; }
 
 	// Setters
-	void SetPosition(const Vector3& pos) { m_position = pos; }
-	void SetTargetPosition(const Vector3& pos) { m_targetPosition = pos; }
+	void setPosition(const Vector3& pos) { m_position = pos; }
+	void setTargetPosition(const Vector3& pos) { m_targetPosition = pos; }
 
 	// Wave movement control
-	void SetWaveMovement(bool enabled, float amplitude = 3.0f, float frequency = 2.0f);
-	void SetSpeed(float speed) { m_speed = speed; }
-	float GetBaseSpeed() const { return m_baseSpeed; }
+	void setWaveMovement(bool enabled, float amplitude = 3.0f, float frequency = 2.0f);
+	void setSpeed(float speed) { m_speed = speed; }
+	float getBaseSpeed() const { return m_baseSpeed; }
 
 private:
 	DX::DeviceResources* m_deviceResources;

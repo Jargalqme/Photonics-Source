@@ -10,21 +10,21 @@ public:
     DeathBeamPool(DX::DeviceResources* deviceResources);
     ~DeathBeamPool() = default;
 
-    void Initialize(size_t poolSize = 20);
-    void Update(float deltaTime);
-    void Render(const DirectX::SimpleMath::Matrix& view,
+    void initialize(size_t poolSize = 20);
+    void update(float deltaTime);
+    void render(const DirectX::SimpleMath::Matrix& view,
         const DirectX::SimpleMath::Matrix& projection,
         const DirectX::SimpleMath::Vector3& cameraPosition);
-    void OnDeviceLost();
+    void onDeviceLost();
 
     // Trigger a death beam at position
-    void Trigger(const DirectX::SimpleMath::Vector3& position);
+    void trigger(const DirectX::SimpleMath::Vector3& position);
 
     // Customization
-    void SetColor(const DirectX::SimpleMath::Color& color) { m_color = color; }
-    void SetHeight(float height) { m_beamHeight = height; }
-    void SetWidth(float width) { m_beamWidth = width; }
-    void SetDuration(float duration) { m_duration = duration; }
+    void setColor(const DirectX::SimpleMath::Color& color) { m_color = color; }
+    void setHeight(float height) { m_beamHeight = height; }
+    void setWidth(float width) { m_beamWidth = width; }
+    void setDuration(float duration) { m_duration = duration; }
 
 private:
     struct DeathBeam // uninit member variable warning!
@@ -52,9 +52,9 @@ private:
         float time;
     };
 
-    void CreateDeviceDependentResources();
-    void CreateShaders();
-    void CreateGeometry();
+    void createDeviceDependentResources();
+    void createShaders();
+    void createGeometry();
 
     DX::DeviceResources* m_deviceResources;
     std::vector<DeathBeam> m_beams;

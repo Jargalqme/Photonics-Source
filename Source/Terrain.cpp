@@ -11,12 +11,12 @@ Terrain::Terrain(DX::DeviceResources* deviceResources)
     m_noise.SetFrequency(0.1f);
 }
 
-void Terrain::Initialize()
+void Terrain::initialize()
 {
-    CreateDeviceDependentResources();
+    createDeviceDependentResources();
 }
 
-void Terrain::GenerateMesh()
+void Terrain::generateMesh()
 {
     m_vertices.clear();
 
@@ -85,7 +85,7 @@ void Terrain::GenerateMesh()
     }
 }
 
-void Terrain::CreateDeviceDependentResources()
+void Terrain::createDeviceDependentResources()
 {
     auto device = m_deviceResources->GetD3DDevice();
 
@@ -113,17 +113,17 @@ void Terrain::CreateDeviceDependentResources()
         )
     );
 
-    GenerateMesh();
-    UploadMesh();
+    generateMesh();
+    uploadMesh();
 }
 
-void Terrain::Rebuild()
+void Terrain::rebuild()
 {
-    GenerateMesh();
-    UploadMesh();
+    generateMesh();
+    uploadMesh();
 }
 
-void Terrain::UploadMesh()
+void Terrain::uploadMesh()
 {
     auto device = m_deviceResources->GetD3DDevice();
 
@@ -140,7 +140,7 @@ void Terrain::UploadMesh()
     );
 }
 
-void Terrain::Render(const Matrix& view, const Matrix& projection)
+void Terrain::render(const Matrix& view, const Matrix& projection)
 {
     auto context = m_deviceResources->GetD3DDeviceContext();
 
@@ -159,7 +159,7 @@ void Terrain::Render(const Matrix& view, const Matrix& projection)
     context->Draw(static_cast<UINT>(m_vertices.size()), 0);
 }
 
-void Terrain::OnDeviceLost()
+void Terrain::onDeviceLost()
 {
     m_vertexBuffer.Reset();
     m_inputLayout.Reset();

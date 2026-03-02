@@ -11,19 +11,19 @@ Core::Core(DX::DeviceResources* deviceResources)
 {
 }
 
-void Core::Initialize()
+void Core::initialize()
 {
-	BuildCore();
+	buildCore();
 }
 
-void Core::Update(float deltaTime)
+void Core::update(float deltaTime)
 {
 }
 
-void Core::Render(const Matrix& view, const Matrix& projection)
+void Core::render(const Matrix& view, const Matrix& projection)
 {
 	if (!m_alive) return;
-    Matrix coreWorld = m_transform.GetMatrix();
+    Matrix coreWorld = m_transform.getMatrix();
 
 	for (const auto& part : m_parts)
 	{
@@ -37,7 +37,7 @@ void Core::Render(const Matrix& view, const Matrix& projection)
 	}
 }
 
-void Core::TakeDamage(float amount)
+void Core::takeDamage(float amount)
 {
 	m_health -= amount;
 	if (m_health <= 0)
@@ -46,7 +46,7 @@ void Core::TakeDamage(float amount)
 	}
 }
 
-void Core::SetPosition(const Vector3& pos)
+void Core::setPosition(const Vector3& pos)
 {
 	m_transform.position = pos;
 	m_boundingSphere.Center.x = pos.x;
@@ -54,25 +54,25 @@ void Core::SetPosition(const Vector3& pos)
 	m_boundingSphere.Center.z = pos.z;
 }
 
-void Core::SetColor(const Color& color)
+void Core::setColor(const Color& color)
 {
     m_color = color;
 
     // Rebuild immediately if already initialized
     if (!m_parts.empty())
     {
-        BuildCore();
+        buildCore();
     }
 }
 
-void Core::Reset(float health)
+void Core::reset(float health)
 {
     m_health = health;
     m_maxHealth = health;
     m_alive = true;
 }
 
-void Core::BuildCore()
+void Core::buildCore()
 {
     auto ctx = m_deviceResources->GetD3DDeviceContext();
     m_parts.clear();
@@ -121,7 +121,7 @@ void Core::BuildCore()
     m_boundingSphere.Radius = 1.5f;
 }
 
-void Core::OnDeviceLost()
+void Core::onDeviceLost()
 {
 	m_parts.clear();
 }

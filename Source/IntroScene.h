@@ -10,16 +10,13 @@ public:
     IntroScene(SceneManager* sceneManager);
     ~IntroScene() override;
 
-    void Initialize(DX::DeviceResources* deviceResources) override;
-    void Enter() override;
-    void Exit() override;
-    void Cleanup() override;
+    void initialize(DX::DeviceResources* deviceResources) override;
+    void enter() override;
+    void exit() override;
+    void finalize() override;
 
-    void Update(float deltaTime, InputManager* input) override;
-    void Render(Renderer* renderer) override;
-
-    void OnDeviceLost() override;
-    void OnDeviceRestored() override;
+    void update(float deltaTime, InputManager* input) override;
+    void render(Renderer* renderer) override;
 
 private:
     SceneManager* m_sceneManager;

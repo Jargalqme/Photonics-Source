@@ -16,19 +16,19 @@ public:
     MenuBackground(MenuBackground const&) = delete;
     MenuBackground& operator=(MenuBackground const&) = delete;
 
-    void Initialize();
-    void Update(float deltaTime);
-    void Render();
-    void OnDeviceLost();
+    void initialize();
+    void update(float deltaTime);
+    void render();
+    void onDeviceLost();
 
     // Setters for customization
-    void SetSpeed(float speed) { m_speed = speed; }
-    void SetPatternScale(float scale) { m_patternScale = scale; }
-    void SetWarpIntensity(float intensity) { m_warpIntensity = intensity; }
-    void SetBrightness(float brightness) { m_brightness = brightness; }
-    void SetChromaticOffset(float offset) { m_chromaticOffset = offset; }
-    void SetColorTint(float r, float g, float b) { m_colorTint = { r, g, b }; }
-    void SetVignetteStrength(float strength) { m_vignetteStrength = strength; }
+    void setSpeed(float speed) { m_speed = speed; }
+    void setPatternScale(float scale) { m_patternScale = scale; }
+    void setWarpIntensity(float intensity) { m_warpIntensity = intensity; }
+    void setBrightness(float brightness) { m_brightness = brightness; }
+    void setChromaticOffset(float offset) { m_chromaticOffset = offset; }
+    void setColorTint(float r, float g, float b) { m_colorTint = { r, g, b }; }
+    void setVignetteStrength(float strength) { m_vignetteStrength = strength; }
 
     enum class ShaderType
     {
@@ -36,7 +36,7 @@ public:
         Fractal,
         Wave
     };
-    void SetShaderType(ShaderType type);
+    void setShaderType(ShaderType type);
 
 private:
     // Vertex Structure
@@ -81,9 +81,9 @@ private:
     size_t m_vertexCount;
 
     // Private methods
-    void CreateFullscreenQuad();
-    void CreateShaders();
-    void CreateDeviceDependentResources();
+    void createFullscreenQuad();
+    void createShaders();
+    void createDeviceDependentResources();
 
     // Shader parameters (tweakable)
     float m_speed = 1.0f;              // Animation speed multiplier

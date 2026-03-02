@@ -69,14 +69,14 @@ Vector3 EnemySpawn::selectSpawnTarget()
 	// Build list of alive cores
 	std::vector<Vector3> aliveCores;
 
-	if (m_coreRed && m_coreRed->IsAlive())
-		aliveCores.push_back(m_coreRed->GetPosition());
+	if (m_coreRed && m_coreRed->isAlive())
+		aliveCores.push_back(m_coreRed->getPosition());
 
-	if (m_coreGreen && m_coreGreen->IsAlive())
-		aliveCores.push_back(m_coreGreen->GetPosition());
+	if (m_coreGreen && m_coreGreen->isAlive())
+		aliveCores.push_back(m_coreGreen->getPosition());
 
-	if (m_coreBlue && m_coreBlue->IsAlive())
-		aliveCores.push_back(m_coreBlue->GetPosition());
+	if (m_coreBlue && m_coreBlue->isAlive())
+		aliveCores.push_back(m_coreBlue->getPosition());
 
 	// If no alive cores, return zero vector
 	if (aliveCores.empty())
@@ -104,10 +104,10 @@ void EnemySpawn::spawnEnemy(EnemyType type, const Vector3& spawnPos, const Vecto
 	// Find an inactive enemy in the pool
 	for (auto& enemy : *m_enemyPool)
 	{
-		if (!enemy->IsActive())
+		if (!enemy->isActive())
 		{
 			// Spawn the enemy
-			enemy->Spawn(type, spawnPos, target);
+			enemy->spawn(type, spawnPos, target);
 
 			// Apply spawn patterns (wave movement)
 			applySpawnPattern(enemy.get());
@@ -130,10 +130,10 @@ void EnemySpawn::applySpawnPattern(Enemy* enemy)
 		float amplitude = 2.0f + (rand() % 30) / 10.0f;  // 2.0 to 5.0
 		float frequency = 1.5f + (rand() % 20) / 10.0f;  // 1.5 to 3.5
 
-		enemy->SetWaveMovement(true, amplitude, frequency);
+		enemy->setWaveMovement(true, amplitude, frequency);
 	}
 	else
 	{
-		enemy->SetWaveMovement(false);
+		enemy->setWaveMovement(false);
 	}
 }

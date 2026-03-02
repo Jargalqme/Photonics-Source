@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <string>
 
@@ -17,32 +17,24 @@ public:
 	Scene(const std::string& name)
 		: m_name(name)
 		, m_isActive(false)
-		, m_deviceResources(nullptr) 
+		, m_deviceResources(nullptr)
 	{
 	}
 	virtual ~Scene() = default;
 
 	// Lifecycle methods
-	virtual void Initialize(DX::DeviceResources* deviceResources) = 0;
-	virtual void Enter() { m_isActive = true; } // Called when scene becomes active
-	virtual void Exit() { m_isActive = false; } // Called when leaving scene
-	virtual void Cleanup() = 0;					// Called before scene destruction
+	virtual void initialize(DX::DeviceResources* deviceResources) { m_deviceResources = deviceResources; }
+	virtual void enter() { m_isActive = true; }
+	virtual void exit() { m_isActive = false; }
+	virtual void finalize() {}
 
 	// Update and render
-	virtual void Update(float deltaTime, InputManager* input) = 0;
-	virtual void Render(Renderer* renderer) = 0;
-
-	// Window events (optional overrides)
-	virtual void OnWindowSizeChanged(int width, int height) {
-		UNREFERENCED_PARAMETER(width);
-		UNREFERENCED_PARAMETER(height);
-	}
-	virtual void OnDeviceLost() {}
-	virtual void OnDeviceRestored() {}
+	virtual void update(float dt, InputManager* input) = 0;
+	virtual void render(Renderer* renderer) = 0;
 
 	// Getters
-	const std::string& GetName() const { return m_name; }
-	bool IsActive() const { return m_isActive; }
+	const std::string& getName() const { return m_name; }
+	bool isActive() const { return m_isActive; }
 
 protected:
 	std::string m_name;

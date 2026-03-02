@@ -13,13 +13,13 @@ Bullet::Bullet(DX::DeviceResources* deviceResources)
 {
 }
 
-void Bullet::Initialize()
+void Bullet::initialize()
 {
 	auto context = m_deviceResources->GetD3DDeviceContext();
 	m_mesh = GeometricPrimitive::CreateCube(context, 0.5f);
 }
 
-void Bullet::Update(float deltaTime)
+void Bullet::update(float deltaTime)
 {
 	if (!m_active)
 		return;
@@ -36,7 +36,7 @@ void Bullet::Update(float deltaTime)
 		m_active = false;
 }
 
-void Bullet::Render(const Matrix& view, const Matrix& projection)
+void Bullet::render(const Matrix& view, const Matrix& projection)
 {
 	if (!m_active) return;
 
@@ -44,7 +44,7 @@ void Bullet::Render(const Matrix& view, const Matrix& projection)
 	m_mesh->Draw(world, view, projection, m_color);
 }
 
-void Bullet::Fire(const Vector3& from, const Vector3& target)
+void Bullet::fire(const Vector3& from, const Vector3& target)
 {
 	m_position = from;				// Start at boss position
 
@@ -60,7 +60,7 @@ void Bullet::Fire(const Vector3& from, const Vector3& target)
 	m_active = true;				// Bullet is now flying
 }
 
-void Bullet::OnDeviceLost()
+void Bullet::onDeviceLost()
 {
 	m_mesh.reset();
 }

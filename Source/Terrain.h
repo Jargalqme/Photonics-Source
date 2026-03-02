@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "DeviceResources.h"
-#include "FastNoiseLite.h"
+#include "../ThirdParty/FastNoiseLite.h"
 #include <vector>
 
 class Terrain
@@ -9,24 +9,24 @@ public:
     Terrain(DX::DeviceResources* deviceResources);
     ~Terrain() = default;
 
-    void Initialize();
-    void Render(const DirectX::SimpleMath::Matrix& view, const DirectX::SimpleMath::Matrix& projection);
-    void CreateDeviceDependentResources();
-    void OnDeviceLost();
+    void initialize();
+    void render(const DirectX::SimpleMath::Matrix& view, const DirectX::SimpleMath::Matrix& projection);
+    void createDeviceDependentResources();
+    void onDeviceLost();
 
-    void Rebuild();
+    void rebuild();
 
     // Setters
     void setBeatPulse(float pulse) { m_beatPulse = pulse; }
     void setLineColor(const DirectX::SimpleMath::Color& color) { m_lineColor = color; }
 
     // ImGui getters
-    float* GetInnerRadiusPtr() { return &m_innerRadius; }
-    float* GetOuterRadiusPtr() { return &m_outerRadius; }
-    float* GetHeightScalePtr() { return &m_heightScale; }
-    float* GetBaseWidthPtr() { return &m_baseWidth; }
-    float* GetLineColorPtr() { return reinterpret_cast<float*>(&m_lineColor); }
-    int* GetSpikeCountPtr() { return &m_spikeCount; }
+    float* getInnerRadiusPtr() { return &m_innerRadius; }
+    float* getOuterRadiusPtr() { return &m_outerRadius; }
+    float* getHeightScalePtr() { return &m_heightScale; }
+    float* getBaseWidthPtr() { return &m_baseWidth; }
+    float* getLineColorPtr() { return reinterpret_cast<float*>(&m_lineColor); }
+    int* getSpikeCountPtr() { return &m_spikeCount; }
 
 private:
     DX::DeviceResources* m_deviceResources;
@@ -51,6 +51,6 @@ private:
     Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
     std::unique_ptr<DirectX::BasicEffect> m_effect;
 
-    void GenerateMesh();
-    void UploadMesh();
+    void generateMesh();
+    void uploadMesh();
 };

@@ -11,7 +11,7 @@ struct Transform
     Vector3 position = { 0.0f, 0.0f, 0.0f };    // World pos (x, y, z)
 
     // GET TRANSFORMATION MATRIX
-    Matrix GetMatrix() const
+    Matrix getMatrix() const
     {
         Matrix S = Matrix::CreateScale(scale);
 
@@ -26,17 +26,18 @@ struct Transform
         return S * R * T;
     }
 
-    void Reset()
+    void reset()
     {
         scale    = Vector3::One;
         rotation = Vector3::Zero;
         position = Vector3::Zero;
     }
-
-    //Matrix GetMatrix() const
-    //{
-    //    return Matrix::CreateScale(scale) *
-    //           Matrix::CreateFromYawPitchRoll(rotation.y, rotation.x, rotation.z) *
-    //           Matrix::CreateTranslation(position);
-    //}
+#if 0
+    Matrix getMatrix() const
+    {
+        return Matrix::CreateScale(scale) *
+               Matrix::CreateFromYawPitchRoll(rotation.y, rotation.x, rotation.z) *
+               Matrix::CreateTranslation(position);
+    }
+#endif
 };

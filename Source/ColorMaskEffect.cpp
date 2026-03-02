@@ -11,7 +11,7 @@ ColorMaskEffect::ColorMaskEffect(DX::DeviceResources* deviceResources)
 {
 }
 
-void ColorMaskEffect::CreateDeviceDependentResources()
+void ColorMaskEffect::createDeviceDependentResources()
 {
     auto device = m_deviceResources->GetD3DDevice();
 
@@ -51,12 +51,12 @@ void ColorMaskEffect::CreateDeviceDependentResources()
         m_sampler.ReleaseAndGetAddressOf()));
 }
 
-void ColorMaskEffect::CreateWindowSizeDependentResources()
+void ColorMaskEffect::createWindowSizeDependentResources()
 {
     // todo
 }
 
-void ColorMaskEffect::OnDeviceLost()
+void ColorMaskEffect::onDeviceLost()
 {
     m_vertexShader.Reset();
     m_pixelShader.Reset();
@@ -64,12 +64,12 @@ void ColorMaskEffect::OnDeviceLost()
     m_sampler.Reset();
 }
 
-void ColorMaskEffect::SetColorMask(float r, float g, float b)
+void ColorMaskEffect::setColorMask(float r, float g, float b)
 {
     m_colorMask = Vector3(r, g, b);
 }
 
-void ColorMaskEffect::Process(ID3D11ShaderResourceView* inputSRV,
+void ColorMaskEffect::process(ID3D11ShaderResourceView* inputSRV,
     ID3D11RenderTargetView* outputRTV)
 {
     auto context = m_deviceResources->GetD3DDeviceContext();

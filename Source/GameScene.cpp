@@ -15,9 +15,9 @@ GameScene::~GameScene()
 {
 }
 
-void GameScene::Initialize(DX::DeviceResources* deviceResources)
+void GameScene::initialize(DX::DeviceResources* deviceResources)
 {
-	m_deviceResources = deviceResources;
+	Scene::initialize(deviceResources);
 
 	// Create camera
 	m_camera = std::make_unique<Camera>();
@@ -32,45 +32,45 @@ void GameScene::Initialize(DX::DeviceResources* deviceResources)
 	m_gridFloor->initialize();
 
 	m_terrain = std::make_unique<Terrain>(m_deviceResources);
-	m_terrain->Initialize();
+	m_terrain->initialize();
 
-	m_lightCycle = std::make_unique<LightCycle>(m_deviceResources);
-	m_lightCycle->Initialize();
+	m_player = std::make_unique<Player>(m_deviceResources);
+	m_player->initialize();
 
 	// Start with follow camera mode
-	m_camera->setFollowTarget(m_lightCycle->GetPositionPtr(), m_lightCycle->GetRotationPtr());
+	m_camera->setFollowTarget(m_player->getPositionPtr(), m_player->getRotationPtr());
 	m_camera->setMode(CameraMode::Follow);
 
-	m_tower = std::make_unique<Tower>(m_deviceResources);
-	m_tower->Initialize();
+	m_playerController = std::make_unique<PlayerController>(m_player.get(), m_camera.get());
+
+	m_enemyBoss = std::make_unique<EnemyBoss>(m_deviceResources);
+	m_enemyBoss->initialize();
 
 	m_enemies.reserve(MAX_ENEMIES);
 	for (int i = 0; i < MAX_ENEMIES; i++)
 	{
 		auto enemy = std::make_unique<Enemy>(m_deviceResources);
-		enemy->Initialize();
+		enemy->initialize();
 		m_enemies.push_back(std::move(enemy));
 	}
 
-
-
 	m_coreRed = std::make_unique<Core>(m_deviceResources);
-	m_coreRed->Initialize();
-	m_coreRed->SetPosition(Vector3(0.0f, 1.0f, 85.0f));
-	m_coreRed->SetColor(Color(1.0f, 0.0f, 0.0f));
-	m_coreRed->SetHealth(150.0f);
+	m_coreRed->initialize();
+	m_coreRed->setPosition(Vector3(0.0f, 1.0f, 85.0f));
+	m_coreRed->setColor(Color(1.0f, 0.0f, 0.0f));
+	m_coreRed->setHealth(150.0f);
 
 	m_coreGreen = std::make_unique<Core>(m_deviceResources);
-	m_coreGreen->Initialize();
-	m_coreGreen->SetPosition(Vector3(-66.0f, 1.0f, -50.0f));
-	m_coreGreen->SetColor(Color(0.0f, 1.0f, 0.0f));
-	m_coreGreen->SetHealth(150.0f);
+	m_coreGreen->initialize();
+	m_coreGreen->setPosition(Vector3(-66.0f, 1.0f, -50.0f));
+	m_coreGreen->setColor(Color(0.0f, 1.0f, 0.0f));
+	m_coreGreen->setHealth(150.0f);
 
 	m_coreBlue = std::make_unique<Core>(m_deviceResources);
-	m_coreBlue->Initialize();
-	m_coreBlue->SetPosition(Vector3(66.0f, 1.0f, -50.0f));
-	m_coreBlue->SetColor(Color(0.0f, 0.0f, 1.0f));
-	m_coreBlue->SetHealth(150.0f);
+	m_coreBlue->initialize();
+	m_coreBlue->setPosition(Vector3(66.0f, 1.0f, -50.0f));
+	m_coreBlue->setColor(Color(0.0f, 0.0f, 1.0f));
+	m_coreBlue->setHealth(150.0f);
 
 	m_enemySpawn = std::make_unique<EnemySpawn>();
 	m_enemySpawn->initialize(&m_enemies, m_coreRed.get(), m_coreGreen.get(), m_coreBlue.get());
@@ -85,10 +85,10 @@ void GameScene::Initialize(DX::DeviceResources* deviceResources)
 	m_animatedBillboard->initialize();
 
 	m_deathBeams = std::make_unique<DeathBeamPool>(m_deviceResources);
-	m_deathBeams->Initialize(20);
-	m_deathBeams->SetHeight(30.0f);
-	m_deathBeams->SetColor(Color(0.0f, 0.0f, 0.0f));
-	m_deathBeams->SetDuration(0.5f);
+	m_deathBeams->initialize(20);
+	m_deathBeams->setHeight(30.0f);
+	m_deathBeams->setColor(Color(0.0f, 0.0f, 0.0f));
+	m_deathBeams->setDuration(0.5f);
 
 	m_collisionManager = std::make_unique<CollisionManager>();
 
@@ -108,20 +108,20 @@ void GameScene::Initialize(DX::DeviceResources* deviceResources)
 
 	// Set beat callback
 	m_musicManager->setBeatCallback([this](int beat) {
-		OnBeat(beat);
+		onBeat(beat);
 	});
 
 	m_gameUI = std::make_unique<GameUI>();
 	m_gameUI->initialize(m_deviceResources);
 	m_gameUI->setMusicManager(m_musicManager.get());
-	m_gameUI->setPlayer(m_lightCycle.get());
+	m_gameUI->setPlayer(m_player.get());
 	m_gameUI->setCores(m_coreRed.get(), m_coreGreen.get(), m_coreBlue.get());
 	m_gameUI->setEnemies(&m_enemies);
 	m_gameUI->setBeamWeapon(m_beamWeapon.get());
 
 	m_debugUI = std::make_unique<DebugUI>();
 	m_debugUI->setCamera(m_camera.get());
-	m_debugUI->setLightCycle(m_lightCycle.get());
+	m_debugUI->setLightCycle(m_player.get());
 	m_debugUI->setGridFloor(m_gridFloor.get());
 	m_debugUI->setTerrain(m_terrain.get());
 	m_debugUI->setAudioManager(m_audioManager.get());
@@ -169,25 +169,25 @@ void GameScene::Initialize(DX::DeviceResources* deviceResources)
 	}
 }
 
-void GameScene::Enter()
+void GameScene::enter()
 {
-	Scene::Enter();
+	Scene::enter();
 
 	// reset spawn system
 	if (m_enemySpawn) m_enemySpawn->reset();
 
 	// reset player
-	if (m_lightCycle)
-		m_lightCycle->Reset();
+	if (m_player)
+		m_player->reset();
 
 	// reset cores
-	if (m_coreRed)   m_coreRed->Reset(150.0f);
-	if (m_coreGreen) m_coreGreen->Reset(150.0f);
-	if (m_coreBlue)  m_coreBlue->Reset(150.0f);
+	if (m_coreRed)   m_coreRed->reset(150.0f);
+	if (m_coreGreen) m_coreGreen->reset(150.0f);
+	if (m_coreBlue)  m_coreBlue->reset(150.0f);
 
 	// deactivate all enemies
 	for (auto& enemy : m_enemies)
-		enemy->Deactivate();
+		enemy->deactivate();
 
 	// reset and start music
 	if (m_musicManager) m_musicManager->reset();
@@ -198,13 +198,13 @@ void GameScene::Enter()
 	{
 		ColorMaskEffect* colorMask = m_renderer->GetColorMaskEffect();
 		if (colorMask)
-			colorMask->ResetMask();
+			colorMask->resetMask();
 	}
 }
 
-void GameScene::Exit()
+void GameScene::exit()
 {
-	Scene::Exit();
+	Scene::exit();
 	if (m_audioManager) m_audioManager->stopMusic();
 
 	// Reset color mask
@@ -212,17 +212,31 @@ void GameScene::Exit()
 	{
 		ColorMaskEffect* colorMask = m_renderer->GetColorMaskEffect();
 		if (colorMask)
-			colorMask->ResetMask();
+			colorMask->resetMask();
 	}
 }
 
-void GameScene::Cleanup()
+void GameScene::finalize()
 {
-	// Clean up resources (explicitly)
+	// Release GPU resources
+	if (m_gridFloor) m_gridFloor->finalize();
+	if (m_terrain) m_terrain->onDeviceLost();
+	if (m_player) m_player->onDeviceLost();
+	if (m_enemyBoss) m_enemyBoss->onDeviceLost();
+	for (auto& enemy : m_enemies)
+		enemy->onDeviceLost();
+	if (m_coreRed) m_coreRed->onDeviceLost();
+	if (m_coreGreen) m_coreGreen->onDeviceLost();
+	if (m_coreBlue) m_coreBlue->onDeviceLost();
+	if (m_deathBeams) m_deathBeams->onDeviceLost();
+	if (m_beamWeapon) m_beamWeapon->finalize();
+
+	// Destroy objects
 	m_camera.reset();
 	m_terrain.reset();
-	m_lightCycle.reset();
-	m_tower.reset();
+	m_player.reset();
+	m_playerController.reset();
+	m_enemyBoss.reset();
 	m_enemies.clear();
 	m_coreRed.reset();
 	m_coreGreen.reset();
@@ -237,7 +251,7 @@ void GameScene::Cleanup()
 	//m_animatedBillboard.reset();
 }
 
-void GameScene::Update(float deltaTime, InputManager* input)
+void GameScene::update(float deltaTime, InputManager* input)
 {
 	// Handle scene-specific input
 	if (input->isKeyPressed(Keyboard::Keys::Escape))
@@ -249,8 +263,7 @@ void GameScene::Update(float deltaTime, InputManager* input)
 	// Toggle cursor for debug UI
 	if (input->isKeyPressed(Keyboard::Keys::Tab))
 	{
-		m_showCursor = !m_showCursor;
-		input->setMouseMode(m_showCursor ? Mouse::MODE_ABSOLUTE : Mouse::MODE_RELATIVE);
+		input->setCursorVisible(!input->isCursorVisible());
 	}
 
 	// Toggle debug mode (F3)
@@ -260,11 +273,12 @@ void GameScene::Update(float deltaTime, InputManager* input)
 	}
 
 	if (m_debugUI)
-		m_debugUI->setShowCursor(m_showCursor);
+		m_debugUI->setInputManager(input);
 
 	// Update subsystems
-	UpdateGamePlay(deltaTime, input);
-	UpdateCamera(deltaTime, input);
+	updateGamePlay(deltaTime, input);
+	m_playerController->update(deltaTime, input);
+	m_camera->update(deltaTime, input);
 
 	if (m_gameUI)
 		m_gameUI->update(deltaTime);
@@ -296,18 +310,18 @@ void GameScene::Update(float deltaTime, InputManager* input)
 	}
 
 	if (m_deathBeams)
-		m_deathBeams->Update(deltaTime);
+		m_deathBeams->update(deltaTime);
 
 	if (m_beamWeapon)
 	{
 		m_beamWeapon->update(deltaTime);
 
-		// zoom while holding right mouse
-		m_camera->setZoom(input->isRightMouseDown());
+		// zoom while holding right mouse (only when cursor hidden)
+		m_camera->setAiming(!input->isCursorVisible() && input->isRightMouseDown());
 
-		if (input->isLeftMousePressed() && m_beamWeapon->canFire())
+		if (!input->isCursorVisible() && input->isLeftMousePressed() && m_beamWeapon->canFire())
 		{
-			Vector3 spawnPos = m_lightCycle->GetPosition();
+			Vector3 spawnPos = m_player->getPosition();
 			spawnPos.y += 1.0f;
 
 			Vector3 cameraPos = m_camera->getPosition();
@@ -334,126 +348,24 @@ void GameScene::Update(float deltaTime, InputManager* input)
 	}
 }
 
-void GameScene::UpdateCamera(float deltaTime, InputManager* input)
+void GameScene::updateGamePlay(float deltaTime, InputManager* input)
 {
-	// Toggle camera mode
-	if (input->isKeyPressed(Keyboard::Keys::F1))
-	{
-		m_camera->setMode(CameraMode::Free);
-	}
-	if (input->isKeyPressed(Keyboard::Keys::F2))
-	{
-		m_camera->setFollowTarget(m_lightCycle->GetPositionPtr(), m_lightCycle->GetRotationPtr());
-		m_camera->setMode(CameraMode::Follow);
-	}
-
-	// Update camera (skip when cursor visible)
-	if (!m_showCursor)
-	{
-		m_camera->update(deltaTime, input);
-	}
-}
-
-void GameScene::UpdateGamePlay(float deltaTime, InputManager* input)
-{
-	if (m_lightCycle)
-	{
-		if (m_camera->getMode() == CameraMode::Follow)
-		{
-			// Get camera directions
-			Vector3 cameraForward = m_camera->getForward();
-			cameraForward.y = 0.0f;
-			cameraForward.Normalize();
-
-			Vector3 cameraRight = m_camera->getRight();
-			cameraRight.y = 0.0f;
-			cameraRight.Normalize();
-
-			// Build movement direction from WASD
-			Vector3 moveDirection = Vector3::Zero;
-
-			if (input->isKeyDown(Keyboard::Keys::W))
-				moveDirection += cameraForward;
-			if (input->isKeyDown(Keyboard::Keys::S))
-				moveDirection -= cameraForward;
-			if (input->isKeyDown(Keyboard::Keys::A))
-				moveDirection -= cameraRight;
-			if (input->isKeyDown(Keyboard::Keys::D))
-				moveDirection += cameraRight;
-
-			// Gamepad support
-			Vector2 stick = input->getGamePadLeftStick();
-			if (stick.LengthSquared() > 0.01f)
-			{
-				moveDirection += cameraForward * stick.y;
-				moveDirection += cameraRight * stick.x;
-			}
-
-			// Movement & Facing
-			bool isMoving = moveDirection.LengthSquared() > 0.001f;
-			bool isShooting = input->isLeftMousePressed() || input->isRightMousePressed();
-
-			if (isMoving || isShooting)
-			{
-				m_lightCycle->MoveInDirection(moveDirection, cameraForward, deltaTime);
-			}
-			else
-			{
-				m_lightCycle->UpdateIdle(deltaTime);
-			}
-
-			// Jump
-			if (input->isKeyPressed(Keyboard::Keys::Space))
-			{
-				m_lightCycle->Jump();
-			}
-		}
-		else
-		{
-			// Free camera mode
-			if (input->isKeyDown(Keyboard::Keys::Up))
-				m_lightCycle->Accelerate(deltaTime);
-			if (input->isKeyDown(Keyboard::Keys::Down))
-				m_lightCycle->Brake(deltaTime);
-			if (input->isKeyDown(Keyboard::Keys::Left))
-				m_lightCycle->Turn(1.0f, deltaTime);
-			if (input->isKeyDown(Keyboard::Keys::Right))
-				m_lightCycle->Turn(-1.0f, deltaTime);
-
-			m_lightCycle->Update(deltaTime);
-		}
-	}
-
-	// Boost (separate from jump if using beat system)
-	if (input->isKeyPressed(Keyboard::Keys::LeftShift))  // Changed to Shift since Space is jump
-	{
-		if (m_musicManager && m_musicManager->isOnBeat())
-		{
-			m_lightCycle->ActivateBoost();
-
-			if (m_audioManager) m_audioManager->playSound("boost");
-
-			input->setVibration(0.7f, 0.4f);
-			m_rumbleTimer = 0.2f;
-		}
-	}
-
 	// Update enemy spawning
 	if (m_enemySpawn)
 		m_enemySpawn->update(deltaTime);
 
 	// Update enemy retargeting
-	UpdateEnemyRetargeting();
+	updateEnemyRetargeting();
 
 	for (auto& enemy : m_enemies)
 	{
-		if (enemy->IsActive())
-			enemy->Update(deltaTime);
+		if (enemy->isActive())
+			enemy->update(deltaTime);
 	}
 
 	// Check all collisions
 	bool isOnBeat = m_musicManager ? m_musicManager->isOnBeat() : false;
-	m_collisionManager->Update(
+	m_collisionManager->update(
 		m_enemies,
 		m_coreRed.get(),
 		m_coreGreen.get(),
@@ -465,73 +377,73 @@ void GameScene::UpdateGamePlay(float deltaTime, InputManager* input)
 		m_camera->getForward()
 	);
 
-	if (m_tower)
-		m_tower->Update(deltaTime);
+	if (m_enemyBoss)
+		m_enemyBoss->update(deltaTime);
 
-	CheckGameConditions();
+	checkGameConditions();
 }
 
-void GameScene::UpdateEnemyRetargeting()
+void GameScene::updateEnemyRetargeting()
 {
 	// Retarget enemies if their target core is dead
 	for (auto& enemy : m_enemies)
 	{
-		if (!enemy->IsActive())
+		if (!enemy->isActive())
 			continue;
 
-		Vector3 targetPos = enemy->GetTargetPosition();
+		Vector3 targetPos = enemy->getTargetPosition();
 
 		// Check if targeting dead core
 		bool needsRetarget = false;
 
-		if (!m_coreRed->IsAlive() && targetPos == m_coreRed->GetPosition())
+		if (!m_coreRed->isAlive() && targetPos == m_coreRed->getPosition())
 			needsRetarget = true;
-		else if (!m_coreGreen->IsAlive() && targetPos == m_coreGreen->GetPosition())
+		else if (!m_coreGreen->isAlive() && targetPos == m_coreGreen->getPosition())
 			needsRetarget = true;
-		else if (!m_coreBlue->IsAlive() && targetPos == m_coreBlue->GetPosition())
+		else if (!m_coreBlue->isAlive() && targetPos == m_coreBlue->getPosition())
 			needsRetarget = true;
 
 		// Retarget to random living core
 		if (needsRetarget)
 		{
 			std::vector<Vector3> livingCores;
-			if (m_coreRed->IsAlive())   livingCores.push_back(m_coreRed->GetPosition());
-			if (m_coreGreen->IsAlive()) livingCores.push_back(m_coreGreen->GetPosition());
-			if (m_coreBlue->IsAlive())  livingCores.push_back(m_coreBlue->GetPosition());
+			if (m_coreRed->isAlive())   livingCores.push_back(m_coreRed->getPosition());
+			if (m_coreGreen->isAlive()) livingCores.push_back(m_coreGreen->getPosition());
+			if (m_coreBlue->isAlive())  livingCores.push_back(m_coreBlue->getPosition());
 
 			if (!livingCores.empty())
 			{
 				int idx = rand() % livingCores.size();
-				enemy->SetTargetPosition(livingCores[idx]);
+				enemy->setTargetPosition(livingCores[idx]);
 			}
 		}
 	}
 }
 
-void GameScene::CheckGameConditions()
+void GameScene::checkGameConditions()
 {
 	// Check lose condition - player dead
-	if (m_lightCycle && m_lightCycle->IsDead())
+	if (m_player && m_player->isDead())
 	{
-		m_sceneManager->TransitionTo("GameOver");
+		m_sceneManager->transitionTo("GameOver");
 		return;
 	}
 
 	// Check lose condition - all cores dead
-	bool allCoresDead = !m_coreRed->IsAlive() &&
-		!m_coreGreen->IsAlive() &&
-		!m_coreBlue->IsAlive();
+	bool allCoresDead = !m_coreRed->isAlive() &&
+		!m_coreGreen->isAlive() &&
+		!m_coreBlue->isAlive();
 
 	if (allCoresDead)
 	{
-		m_sceneManager->TransitionTo("GameOver");
+		m_sceneManager->transitionTo("GameOver");
 		return;
 	}
 
 	// Check win condition - song complete
 	if (m_musicManager && m_musicManager->isSongComplete())
 	{
-		m_sceneManager->TransitionTo("Victory");
+		m_sceneManager->transitionTo("Victory");
 		return;
 	}
 
@@ -542,25 +454,25 @@ void GameScene::CheckGameConditions()
 
 		if (colorMask)
 		{
-			if (m_coreRed && !m_coreRed->IsAlive())
-				colorMask->DisableRed();
+			if (m_coreRed && !m_coreRed->isAlive())
+				colorMask->disableRed();
 
-			if (m_coreGreen && !m_coreGreen->IsAlive())
-				colorMask->DisableGreen();
+			if (m_coreGreen && !m_coreGreen->isAlive())
+				colorMask->disableGreen();
 
-			if (m_coreBlue && !m_coreBlue->IsAlive())
-				colorMask->DisableBlue();
+			if (m_coreBlue && !m_coreBlue->isAlive())
+				colorMask->disableBlue();
 		}
 	}
 }
 
-void GameScene::OnBeat(int beat)
+void GameScene::onBeat(int beat)
 {
 	if (m_gameUI)
 		m_gameUI->triggerBeatFlash(beat);
 }
 
-void GameScene::Render(Renderer* renderer)
+void GameScene::render(Renderer* renderer)
 {
 	m_renderer = renderer;
 
@@ -569,10 +481,10 @@ void GameScene::Render(Renderer* renderer)
 		m_gridFloor->render(m_camera->getViewMatrix(), m_camera->getProjectionMatrix());
 
 	if (m_terrain)
-		m_terrain->Render(m_camera->getViewMatrix(), m_camera->getProjectionMatrix());
+		m_terrain->render(m_camera->getViewMatrix(), m_camera->getProjectionMatrix());
 
-	if (m_lightCycle)
-		m_lightCycle->Render(m_camera->getViewMatrix(), m_camera->getProjectionMatrix());
+	if (m_player)
+		m_player->render(m_camera->getViewMatrix(), m_camera->getProjectionMatrix());
 
 	// Render floating shapes
 	for (size_t i = 0; i < m_floatingShapes.size(); i++)
@@ -593,26 +505,26 @@ void GameScene::Render(Renderer* renderer)
 			shapeColor);
 	}
 
-	if (m_tower)
-		m_tower->Render(m_camera->getViewMatrix(), m_camera->getProjectionMatrix());
+	if (m_enemyBoss)
+		m_enemyBoss->render(m_camera->getViewMatrix(), m_camera->getProjectionMatrix());
 
 	for (auto& enemy : m_enemies)
 	{
-		if (enemy->IsActive())
-			enemy->Render(m_camera->getViewMatrix(), m_camera->getProjectionMatrix());
+		if (enemy->isActive())
+			enemy->render(m_camera->getViewMatrix(), m_camera->getProjectionMatrix());
 	}
 
 	if (m_coreRed)
-		m_coreRed->Render(m_camera->getViewMatrix(), m_camera->getProjectionMatrix());
+		m_coreRed->render(m_camera->getViewMatrix(), m_camera->getProjectionMatrix());
 
 	if (m_coreGreen)
-		m_coreGreen->Render(m_camera->getViewMatrix(), m_camera->getProjectionMatrix());
+		m_coreGreen->render(m_camera->getViewMatrix(), m_camera->getProjectionMatrix());
 
 	if (m_coreBlue)
-		m_coreBlue->Render(m_camera->getViewMatrix(), m_camera->getProjectionMatrix());
+		m_coreBlue->render(m_camera->getViewMatrix(), m_camera->getProjectionMatrix());
 
 	if (m_deathBeams)
-		m_deathBeams->Render(m_camera->getViewMatrix(), m_camera->getProjectionMatrix(), m_camera->getPosition());
+		m_deathBeams->render(m_camera->getViewMatrix(), m_camera->getProjectionMatrix(), m_camera->getPosition());
 
 	if (m_beamWeapon)
 		m_beamWeapon->render(m_camera->getViewMatrix(), m_camera->getProjectionMatrix(), m_camera->getPosition());
@@ -627,41 +539,4 @@ void GameScene::Render(Renderer* renderer)
 		m_debugUI->render();
 }
 
-void GameScene::OnWindowSizeChanged(int width, int height)
-{
-	// Update camera aspect ratio
-	if (m_camera)
-	{
-		m_camera->setProjectionParameters(45.0f, float(width) / float(height), 0.1f, 1000.0f);
-	}
-}
-
-void GameScene::OnDeviceLost()
-{
-	// Handle device lost
-	if (m_gridFloor) m_gridFloor->finalize();
-
-	if (m_terrain) m_terrain->OnDeviceLost();
-
-	if (m_lightCycle) m_lightCycle->OnDeviceLost();
-
-	if (m_tower) m_tower->OnDeviceLost();
-
-	for (auto& enemy : m_enemies)
-	{
-		enemy->OnDeviceLost();
-	}
-
-	if (m_coreRed) m_coreRed->OnDeviceLost();
-
-	if (m_coreGreen) m_coreGreen->OnDeviceLost();
-
-	if (m_coreBlue) m_coreBlue->OnDeviceLost();
-
-	if (m_deathBeams) m_deathBeams->OnDeviceLost();
-
-	//if (m_animatedBillboard) m_animatedBillboard->finalize();
-
-	if (m_beamWeapon) m_beamWeapon->finalize();
-}
 

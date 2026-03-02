@@ -114,6 +114,10 @@ public:
     void setVibration(float leftMotor, float rightMotor, int player = 0);
     void stopVibration(int player = 0);
 
+    // Cursor visibility (also switches mouse mode)
+    void setCursorVisible(bool visible);
+    bool isCursorVisible() const { return m_cursorVisible; }
+
     // マウスモード切替
     // MODE_RELATIVE: カーソル非表示、FPSカメラ向け
     // MODE_ABSOLUTE: カーソル表示、UI操作向け
@@ -153,6 +157,7 @@ private:
     float m_mouseSensitivity;
     float m_gamepadSensitivity;
     Mouse::Mode m_currentMouseMode = Mouse::MODE_RELATIVE;
+    bool m_cursorVisible = false;
 };
 
 

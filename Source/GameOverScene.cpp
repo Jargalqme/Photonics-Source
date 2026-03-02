@@ -14,9 +14,9 @@ GameOverScene::~GameOverScene()
 {
 }
 
-void GameOverScene::Initialize(DX::DeviceResources* deviceResources)
+void GameOverScene::initialize(DX::DeviceResources* deviceResources)
 {
-    m_deviceResources = deviceResources;
+    Scene::initialize(deviceResources);
 
     m_audioManager = std::make_unique<AudioManager>();
     m_audioManager->initialize();
@@ -24,35 +24,35 @@ void GameOverScene::Initialize(DX::DeviceResources* deviceResources)
     
     // === Shader Background ===
     m_background = std::make_unique<MenuBackground>(deviceResources);
-    m_background->Initialize();
-    m_background->SetShaderType(MenuBackground::ShaderType::Wave);
-    m_background->SetColorTint(1.0f, 0.2f, 0.2f);  // Red
+    m_background->initialize();
+    m_background->setShaderType(MenuBackground::ShaderType::Wave);
+    m_background->setColorTint(1.0f, 0.2f, 0.2f);  // Red
 }
 
-void GameOverScene::Enter()
+void GameOverScene::enter()
 {
-	Scene::Enter();
+	Scene::enter();
     m_selectedIndex = 0;
     if (m_audioManager) m_audioManager->playMusic("gameover", true);
 }
 
-void GameOverScene::Exit()
+void GameOverScene::exit()
 {
-	Scene::Exit();
+	Scene::exit();
     if (m_audioManager) m_audioManager->stopMusic();
 }
 
-void GameOverScene::Cleanup()
+void GameOverScene::finalize()
 {
-
+    if (m_background) m_background->onDeviceLost();
 }
 
-void GameOverScene::Update(float deltaTime, InputManager* input)
+void GameOverScene::update(float deltaTime, InputManager* input)
 {
     if (m_audioManager) m_audioManager->update();
 
     // Update background animation  <-- ADD
-    if (m_background) m_background->Update(deltaTime);
+    if (m_background) m_background->update(deltaTime);
 
     // Navigation
     if (input->isKeyPressed(Keyboard::Keys::Up) || input->isKeyPressed(Keyboard::Keys::W) || input->isGamePadDPadUpPressed())
@@ -72,20 +72,20 @@ void GameOverScene::Update(float deltaTime, InputManager* input)
         switch (m_selectedIndex)
         {
         case 0:  // RETRY
-            m_sceneManager->TransitionTo("GameScene");
+            m_sceneManager->transitionTo("GameScene");
             break;
         case 1:  // MAIN MENU
-            m_sceneManager->TransitionTo("MainMenu");
+            m_sceneManager->transitionTo("MainMenu");
             break;
         }
     }
 }
 
-void GameOverScene::Render(Renderer* renderer)
+void GameOverScene::render(Renderer* renderer)
 {
     (void)renderer;
 
-    if (m_background) m_background->Render();
+    if (m_background) m_background->render();
 
     ImVec2 windowSize = ImGui::GetIO().DisplaySize;
     float centerX = windowSize.x * 0.5f;
@@ -148,16 +148,3 @@ void GameOverScene::Render(Renderer* renderer)
     ImGui::End();
 }
 
-void GameOverScene::OnDeviceLost()
-{
-    if (m_background) m_background->OnDeviceLost();
-}
-
-void GameOverScene::OnDeviceRestored()
-{
-    if (m_background)
-    {
-        m_background->SetShaderType(MenuBackground::ShaderType::Wave);
-        m_background->SetColorTint(1.0f, 0.2f, 0.2f);
-    }
-}

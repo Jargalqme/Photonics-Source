@@ -6,7 +6,7 @@
 #include <memory>
 
 class MusicManager;
-class LightCycle;
+class Player;
 class Core;
 class Enemy;
 class BeamWeapon;
@@ -25,7 +25,7 @@ public:
 
     // Connect to game systems
     void setMusicManager(MusicManager* music) { m_musicManager = music; }
-    void setPlayer(LightCycle* player) { m_player = player; }
+    void setPlayer(Player* player) { m_player = player; }
     void setCores(Core* r, Core* g, Core* b);
     void setEnemies(std::vector<std::unique_ptr<Enemy>>* enemies) { m_enemies = enemies; }
     void setBeamWeapon(BeamWeapon* beam) { m_beamWeapon = beam; }
@@ -37,7 +37,7 @@ private:
 
     // Game references (not owned, just watching)
     MusicManager* m_musicManager = nullptr;
-    LightCycle* m_player = nullptr;
+    Player* m_player = nullptr;
     Core* m_coreRed = nullptr;
     Core* m_coreGreen = nullptr;
     Core* m_coreBlue = nullptr;

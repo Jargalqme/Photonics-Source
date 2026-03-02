@@ -3,7 +3,7 @@
 
 namespace CollisionSystem
 {
-	bool CheckSphereSphere(
+	bool checkSphereSphere(
 		const DirectX::BoundingSphere& a,
 		const DirectX::BoundingSphere& b)
 	{
@@ -11,7 +11,7 @@ namespace CollisionSystem
 		return a.Intersects(b);
 	}
 
-	bool CheckRaySphere(
+	bool checkRaySphere(
 		const DirectX::SimpleMath::Vector3& rayStart,
 		const DirectX::SimpleMath::Vector3& rayDirection,
 		const DirectX::BoundingSphere& sphere,

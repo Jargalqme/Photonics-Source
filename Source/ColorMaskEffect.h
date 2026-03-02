@@ -7,25 +7,25 @@ public:
 	ColorMaskEffect(DX::DeviceResources* deviceResources);
 	~ColorMaskEffect() = default;
 
-	void CreateDeviceDependentResources();      // Load shaders
-	void CreateWindowSizeDependentResources();
-	void OnDeviceLost();						// Release GPU resources
+	void createDeviceDependentResources();      // Load shaders
+	void createWindowSizeDependentResources();
+	void onDeviceLost();						// Release GPU resources
 
 	// Apply color mask to input texture, output to render target
-	void Process(ID3D11ShaderResourceView* inputSRV,
+	void process(ID3D11ShaderResourceView* inputSRV,
 		ID3D11RenderTargetView* outputRTV);
 
 	// Set mask directly
-	void SetColorMask(float r, float g, float b);
+	void setColorMask(float r, float g, float b);
 
 	// Get current mask (for ImGui)
-	float* GetColorMaskPtr() { return &m_colorMask.x; }
+	float* getColorMaskPtr() { return &m_colorMask.x; }
 
 	// Convenience for core death
-	void DisableRed()   { m_colorMask.x = 0.5f; }
-	void DisableGreen() { m_colorMask.y = 0.5f; }
-	void DisableBlue()  { m_colorMask.z = 0.5f; }
-	void ResetMask()    { m_colorMask = DirectX::SimpleMath::Vector3(1, 1, 1); }
+	void disableRed()   { m_colorMask.x = 0.5f; }
+	void disableGreen() { m_colorMask.y = 0.5f; }
+	void disableBlue()  { m_colorMask.z = 0.5f; }
+	void resetMask()    { m_colorMask = DirectX::SimpleMath::Vector3(1, 1, 1); }
 
 private:
 	DX::DeviceResources* m_deviceResources;

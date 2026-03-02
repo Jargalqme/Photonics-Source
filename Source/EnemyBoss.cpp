@@ -1,28 +1,28 @@
-﻿#include "pch.h"
-#include "EnemyTower.h"
+#include "pch.h"
+#include "EnemyBoss.h"
 
-Tower::Tower(DX::DeviceResources* deviceResources)
-	: m_deviceResources(deviceResources)
-	, m_boundingSphere(XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f)
-	, m_position(0.0f, 0.0f, 0.0f)
-	, m_color(Colors::Black)
+EnemyBoss::EnemyBoss(DX::DeviceResources* deviceResources)
+    : m_deviceResources(deviceResources)
+    , m_boundingSphere(XMFLOAT3(0.0f, 0.0f, 0.0f), 2.0f)
+    , m_position(0.0f, 0.0f, 0.0f)
+    , m_color(Colors::Black)
 {
 }
 
-void Tower::Initialize()
+void EnemyBoss::initialize()
 {
-	BuildTokyoBigSight();
+    buildBoss();
 }
 
 
-void Tower::Update(float deltaTime)
+void EnemyBoss::update(float deltaTime)
 {
-	m_boundingSphere.Center.x = m_position.x;
-	m_boundingSphere.Center.y = m_position.y;
-	m_boundingSphere.Center.z = m_position.z;
+    m_boundingSphere.Center.x = m_position.x;
+    m_boundingSphere.Center.y = m_position.y;
+    m_boundingSphere.Center.z = m_position.z;
 }
 
-void Tower::Render(const Matrix& view, const Matrix& projection)
+void EnemyBoss::render(const Matrix& view, const Matrix& projection)
 {
     Matrix towerWorld = Matrix::CreateTranslation(m_position);
 
@@ -38,12 +38,12 @@ void Tower::Render(const Matrix& view, const Matrix& projection)
     }
 }
 
-void Tower::OnDeviceLost()
+void EnemyBoss::onDeviceLost()
 {
     m_parts.clear();
 }
 
-void Tower::BuildTokyoBigSight()
+void EnemyBoss::buildBoss()
 {
     auto ctx = m_deviceResources->GetD3DDeviceContext();
     m_parts.clear();

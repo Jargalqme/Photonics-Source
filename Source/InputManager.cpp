@@ -184,6 +184,12 @@ Vector2 InputManager::getLookInput() const
     return look;
 }
 
+void InputManager::setCursorVisible(bool visible)
+{
+    m_cursorVisible = visible;
+    setMouseMode(visible ? Mouse::MODE_ABSOLUTE : Mouse::MODE_RELATIVE);
+}
+
 // マウスモード切替
 void InputManager::setMouseMode(Mouse::Mode mode)
 {

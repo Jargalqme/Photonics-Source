@@ -38,13 +38,13 @@ void Renderer::Clear()
 
 void Renderer::CreateDeviceDependentResources()
 {
-	m_colorMaskEffect->CreateDeviceDependentResources();
+	m_colorMaskEffect->createDeviceDependentResources();
 	CreateUIResources();
 }
 
 void Renderer::CreateWindowSizeDependentResources()
 {
-    m_colorMaskEffect->CreateWindowSizeDependentResources();
+    m_colorMaskEffect->createWindowSizeDependentResources();
 
     // Create intermediate render target for scene
     auto device = m_deviceResources->GetD3DDevice();
@@ -78,12 +78,12 @@ void Renderer::CreateWindowSizeDependentResources()
 void Renderer::ApplyPostProcess()
 {
     auto backbuffer = m_deviceResources->GetRenderTargetView();
-    m_colorMaskEffect->Process(m_sceneSRV.Get(), backbuffer);
+    m_colorMaskEffect->process(m_sceneSRV.Get(), backbuffer);
 }
 
 void Renderer::OnDeviceLost()
 {
-    m_colorMaskEffect->OnDeviceLost();
+    m_colorMaskEffect->onDeviceLost();
     m_sceneTexture.Reset();
     m_sceneRTV.Reset();
     m_sceneSRV.Reset();

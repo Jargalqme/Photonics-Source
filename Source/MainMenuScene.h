@@ -12,16 +12,13 @@ public:
 	~MainMenuScene() override;
 
 	// Scene interface
-	void Initialize(DX::DeviceResources* deviceResources) override;
-	void Enter() override;
-	void Exit() override;
-	void Cleanup() override;
+	void initialize(DX::DeviceResources* deviceResources) override;
+	void enter() override;
+	void exit() override;
+	void finalize() override;
 
-	void Update(float deltaTime, InputManager* input) override;
-	void Render(Renderer* renderer) override;
-
-	void OnDeviceLost() override;
-	void OnDeviceRestored() override;
+	void update(float deltaTime, InputManager* input) override;
+	void render(Renderer* renderer) override;
 
 private:
 	SceneManager* m_sceneManager; // To switch scenes
@@ -32,5 +29,5 @@ private:
 	int m_selectedIndex = 0;		// currently selected option
 	const int m_menuItemCount = 2;  // total menu options (start, quit)
 
-	void RenderMenu();
+	void renderMenu();
 };

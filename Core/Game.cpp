@@ -36,26 +36,29 @@ void Game::Initialize(HWND window, int width, int height)
     m_renderer->CreateWindowSizeDependentResources();
 
     m_input->initialize(window);
-    m_sceneManager->Initialize(m_deviceResources.get());
+    m_sceneManager->initialize(m_deviceResources.get());
 
     // Create and add scenes
     auto introScene = std::make_unique<IntroScene>(m_sceneManager.get());
-    m_sceneManager->AddScene("Intro", std::move(introScene));
+    m_sceneManager->addScene("Intro", std::move(introScene));
 
     auto mainMenuScene = std::make_unique<MainMenuScene>(m_sceneManager.get());
-    m_sceneManager->AddScene("MainMenu", std::move(mainMenuScene));
+    m_sceneManager->addScene("MainMenu", std::move(mainMenuScene));
 
     auto gameScene = std::make_unique<GameScene>(m_sceneManager.get());
-    m_sceneManager->AddScene("GameScene", std::move(gameScene));
+    m_sceneManager->addScene("GameScene", std::move(gameScene));
 
     auto victoryScene = std::make_unique<VictoryScene>(m_sceneManager.get());
-    m_sceneManager->AddScene("Victory", std::move(victoryScene));
+    m_sceneManager->addScene("Victory", std::move(victoryScene));
 
     auto gameOverScene = std::make_unique<GameOverScene>(m_sceneManager.get());
-    m_sceneManager->AddScene("GameOver", std::move(gameOverScene));
+    m_sceneManager->addScene("GameOver", std::move(gameOverScene));
+
+    auto editorScene = std::make_unique<EditorScene>(m_sceneManager.get());
+    m_sceneManager->addScene("Editor", std::move(editorScene));
 
     // Start with main menu
-    m_sceneManager->TransitionTo("MainMenu");
+    m_sceneManager->transitionTo("Editor");
 
     // TODO: Change the timer settings if you want something other than the default variable timestep mode.
     // e.g. for 60 FPS fixed timestep update logic, call:
@@ -97,7 +100,7 @@ void Game::Update(DX::StepTimer const& timer)
     m_input->update();
 
     // Update active scene
-    m_sceneManager->Update(deltaTime, m_input.get());
+    m_sceneManager->update(deltaTime, m_input.get());
 }
 
 #pragma endregion
@@ -114,7 +117,7 @@ void Game::Render()
     ImGui::NewFrame();
 
     // === RENDER SCENE ===
-    m_sceneManager->Render(m_renderer.get());
+    m_sceneManager->render(m_renderer.get());
 
     // === END SCENE (copies to backbuffer) ===
     m_renderer->EndScene();
@@ -174,7 +177,6 @@ void Game::OnWindowSizeChanged(int width, int height)
 
     m_renderer->CreateWindowSizeDependentResources();
 
-    m_sceneManager->OnWindowSizeChanged(width, height);
 }
 
 // Properties

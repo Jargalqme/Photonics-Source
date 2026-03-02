@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "SceneManager.h"
 #include "Scene.h"
 #include "Renderer.h"
@@ -12,42 +12,42 @@ SceneManager::SceneManager()
 
 SceneManager::~SceneManager()
 {
-	Cleanup();
+	finalize();
 }
 
-void SceneManager::Initialize(DX::DeviceResources* deviceResources)
+void SceneManager::initialize(DX::DeviceResources* deviceResources)
 {
 	m_deviceResources = deviceResources;
 }
 
-void SceneManager::AddScene(const std::string& name, std::unique_ptr<Scene> scene)
+void SceneManager::addScene(const std::string& name, std::unique_ptr<Scene> scene)
 {
 	assert(scene != nullptr && "Cannot add null scene");
 
 	// Initialize the scene
-	scene->Initialize(m_deviceResources);
+	scene->initialize(m_deviceResources);
 
 	// Add to collection
 	m_scenes[name] = std::move(scene);
 }
 
-void SceneManager::RemoveScene(const std::string& name)
+void SceneManager::removeScene(const std::string& name)
 {
 	auto it = m_scenes.find(name);
 	if (it != m_scenes.end())
 	{
 		if (m_activeScene == it->second.get())
 		{
-			m_activeScene->Exit();
+			m_activeScene->exit();
 			m_activeScene = nullptr;
 		}
 
-		it->second->Cleanup();
+		it->second->finalize();
 		m_scenes.erase(it);
 	}
 }
 
-void SceneManager::SetActiveScene(const std::string& name)
+void SceneManager::setActiveScene(const std::string& name)
 {
 	auto it = m_scenes.find(name);
 	if (it != m_scenes.end())
@@ -55,7 +55,7 @@ void SceneManager::SetActiveScene(const std::string& name)
 		// Exit current scene
 		if (m_activeScene)
 		{
-			m_activeScene->Exit();
+			m_activeScene->exit();
 		}
 
 		// Clear the stack when setting a new scene directly
@@ -66,11 +66,11 @@ void SceneManager::SetActiveScene(const std::string& name)
 
 		// Enter new scene
 		m_activeScene = it->second.get();
-		m_activeScene->Enter();
+		m_activeScene->enter();
 	}
 }
 
-void SceneManager::PushScene(const std::string& name)
+void SceneManager::pushScene(const std::string& name)
 {
 	auto it = m_scenes.find(name);
 	if (it != m_scenes.end())
@@ -78,24 +78,24 @@ void SceneManager::PushScene(const std::string& name)
 		// Pause current scene (exit but keep on stack)
 		if (m_activeScene)
 		{
-			m_activeScene->Exit();
+			m_activeScene->exit();
 			m_sceneStack.push(m_activeScene);
 		}
 
 		// Enter new scene
 		m_activeScene = it->second.get();
-		m_activeScene->Enter();
+		m_activeScene->enter();
 	}
 }
 
-void SceneManager::PopScene()
+void SceneManager::popScene()
 {
 	if (!m_sceneStack.empty())
 	{
 		// Exit current scene
 		if (m_activeScene)
 		{
-			m_activeScene->Exit();
+			m_activeScene->exit();
 		}
 
 		// Return to previous scene
@@ -104,19 +104,19 @@ void SceneManager::PopScene()
 
 		if (m_activeScene)
 		{
-			m_activeScene->Enter();
+			m_activeScene->enter();
 		}
 	}
 }
 
-void SceneManager::TransitionTo(const std::string& sceneName, float duration)
+void SceneManager::transitionTo(const std::string& sceneName, float duration)
 {
 	// Don't start new transition if already transitioning
 	if (m_fadingOut || m_fadingIn)
 		return;
 
 	// Verify scene exists
-	if (!HasScene(sceneName))
+	if (!hasScene(sceneName))
 		return;
 
 	m_pendingScene = sceneName;
@@ -125,7 +125,7 @@ void SceneManager::TransitionTo(const std::string& sceneName, float duration)
 	m_fadeAlpha = 0.0f;
 }
 
-void SceneManager::UpdateTransition(float deltaTime)
+void SceneManager::updateTransition(float deltaTime)
 {
 	if (m_fadingOut)
 	{
@@ -136,7 +136,7 @@ void SceneManager::UpdateTransition(float deltaTime)
 			m_fadeAlpha = 1.0f;
 
 			// Switch scene while fully black
-			SetActiveScene(m_pendingScene);
+			setActiveScene(m_pendingScene);
 			m_pendingScene.clear();
 
 			// Start fading back in
@@ -156,21 +156,21 @@ void SceneManager::UpdateTransition(float deltaTime)
 	}
 }
 
-void SceneManager::Update(float deltaTime, InputManager* input)
+void SceneManager::update(float deltaTime, InputManager* input)
 {
-	UpdateTransition(deltaTime);
+	updateTransition(deltaTime);
 
-	if (m_activeScene && m_activeScene->IsActive())
+	if (m_activeScene && m_activeScene->isActive())
 	{
-		m_activeScene->Update(deltaTime, input);
+		m_activeScene->update(deltaTime, input);
 	}
 }
 
-void SceneManager::Render(Renderer* renderer)
+void SceneManager::render(Renderer* renderer)
 {
 	if (m_activeScene)
 	{
-		m_activeScene->Render(renderer);
+		m_activeScene->render(renderer);
 	}
 
 	// Fade overlay - Must wrap in BeginUI/EndUI
@@ -182,54 +182,30 @@ void SceneManager::Render(Renderer* renderer)
 	}
 }
 
-void SceneManager::OnWindowSizeChanged(int width, int height)
-{
-	if (m_activeScene)
-	{
-		m_activeScene->OnWindowSizeChanged(width, height);
-	}
-}
-
-void SceneManager::OnDeviceLost()
-{
-	if (m_activeScene)
-	{
-		m_activeScene->OnDeviceLost();
-	}
-}
-
-void SceneManager::OnDeviceRestored()
-{
-	if (m_activeScene)
-	{
-		m_activeScene->OnDeviceRestored();
-	}
-}
-
-Scene* SceneManager::GetScene(const std::string& name) const
+Scene* SceneManager::getScene(const std::string& name) const
 {
 	auto it = m_scenes.find(name);
 	return (it != m_scenes.end()) ? it->second.get() : nullptr;
 }
 
-bool SceneManager::HasScene(const std::string& name) const
+bool SceneManager::hasScene(const std::string& name) const
 {
 	return m_scenes.find(name) != m_scenes.end();
 }
 
-void SceneManager::Cleanup()
+void SceneManager::finalize()
 {
 	// Exit active scene
 	if (m_activeScene)
 	{
-		m_activeScene->Exit();
+		m_activeScene->exit();
 		m_activeScene = nullptr;
 	}
 
-	// Cleanup all scenes
+	// Finalize all scenes
 	for (auto& pair : m_scenes)
 	{
-		pair.second->Cleanup();
+		pair.second->finalize();
 	}
 
 	m_scenes.clear();

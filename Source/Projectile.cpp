@@ -17,11 +17,11 @@ Projectile::Projectile()
 {
 }
 
-void Projectile::Initialize()
+void Projectile::initialize()
 {
 }
 
-void Projectile::Spawn(
+void Projectile::spawn(
     const Vector3& position,
     const Vector3& direction,
     float speed,
@@ -40,7 +40,7 @@ void Projectile::Spawn(
     m_lifetime = m_maxLifetime;  // Reset lifetime
 }
 
-void Projectile::Update(float deltaTime)
+void Projectile::update(float deltaTime)
 {
     if (!m_isActive) return;
 
@@ -53,11 +53,11 @@ void Projectile::Update(float deltaTime)
     // Deactivate when expired
     if (m_lifetime <= 0.0f)
     {
-        Deactivate();
+        deactivate();
     }
 }
 
-void Projectile::Render(const Matrix& view, const Matrix& projection, GeometricPrimitive* mesh)
+void Projectile::render(const Matrix& view, const Matrix& projection, GeometricPrimitive* mesh)
 {
     if (!m_isActive) return;
     if (!mesh) return;
@@ -76,7 +76,7 @@ void Projectile::Render(const Matrix& view, const Matrix& projection, GeometricP
     mesh->Draw(world, view, projection, m_color);
 }
 
-void Projectile::Deactivate()
+void Projectile::deactivate()
 {
     m_isActive = false;
     m_position = Vector3::Zero;

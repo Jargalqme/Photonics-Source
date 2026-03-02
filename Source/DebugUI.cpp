@@ -7,6 +7,7 @@
 #include "ProjectilePool.h"
 #include "AudioManager.h"
 #include "MusicManager.h"
+#include "InputManager.h"
 #include <imgui.h>
 
 void DebugUI::render()
@@ -17,23 +18,23 @@ void DebugUI::render()
 	ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
 	ImGui::Separator();
 
-	ImGui::Text("Cursor: %s (Tab to toggle)", m_showCursor ? "VISIBLE" : "HIDDEN");
+	bool cursorVisible = m_input ? m_input->isCursorVisible() : false;
+	ImGui::Text("Cursor: %s (Tab to toggle)", cursorVisible ? "VISIBLE" : "HIDDEN");
 
 	// Camera Mode
 	ImGui::Text("Camera: %s (F1/F2 to switch)", m_camera->getModeName());
 	ImGui::Separator();
 
 	// LightCycle
-	if (ImGui::CollapsingHeader("LightCycle", ImGuiTreeNodeFlags_DefaultOpen))
+	if (ImGui::CollapsingHeader("Player", ImGuiTreeNodeFlags_DefaultOpen))
 	{
 		// Position info
-		Vector3 pos = m_lightCycle->GetPosition();
+		Vector3 pos = m_player->getPosition();
 		ImGui::Text("World Pos: %.1f, %.1f, %.1f", pos.x, pos.y, pos.z);
-		ImGui::Text("Speed: %.1f m/s", m_lightCycle->GetSpeed());
 
 		if (ImGui::TreeNode("Transform (SRT)"))
 		{
-			Transform* t = m_lightCycle->GetTransformPtr();
+			Transform* t = m_player->getTransformPtr();
 
 			ImGui::Text("Scale:    %.2f, %.2f, %.2f", t->scale.x, t->scale.y, t->scale.z);
 			ImGui::Text("Rotation: %.2f, %.2f, %.2f (rad)", t->rotation.x, t->rotation.y, t->rotation.z);
@@ -60,21 +61,6 @@ void DebugUI::render()
 		ImGui::ColorEdit4("Line Color", m_gridFloor->getLineColorPtr());
 		ImGui::ColorEdit4("Base Color", m_gridFloor->getBaseColorPtr());
 	}
-
-	//if (ImGui::CollapsingHeader("Terrain"))
-	//{
-	//	bool rebuild = false;
-
-	//	rebuild |= ImGui::SliderFloat("Inner Radius", m_terrain->GetInnerRadiusPtr(), 50.0f, 200.0f);
-	//	rebuild |= ImGui::SliderFloat("Outer Radius", m_terrain->GetOuterRadiusPtr(), 150.0f, 400.0f);
-	//	rebuild |= ImGui::SliderFloat("Height Scale", m_terrain->GetHeightScalePtr(), 10.0f, 100.0f);
-
-	//	if (ImGui::ColorEdit4("Terrain Color", m_terrain->GetColorPtr()))
-	//		rebuild = true;
-
-	//	if (rebuild)
-	//		m_terrain->Rebuild();
-	//}
 
 	// Audio & Music
 	if (ImGui::CollapsingHeader("Audio & Music"))

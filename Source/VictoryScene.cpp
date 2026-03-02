@@ -14,9 +14,9 @@ VictoryScene::~VictoryScene()
 {
 }
 
-void VictoryScene::Initialize(DX::DeviceResources* deviceResources)
+void VictoryScene::initialize(DX::DeviceResources* deviceResources)
 {
-    m_deviceResources = deviceResources;
+    Scene::initialize(deviceResources);
 
     // Create audio manager instance
     m_audioManager = std::make_unique<AudioManager>();
@@ -25,36 +25,36 @@ void VictoryScene::Initialize(DX::DeviceResources* deviceResources)
     
     // Shader Background
     m_background = std::make_unique<MenuBackground>(deviceResources);
-    m_background->Initialize();
-    m_background->SetShaderType(MenuBackground::ShaderType::Wave);
-    m_background->SetColorTint(1.0f, 0.85f, 0.4f);  // Gold
+    m_background->initialize();
+    m_background->setShaderType(MenuBackground::ShaderType::Wave);
+    m_background->setColorTint(1.0f, 0.85f, 0.4f);  // Gold
 }
 
-void VictoryScene::Enter()
+void VictoryScene::enter()
 {
-	Scene::Enter();  // call parent class
+	Scene::enter();
     m_selectedIndex = 0;
     // playmusic with loop = true 
     if (m_audioManager) m_audioManager->playMusic("victory", true);
 }
 
-void VictoryScene::Exit()
+void VictoryScene::exit()
 {
-	Scene::Exit();
+	Scene::exit();
     if (m_audioManager) m_audioManager->stopMusic();
 }
 
-void VictoryScene::Cleanup()
+void VictoryScene::finalize()
 {
-
+    if (m_background) m_background->onDeviceLost();
 }
 
-void VictoryScene::Update(float deltaTime, InputManager* input)
+void VictoryScene::update(float deltaTime, InputManager* input)
 {
     if (m_audioManager) m_audioManager->update();
 
     // Update background animation
-    if (m_background) m_background->Update(deltaTime);
+    if (m_background) m_background->update(deltaTime);
 
     // Navigation
     if (input->isKeyPressed(Keyboard::Keys::Up) || input->isKeyPressed(Keyboard::Keys::W) || input->isGamePadDPadUpPressed())
@@ -74,21 +74,21 @@ void VictoryScene::Update(float deltaTime, InputManager* input)
         switch (m_selectedIndex)
         {
         case 0:  // PLAY AGAIN
-            m_sceneManager->TransitionTo("GameScene");
+            m_sceneManager->transitionTo("GameScene");
             break;
         case 1:  // MAIN MENU
-            m_sceneManager->TransitionTo("MainMenu");
+            m_sceneManager->transitionTo("MainMenu");
             break;
         }
     }
 }
 
-void VictoryScene::Render(Renderer* renderer)
+void VictoryScene::render(Renderer* renderer)
 {
     (void)renderer;
 
     // Render shader background
-    if (m_background) m_background->Render();
+    if (m_background) m_background->render();
 
     // ImGui UI
     ImVec2 windowSize = ImGui::GetIO().DisplaySize;
@@ -152,16 +152,3 @@ void VictoryScene::Render(Renderer* renderer)
     ImGui::End();
 }
 
-void VictoryScene::OnDeviceLost()
-{
-    if (m_background) m_background->OnDeviceLost();
-}
-
-void VictoryScene::OnDeviceRestored()
-{
-    if (m_background)
-    {
-        m_background->SetShaderType(MenuBackground::ShaderType::Wave);
-        m_background->SetColorTint(1.0f, 0.85f, 0.4f);
-    }
-}

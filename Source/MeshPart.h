@@ -70,4 +70,11 @@ struct MeshPart
         float size,
         const Vector3& pos,
         const Color& color);
+
+    static MeshPart CreateGeoSphere(
+        ID3D11DeviceContext* ctx,
+        float diameter,
+        const Vector3& pos,
+        const Color& color,
+        size_t tessellation = 3);
 };

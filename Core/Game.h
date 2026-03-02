@@ -10,6 +10,7 @@
 #include "Source/MainMenuScene.h"
 #include "Source/VictoryScene.h"
 #include "Source/GameOverScene.h"
+#include "Source/EditorScene.h"
 #include <memory>
 
 class Game final : public DX::IDeviceNotify  

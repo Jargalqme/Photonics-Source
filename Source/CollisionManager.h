@@ -12,7 +12,7 @@
 class CollisionManager
 {
 public:
-	void Update(
+	void update(
 		std::vector<std::unique_ptr<Enemy>>& enemies,
 		Core* coreRed,
 		Core* coreGreen,
@@ -24,14 +24,14 @@ public:
 		const Vector3& cameraForward
 	);
 private:
-	void CheckEnemyVsCores(
+	void checkEnemyVsCores(
 		std::vector<std::unique_ptr<Enemy>>& enemies,
 		Core* coreRed,
 		Core* coreGreen,
 		Core* coreBlue
 	);
 
-	void CheckBeamVsEnemies(
+	void checkBeamVsEnemies(
 		std::vector<std::unique_ptr<Enemy>>& enemies,
 		BeamWeapon* beamWeapon,
 		DeathBeamPool* deathBeams,

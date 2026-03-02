@@ -12,10 +12,19 @@ enum class CameraMode {
     Follow   // TPS-Style (for gameplay)
 };
 
+struct CameraState {
+    float distance = 4.5f;   // distance behind player
+    float height = 1.5f;   // height above player pivot
+    float shoulderOffset = 1.5f;   // right-side offset
+    float fov = 45.0f;  // field of view (degrees)
+
+    static CameraState Lerp(const CameraState& a, const CameraState& b, float t);
+};
+
 class Camera {
 public:
-	Camera();
-	~Camera() = default;
+    Camera();
+    ~Camera() = default;
 
     // Mode
     void setMode(CameraMode mode);
@@ -28,9 +37,6 @@ public:
     // Settings
     void setMoveSpeed(float speed) { m_moveSpeed = speed; }
     void setMouseSensitivity(float sens) { m_mouseSensitivity = sens; }
-    void setFollowDistance(float dist) { m_followDistance = dist; }
-    void setFollowHeight(float height) { m_followHeight = height; }
-
     // Update - delegates to controller
     void update(float deltaTime, InputManager* input);
 
@@ -67,11 +73,10 @@ public:
     void triggerShake(float intensity, float duration);
     bool isShaking() const { return m_currentShakeIntensity > 0.01f; }
 
-    // Zoom
-    void setZoom(bool zooming);
-    void setZoomFOV(float fov) { m_zoomFOV = XMConvertToRadians(fov); }
-    void setZoomSpeed(float speed) { m_zoomSpeed = speed; }
-    bool isZooming() const { return m_isZooming; }
+    // Aiming (OTS state blend)
+    void setAiming(bool aiming);
+    bool isAiming() const { return m_isAiming; }
+    float getShoulderOffset() const { return m_current.shoulderOffset; }
 
 private:
     // Mode
@@ -84,10 +89,15 @@ private:
     // Follow mode settings
     Vector3* m_followTargetPos = nullptr;
     float* m_followTargetRot = nullptr;
-    float m_followDistance = 6.0f;
-    float m_followHeight = 2.0f;
-    float m_followSmoothSpeed = 5.0f;
+    float m_followSmoothSpeed = 10.0f;
     Vector3 m_smoothedPosition;
+
+    // Camera state presets
+    CameraState m_followState;    // normal gameplay
+    CameraState m_aimState;       // right-click aim
+    CameraState m_current;        // blended live state
+    float m_blendSpeed = 8.0f;    // transition speed between states
+    bool m_isAiming = false;      // which state to blend toward
 
     // Internal update methods
     void updateFreeMode(float deltaTime, InputManager* input);
@@ -95,10 +105,10 @@ private:
 
     // Transform
     Vector3 m_position = { 0.0f, 0.0f, 5.0f };
-    Vector3 m_right    = { 1.0f, 0.0f, 0.0f };
-    Vector3 m_up       = { 0.0f, 1.0f, 0.0f };
-    Vector3 m_forward  = { 0.0f, 0.0f, 1.0f };
-    
+    Vector3 m_right = { 1.0f, 0.0f, 0.0f };
+    Vector3 m_up = { 0.0f, 1.0f, 0.0f };
+    Vector3 m_forward = { 0.0f, 0.0f, 1.0f };
+
     // Rotation (degrees)
     float m_pitch;   // yes  - nodding (up/down)
     float m_yaw;   // no   - shaking (left/right)
@@ -121,14 +131,6 @@ private:
     float m_currentShakeIntensity = 0.0f;
     void updateShake(float deltaTime);
     Vector3 getShakeOffset() const;
-
-    // Zoom
-    bool m_isZooming = false;
-    float m_normalFOV = XMConvertToRadians(45.0f);
-    float m_zoomFOV = XMConvertToRadians(25.0f);
-    float m_currentFOV = XMConvertToRadians(45.0f);
-    float m_zoomSpeed = 5.0f;
-    void updateZoom(float deltaTime);
 
     void updateDirectionVectors();
 };

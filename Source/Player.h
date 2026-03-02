@@ -6,85 +6,64 @@
 #include "MeshPart.h"
 #include "Transform.h"
 
-class LightCycle
+class Player
 {
 public:
-	LightCycle(DX::DeviceResources* deviceResources);
+	Player(DX::DeviceResources* deviceResources);
 
-	void Initialize();
-	void Update(float deltaTime);
-	void Render(const Matrix& view, const Matrix& projection);
-	void OnDeviceLost();
+	void initialize();
+	void render(const Matrix& view, const Matrix& projection);
+	void onDeviceLost();
 
-	// Control interface
-	void Accelerate(float deltaTime);
-	void Brake(float deltaTime);
-	void Turn(float direction, float deltaTime);
+	void moveInDirection(const Vector3& moveDirection, float aimYaw, float deltaTime);
+	void jump();
+	bool isGrounded() const { return m_isGrounded; }
+	void updateIdle(float aimYaw, float deltaTime);
 
-	void MoveInDirection(const Vector3& moveDirection, const Vector3& facingDirection, float deltaTime);
-	void Jump();
-	bool IsGrounded() const { return m_isGrounded; }
-	void UpdateIdle(float deltaTime);
-
-	void TakeDamage(float amount);
-	bool IsDead() const { return m_health <= 0; }
+	void takeDamage(float amount);
+	bool isDead() const { return m_health <= 0; }
 
 	// boost
-	void ActivateBoost();
-	bool IsBoosting() const { return m_boosting; }
-	float GetBoostTimer() const { return m_boostTimer; }
-	float GetBoostDuration() const { return m_boostDuration; }
+	void activateBoost();
+	bool isBoosting() const { return m_boosting; }
+	float getBoostTimer() const { return m_boostTimer; }
+	float getBoostDuration() const { return m_boostDuration; }
 
 	// Getters
-	Vector3 GetPosition() const { return m_transform.position; }
-	Vector3 GetForward() const;
-	float GetSpeed() const { return m_speed; }
-	float GetHealth() const { return m_health; }
-	float GetMaxHealth() const { return m_maxHealth; }
+	Vector3 getPosition() const { return m_transform.position; }
+	Vector3 getForward() const;
+	float getHealth() const { return m_health; }
+	float getMaxHealth() const { return m_maxHealth; }
 
 	// Debug UI access
-	float* GetMaxSpeedPtr() { return &m_maxSpeed; }
-	float* GetAccelerationPtr() { return &m_acceleration; }
-	float* GetBrakeForcePtr() { return &m_brakeForce; }
-	float* GetTurnRatePtr() { return &m_turnRate; }
-	float* GetFrictionPtr() { return &m_friction; }
-	float* GetColorPtr() { return reinterpret_cast<float*>(&m_primaryColor); }
+	float* getSpeedPtr() { return &m_speed; }
+	float* getColorPtr() { return reinterpret_cast<float*>(&m_color); }
 
 	// Return pointers for camera to track
-	Vector3* GetPositionPtr() { return &m_transform.position; }
-	float* GetRotationPtr() { return &m_transform.rotation.y; }
+	Vector3* getPositionPtr() { return &m_transform.position; }
+	float* getRotationPtr() { return &m_transform.rotation.y; }
 
-	Transform* GetTransformPtr() { return &m_transform; }
+	Transform* getTransformPtr() { return &m_transform; }
 
-	void SetPosition(const Vector3& pos) { m_transform.position = pos; }
-	void SetColor(const Color& color) { m_primaryColor = color; }
-	void SetHealth(float health) { m_health = health; }
-	void Reset();
-	const DirectX::BoundingSphere& GetBoundingSphere() const { return m_boundingSphere; }
+	void setPosition(const Vector3& pos) { m_transform.position = pos; }
+	void setColor(const Color& color) { m_color = color; }
+	void setHealth(float health) { m_health = health; }
+	void reset();
+	const DirectX::BoundingSphere& getBoundingSphere() const { return m_boundingSphere; }
 
 private:
-	void BuildWeapon();
+	void buildPlayer();
 	DX::DeviceResources* m_deviceResources;
 
 	// Rendering - composite model built from MeshParts
 	std::vector<MeshPart> m_parts;
-	Color m_primaryColor;	// body/team color
-	Color m_carbonColor;	// carbon fiber (dark gray)
-	Color m_glowColor;		// hover pods (cyan)
+	Color m_color;
 
 	DirectX::BoundingSphere m_boundingSphere;
 
 	Transform m_transform;
 
-	// Forward physics
 	float m_speed;
-	float m_maxSpeed;
-	float m_acceleration;
-	float m_brakeForce;
-	float m_turnRate;
-	float m_friction;
-
-	float m_arenaRadius;
 	float m_health;
 	float m_maxHealth;
 

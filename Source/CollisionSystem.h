@@ -5,14 +5,14 @@ namespace CollisionSystem
 {
 	// Sphere vs Sphere
 	// Returns true if spheres overlap
-	bool CheckSphereSphere(
+	bool checkSphereSphere(
 		const DirectX::BoundingSphere& a,
 		const DirectX::BoundingSphere& b);
 
 	// Ray vs Sphere
 	// Returns true if ray hits sphere
 	// outDistance = how far along ray the hit occurred
-	bool CheckRaySphere(
+	bool checkRaySphere(
 		const DirectX::SimpleMath::Vector3& rayStart,
 		const DirectX::SimpleMath::Vector3& rayDirection,
 		const DirectX::BoundingSphere& sphere,

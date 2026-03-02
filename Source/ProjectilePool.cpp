@@ -10,7 +10,7 @@ ProjectilePool::ProjectilePool(DX::DeviceResources* deviceResources)
 }
 
 
-void ProjectilePool::Initialize(size_t poolSize)
+void ProjectilePool::initialize(size_t poolSize)
 {
     auto context = m_deviceResources->GetD3DDeviceContext();
 
@@ -22,11 +22,11 @@ void ProjectilePool::Initialize(size_t poolSize)
 
     for (auto& projectile : m_projectiles)
     {
-        projectile.Initialize();
+        projectile.initialize();
     }
 }
 
-bool ProjectilePool::Spawn(
+bool ProjectilePool::spawn(
     const Vector3& position,
     const Vector3& direction,
     float speed,
@@ -35,9 +35,9 @@ bool ProjectilePool::Spawn(
     // Find first inactive projectile
     for (auto& projectile : m_projectiles)
     {
-        if (!projectile.IsActive())
+        if (!projectile.isActive())
         {
-            projectile.Spawn(position, direction, speed, damage);
+            projectile.spawn(position, direction, speed, damage);
             return true;  // Success!
         }
     }
@@ -46,19 +46,19 @@ bool ProjectilePool::Spawn(
     return false;
 }
 
-void ProjectilePool::Update(float deltaTime)
+void ProjectilePool::update(float deltaTime)
 {
     for (auto& projectile : m_projectiles)
     {
-        projectile.Update(deltaTime);
+        projectile.update(deltaTime);
     }
 }
 
-void ProjectilePool::Render(const Matrix& view, const Matrix& projection)
+void ProjectilePool::render(const Matrix& view, const Matrix& projection)
 {
     for (auto& projectile : m_projectiles)
     {
-        projectile.Render(view, projection, m_sharedMesh.get());
+        projectile.render(view, projection, m_sharedMesh.get());
     }
 }
 
@@ -67,13 +67,13 @@ int ProjectilePool::GetActiveCount() const
     int count = 0;
     for (const auto& projectile : m_projectiles)
     {
-        if (projectile.IsActive())
+        if (projectile.isActive())
             count++;
     }
     return count;
 }
 
-void ProjectilePool::OnDeviceLost()
+void ProjectilePool::onDeviceLost()
 {
     m_sharedMesh.reset();
     m_projectiles.clear();

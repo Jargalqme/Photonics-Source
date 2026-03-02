@@ -15,7 +15,7 @@ DeathBeamPool::DeathBeamPool(DX::DeviceResources* deviceResources)
 {
 }
 
-void DeathBeamPool::Initialize(size_t poolSize)
+void DeathBeamPool::initialize(size_t poolSize)
 {
     m_beams.resize(poolSize);
     for (auto& beam : m_beams)
@@ -24,10 +24,10 @@ void DeathBeamPool::Initialize(size_t poolSize)
         beam.life = 0.0f;
     }
 
-    CreateDeviceDependentResources();
+    createDeviceDependentResources();
 }
 
-void DeathBeamPool::Update(float deltaTime)
+void DeathBeamPool::update(float deltaTime)
 {
     m_time += deltaTime;
 
@@ -44,7 +44,7 @@ void DeathBeamPool::Update(float deltaTime)
     }
 }
 
-void DeathBeamPool::Trigger(const Vector3& position)
+void DeathBeamPool::trigger(const Vector3& position)
 {
     // Find inactive beam
     for (auto& beam : m_beams)
@@ -59,10 +59,10 @@ void DeathBeamPool::Trigger(const Vector3& position)
     }
 }
 
-void DeathBeamPool::CreateDeviceDependentResources()
+void DeathBeamPool::createDeviceDependentResources()
 {
-    CreateGeometry();
-    CreateShaders();
+    createGeometry();
+    createShaders();
 
     auto device = m_deviceResources->GetD3DDevice();
 
@@ -108,7 +108,7 @@ void DeathBeamPool::CreateDeviceDependentResources()
         m_rasterizerState.ReleaseAndGetAddressOf()));
 }
 
-void DeathBeamPool::CreateGeometry()
+void DeathBeamPool::createGeometry()
 {
     auto device = m_deviceResources->GetD3DDevice();
 
@@ -134,7 +134,7 @@ void DeathBeamPool::CreateGeometry()
         m_vertexBuffer.ReleaseAndGetAddressOf()));
 }
 
-void DeathBeamPool::CreateShaders()
+void DeathBeamPool::createShaders()
 {
     auto device = m_deviceResources->GetD3DDevice();
 
@@ -170,7 +170,7 @@ void DeathBeamPool::CreateShaders()
         m_inputLayout.ReleaseAndGetAddressOf()));
 }
 
-void DeathBeamPool::Render(
+void DeathBeamPool::render(
     const Matrix& view,
     const Matrix& projection,
     const Vector3& cameraPosition)
@@ -225,7 +225,7 @@ void DeathBeamPool::Render(
     context->RSSetState(nullptr);
 }
 
-void DeathBeamPool::OnDeviceLost()
+void DeathBeamPool::onDeviceLost()
 {
     m_vertexBuffer.Reset();
     m_constantBuffer.Reset();

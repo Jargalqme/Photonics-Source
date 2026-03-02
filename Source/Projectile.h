@@ -9,24 +9,24 @@ public:
     ~Projectile() = default;
 
     // Core methods
-    void Initialize();
-    void Spawn(const DirectX::SimpleMath::Vector3& position,
+    void initialize();
+    void spawn(const DirectX::SimpleMath::Vector3& position,
         const DirectX::SimpleMath::Vector3& direction,
         float speed,
         float damage);
-    void Update(float deltaTime);
-    void Render(const DirectX::SimpleMath::Matrix& view,
+    void update(float deltaTime);
+    void render(const DirectX::SimpleMath::Matrix& view,
         const DirectX::SimpleMath::Matrix& projection,
         DirectX::GeometricPrimitive* mesh);
-    void Deactivate();
+    void deactivate();
 
     // State
-    bool IsActive() const { return m_isActive; }
+    bool isActive() const { return m_isActive; }
 
     // For collision
-    DirectX::SimpleMath::Vector3 GetPosition() const { return m_position; }
-    float GetRadius() const { return m_radius; }
-    float GetDamage() const { return m_damage; }
+    DirectX::SimpleMath::Vector3 getPosition() const { return m_position; }
+    float getRadius() const { return m_radius; }
+    float getDamage() const { return m_damage; }
 private:
     bool m_isActive;
 

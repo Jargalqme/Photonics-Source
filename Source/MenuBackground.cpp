@@ -12,19 +12,19 @@ MenuBackground::MenuBackground(DX::DeviceResources* deviceResources)
 {
 }
 
-void MenuBackground::Initialize()
+void MenuBackground::initialize()
 {
-    CreateFullscreenQuad();
-    CreateDeviceDependentResources();
+    createFullscreenQuad();
+    createDeviceDependentResources();
 }
 
-void MenuBackground::Update(float deltaTime)
+void MenuBackground::update(float deltaTime)
 {
     // Accumulate time for shader animation
     m_time += deltaTime;
 }
 
-void MenuBackground::CreateFullscreenQuad()
+void MenuBackground::createFullscreenQuad()
 {
     m_vertices.clear();
 
@@ -41,7 +41,7 @@ void MenuBackground::CreateFullscreenQuad()
     m_vertexCount = m_vertices.size();
 }
 
-void MenuBackground::CreateDeviceDependentResources()
+void MenuBackground::createDeviceDependentResources()
 {
     auto device = m_deviceResources->GetD3DDevice();
 
@@ -64,7 +64,7 @@ void MenuBackground::CreateDeviceDependentResources()
     DX::ThrowIfFailed(device->CreateBuffer(&bufferDesc, nullptr, m_constantBuffer.ReleaseAndGetAddressOf()));
 
     // Create shaders
-    CreateShaders();
+    createShaders();
 
     // Blend State (Alpha blending)
     D3D11_BLEND_DESC blendDesc = {};
@@ -97,7 +97,7 @@ void MenuBackground::CreateDeviceDependentResources()
     DX::ThrowIfFailed(device->CreateRasterizerState(&rsDesc, m_rasterizerState.ReleaseAndGetAddressOf()));
 }
 
-void MenuBackground::CreateShaders()
+void MenuBackground::createShaders()
 {
     auto device = m_deviceResources->GetD3DDevice();
 
@@ -159,7 +159,7 @@ void MenuBackground::CreateShaders()
     ));
 }
 
-void MenuBackground::Render()
+void MenuBackground::render()
 {
     auto context = m_deviceResources->GetD3DDeviceContext();
 
@@ -216,12 +216,12 @@ void MenuBackground::Render()
     context->RSSetState(nullptr);
 }
 
-void MenuBackground::SetShaderType(ShaderType type)
+void MenuBackground::setShaderType(ShaderType type)
 {
     m_shaderType = type;
 }
 
-void MenuBackground::OnDeviceLost()
+void MenuBackground::onDeviceLost()
 {
     m_vertexBuffer.Reset();
     m_constantBuffer.Reset();

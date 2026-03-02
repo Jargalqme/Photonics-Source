@@ -40,7 +40,6 @@
     <ClInclude Include="Source\GameUI.h" />
     <ClInclude Include="Source\MeshPart.h" />
     <ClInclude Include="Source\MenuBackground.h" />
-    <ClInclude Include="Source\FastNoiseLite.h" />
     <ClInclude Include="Source\DeathBeamPool.h" />
     <ClInclude Include="Source\GameScene.h">
       <Filter>Scene</Filter>
@@ -132,9 +131,6 @@
     <ClInclude Include="Source\Core.h">
       <Filter>Entity</Filter>
     </ClInclude>
-    <ClInclude Include="Source\EnemyTower.h">
-      <Filter>Entity</Filter>
-    </ClInclude>
     <ClInclude Include="Source\EnemyTroops.h">
       <Filter>Entity</Filter>
     </ClInclude>
@@ -144,6 +140,11 @@
     <ClInclude Include="Source\AnimatedBillboard.h" />
     <ClInclude Include="Source\EnemySpawn.h" />
     <ClInclude Include="Source\Player.h" />
+    <ClInclude Include="Source\PlayerController.h" />
+    <ClInclude Include="Source\EnemyBoss.h" />
+    <ClInclude Include="Source\RoomData.h" />
+    <ClInclude Include="Source\EditorScene.h" />
+    <ClInclude Include="ThirdParty\FastNoiseLite.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Camera.cpp" />
@@ -234,9 +235,6 @@
     <ClCompile Include="Source\Core.cpp">
       <Filter>Entity</Filter>
     </ClCompile>
-    <ClCompile Include="Source\EnemyTower.cpp">
-      <Filter>Entity</Filter>
-    </ClCompile>
     <ClCompile Include="Source\EnemyTroops.cpp">
       <Filter>Entity</Filter>
     </ClCompile>
@@ -248,6 +246,10 @@
     <ClCompile Include="Source\AnimatedBillboard.cpp" />
     <ClCompile Include="Source\EnemySpawn.cpp" />
     <ClCompile Include="Source\Player.cpp" />
+    <ClCompile Include="Source\PlayerController.cpp" />
+    <ClCompile Include="Source\EnemyBoss.cpp" />
+    <ClCompile Include="Source\RoomData.cpp" />
+    <ClCompile Include="Source\EditorScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

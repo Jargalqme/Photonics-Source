@@ -21,12 +21,12 @@ Enemy::Enemy(DX::DeviceResources* deviceResources)
 }
 
 
-void Enemy::Initialize()
+void Enemy::initialize()
 {
 }
 
 
-void Enemy::Update(float deltaTime)
+void Enemy::update(float deltaTime)
 {
 	if (!m_active)
 		return;
@@ -80,7 +80,7 @@ void Enemy::Update(float deltaTime)
 	}
 }
 
-void Enemy::Render(const Matrix& view, const Matrix& projection)
+void Enemy::render(const Matrix& view, const Matrix& projection)
 {
 
 	if (!m_active)
@@ -89,7 +89,7 @@ void Enemy::Render(const Matrix& view, const Matrix& projection)
 	m_mesh->Draw(world, view, projection, m_color);
 }
 
-void Enemy::Spawn(EnemyType type, const Vector3& startPos, const Vector3& targetPos)
+void Enemy::spawn(EnemyType type, const Vector3& startPos, const Vector3& targetPos)
 {
 	m_type = type;
 	m_position = startPos;
@@ -115,7 +115,7 @@ void Enemy::Spawn(EnemyType type, const Vector3& startPos, const Vector3& target
 	m_boundingSphere.Radius = 1.5f;
 }
 
-void Enemy::TakeDamage(float amount)
+void Enemy::takeDamage(float amount)
 {
 	m_health -= amount;
 
@@ -128,19 +128,19 @@ void Enemy::TakeDamage(float amount)
 	}
 }
 
-void Enemy::SetWaveMovement(bool enabled, float amplitude, float frequency)
+void Enemy::setWaveMovement(bool enabled, float amplitude, float frequency)
 {
 	m_useWaveMovement = enabled;
 	m_waveAmplitude = amplitude;
 	m_waveFrequency = frequency;
 }
 
-void Enemy::Deactivate()
+void Enemy::deactivate()
 {
 	m_active = false;
 }
 
-void Enemy::OnDeviceLost()
+void Enemy::onDeviceLost()
 {
 	m_mesh.reset();
 }

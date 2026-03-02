@@ -223,21 +223,21 @@ void GameUI::drawMinimap()
     );
 
     // Draw Cores (only if inside circle)
-    if (m_coreRed && m_coreRed->IsAlive())
+    if (m_coreRed && m_coreRed->isAlive())
     {
-        ImVec2 pos = worldToMinimap(m_coreRed->GetPosition());
+        ImVec2 pos = worldToMinimap(m_coreRed->getPosition());
         if (isInsideCircle(pos))
             drawList->AddCircleFilled(pos, 5.0f, IM_COL32(255, 0, 0, 255));
     }
-    if (m_coreGreen && m_coreGreen->IsAlive())
+    if (m_coreGreen && m_coreGreen->isAlive())
     {
-        ImVec2 pos = worldToMinimap(m_coreGreen->GetPosition());
+        ImVec2 pos = worldToMinimap(m_coreGreen->getPosition());
         if (isInsideCircle(pos))
             drawList->AddCircleFilled(pos, 5.0f, IM_COL32(0, 255, 0, 255));
     }
-    if (m_coreBlue && m_coreBlue->IsAlive())
+    if (m_coreBlue && m_coreBlue->isAlive())
     {
-        ImVec2 pos = worldToMinimap(m_coreBlue->GetPosition());
+        ImVec2 pos = worldToMinimap(m_coreBlue->getPosition());
         if (isInsideCircle(pos))
             drawList->AddCircleFilled(pos, 5.0f, IM_COL32(0, 100, 255, 255));
     }
@@ -247,9 +247,9 @@ void GameUI::drawMinimap()
     {
         for (auto& enemy : *m_enemies)
         {
-            if (enemy->IsActive())
+            if (enemy->isActive())
             {
-                ImVec2 pos = worldToMinimap(enemy->GetPosition());
+                ImVec2 pos = worldToMinimap(enemy->getPosition());
                 if (isInsideCircle(pos))
                     drawList->AddCircleFilled(pos, 2.0f, IM_COL32(255, 255, 0, 255));
             }
@@ -259,7 +259,7 @@ void GameUI::drawMinimap()
     // Draw Player (cyan)
     if (m_player)
     {
-        ImVec2 pos = worldToMinimap(m_player->GetPosition());
+        ImVec2 pos = worldToMinimap(m_player->getPosition());
         if (isInsideCircle(pos))
             drawList->AddCircleFilled(pos, 4.0f, IM_COL32(0, 255, 255, 255));
     }
@@ -280,7 +280,7 @@ void GameUI::drawHealthBars()
     auto drawHealthBar = [&](float y, Core* core, ImU32 color, const char* label) {
         if (!core) return;
 
-        float healthPercent = core->IsAlive() ? (core->GetHealth() / core->GetMaxHealth()) : 0.0f;
+        float healthPercent = core->isAlive() ? (core->getHealth() / core->getMaxHealth()) : 0.0f;
 
         // Background
         drawList->AddRectFilled(
@@ -336,9 +336,9 @@ void GameUI::drawBoostIndicator()
     ImDrawList* drawList = ImGui::GetForegroundDrawList();
 
     // Get boost state
-    bool isBoosting = m_player->IsBoosting();
-    float boostTimer = m_player->GetBoostTimer();
-    float boostDuration = m_player->GetBoostDuration();
+    bool isBoosting = m_player->isBoosting();
+    float boostTimer = m_player->getBoostTimer();
+    float boostDuration = m_player->getBoostDuration();
     float boostPercent = isBoosting ? (boostTimer / boostDuration) : 1.0f;
 
     // Background

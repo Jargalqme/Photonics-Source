@@ -2,11 +2,12 @@
 #include "Scene.h"
 #include "GridFloor.h"
 #include "Terrain.h"
-#include "EnemyTower.h"
+#include "EnemyBoss.h"
 #include "EnemyTroops.h"
 #include "EnemySpawn.h"
 #include "Core.h"
 #include "Player.h"
+#include "PlayerController.h"
 #include "DeathBeamPool.h"
 #include "ProjectilePool.h"
 #include "SceneManager.h"
@@ -29,16 +30,13 @@ public:
 	~GameScene() override;
 
 	// Scene interface
-	void Initialize(DX::DeviceResources* deviceResources) override;
-	void Enter() override;
-	void Exit() override;
-	void Cleanup() override;
+	void initialize(DX::DeviceResources* deviceResources) override;
+	void enter() override;
+	void exit() override;
+	void finalize() override;
 
-	void Update(float deltaTime, InputManager* input) override;
-	void Render(Renderer* renderer) override;
-
-	void OnWindowSizeChanged(int width, int height) override;
-	void OnDeviceLost() override;
+	void update(float deltaTime, InputManager* input) override;
+	void render(Renderer* renderer) override;
 
 private:
 	// Core systems
@@ -54,10 +52,11 @@ private:
 	// World objects
 	std::unique_ptr<GridFloor> m_gridFloor;
 	std::unique_ptr<Terrain> m_terrain;
-	std::unique_ptr<Tower> m_tower;
+	std::unique_ptr<EnemyBoss> m_enemyBoss;
 
 	// Player
-	std::unique_ptr<LightCycle> m_lightCycle;
+	std::unique_ptr<Player> m_player;
+	std::unique_ptr<PlayerController> m_playerController;
 	std::unique_ptr<BeamWeapon> m_beamWeapon;
 
 	// Objectives (Cores)
@@ -86,13 +85,11 @@ private:
 
 	// Debug
 	float m_rumbleTimer = 0.0f;
-	bool m_showCursor = false;
 	bool m_debugMode = false;
 
 	// Private helper methods
-	void UpdateCamera(float deltaTime, InputManager* input);
-	void UpdateGamePlay(float deltaTime, InputManager* input);
-	void UpdateEnemyRetargeting();
-	void CheckGameConditions();
-	void OnBeat(int beat);
+	void updateGamePlay(float deltaTime, InputManager* input);
+	void updateEnemyRetargeting();
+	void checkGameConditions();
+	void onBeat(int beat);
 };

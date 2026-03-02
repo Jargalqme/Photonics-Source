@@ -213,10 +213,10 @@
     <ClInclude Include="Source\Core.h" />
     <ClInclude Include="Source\DeathBeamPool.h" />
     <ClInclude Include="Source\DebugUI.h" />
+    <ClInclude Include="Source\EditorScene.h" />
+    <ClInclude Include="Source\EnemyBoss.h" />
     <ClInclude Include="Source\EnemySpawn.h" />
-    <ClInclude Include="Source\EnemyTower.h" />
     <ClInclude Include="Source\EnemyTroops.h" />
-    <ClInclude Include="Source\FastNoiseLite.h" />
     <ClInclude Include="Source\GameOverScene.h" />
     <ClInclude Include="Source\GameScene.h" />
     <ClInclude Include="Source\GameUI.h" />
@@ -228,13 +228,16 @@
     <ClInclude Include="Source\MeshPart.h" />
     <ClInclude Include="Source\MusicManager.h" />
     <ClInclude Include="Source\Player.h" />
+    <ClInclude Include="Source\PlayerController.h" />
     <ClInclude Include="Source\Projectile.h" />
     <ClInclude Include="Source\ProjectilePool.h" />
+    <ClInclude Include="Source\RoomData.h" />
     <ClInclude Include="Source\Scene.h" />
     <ClInclude Include="Source\SceneManager.h" />
     <ClInclude Include="Source\Terrain.h" />
     <ClInclude Include="Source\Transform.h" />
     <ClInclude Include="Source\VictoryScene.h" />
+    <ClInclude Include="ThirdParty\FastNoiseLite.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\DeviceResources.cpp" />
@@ -284,8 +287,9 @@
     <ClCompile Include="Source\Core.cpp" />
     <ClCompile Include="Source\DeathBeamPool.cpp" />
     <ClCompile Include="Source\DebugUI.cpp" />
+    <ClCompile Include="Source\EditorScene.cpp" />
+    <ClCompile Include="Source\EnemyBoss.cpp" />
     <ClCompile Include="Source\EnemySpawn.cpp" />
-    <ClCompile Include="Source\EnemyTower.cpp" />
     <ClCompile Include="Source\EnemyTroops.cpp" />
     <ClCompile Include="Source\GameOverScene.cpp" />
     <ClCompile Include="Source\GameScene.cpp" />
@@ -298,8 +302,10 @@
     <ClCompile Include="Source\MeshPart.cpp" />
     <ClCompile Include="Source\MusicManager.cpp" />
     <ClCompile Include="Source\Player.cpp" />
+    <ClCompile Include="Source\PlayerController.cpp" />
     <ClCompile Include="Source\Projectile.cpp" />
     <ClCompile Include="Source\ProjectilePool.cpp" />
+    <ClCompile Include="Source\RoomData.cpp" />
     <ClCompile Include="Source\SceneManager.cpp" />
     <ClCompile Include="Source\Terrain.cpp" />
     <ClCompile Include="Source\VictoryScene.cpp" />
