@@ -1,3 +1,8 @@
+//---------------------------------------------------------------------------
+//! @file   BeamPS.hlsl
+//! @brief  Beam weapon pixel shader — core/inner/outer glow layers + pulse
+//---------------------------------------------------------------------------
+
 cbuffer BeamConstants : register(b0)
 {
     matrix ViewProjection;
@@ -10,14 +15,14 @@ cbuffer BeamConstants : register(b0)
     float  Time;
 };
 
-struct PSInput
+struct PS_INPUT
 {
     float4 position : SV_POSITION;
     float2 uv       : TEXCOORD0;
     float3 worldPos : TEXCOORD1;
 };
 
-float4 main(PSInput input) : SV_TARGET
+float4 main(PS_INPUT input) : SV_TARGET
 {
     // Distance from center
     // uv.y ranges [0,1]. subtract 0.5 to center, abs symmetry, *2 to normalize to [0,1].

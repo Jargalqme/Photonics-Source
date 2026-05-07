@@ -1,3 +1,8 @@
+//---------------------------------------------------------------------------
+//! @file   PristineGridPS.hlsl
+//! @brief  Anti-aliased procedural grid lines (Ben Golus pristine grid)
+//---------------------------------------------------------------------------
+
 cbuffer GridConstants : register(b0)
 {
     matrix worldViewProjection;
@@ -6,7 +11,7 @@ cbuffer GridConstants : register(b0)
     float4 baseColor;
 };
 
-struct PSInput
+struct PS_INPUT
 {
     float4 position : SV_POSITION;
     float2 worldPos : TEXCOORD0;
@@ -41,7 +46,7 @@ float pristineGrid(float2 uv, float2 lineWidth)
     return lerp(grid2.x, 1.0, grid2.y);
 }
 
-float4 main(PSInput input) : SV_TARGET
+float4 main(PS_INPUT input) : SV_TARGET
 {
     float2 uv = input.worldPos * gridParams.z;
     float2 lineWidth = float2(gridParams.x, gridParams.y);

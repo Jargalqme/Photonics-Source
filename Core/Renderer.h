@@ -1,13 +1,17 @@
-﻿#pragma once
+#pragma once
 
 #include "DeviceResources.h"
-#include "Source/ColorMaskEffect.h"
+#include "Source/Render/ColorMaskEffect.h"
+#include "Source/Render/Bloom.h"
 #include <memory>
 #include <string>
 #include <SpriteBatch.h>
 #include <SpriteFont.h>
 
 enum class FontType { Title, Quote, Menu, Hud };
+
+class RenderCommandQueue;
+struct ImportedModelCommand;
 
 class Renderer final
 {
@@ -30,9 +34,23 @@ public:
     DX::DeviceResources* GetDeviceResources() { return m_deviceResources; }
 
     ColorMaskEffect* GetColorMaskEffect() { return m_colorMaskEffect.get(); }
+    Bloom* GetBloom() { return m_bloom.get(); }
 
     void BeginScene();
     void EndScene();
+
+    void ExecuteRenderCommands(
+        const RenderCommandQueue& queue,
+        const DirectX::SimpleMath::Matrix& view,
+        const DirectX::SimpleMath::Matrix& projection,
+        const DirectX::SimpleMath::Vector3& cameraPosition);
+
+    void BeginViewmodelPass();
+
+    void SetRenderResolution(int width, int height);
+
+    int GetRenderWidth() const;
+    int GetRenderHeight() const;
 
     void ApplyPostProcess();
 
@@ -76,14 +94,34 @@ static_cast<LONG>(REF_WIDTH), static_cast<LONG>(REF_HEIGHT) };
 
 private:
     DirectX::SpriteFont* GetFont(FontType type);
+    void CreateImportedModelResources();
+    void DrawImportedModelCommand(
+        const ImportedModelCommand& command,
+        const DirectX::SimpleMath::Matrix& view,
+        const DirectX::SimpleMath::Matrix& projection);
+
     // Device resources (not owned by this class)
     DX::DeviceResources* m_deviceResources;
 
     std::unique_ptr<ColorMaskEffect> m_colorMaskEffect;
+    std::unique_ptr<Bloom> m_bloom;
+
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> m_importedModelVS;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> m_importedModelPS;
+    Microsoft::WRL::ComPtr<ID3D11InputLayout> m_importedModelInputLayout;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> m_importedModelConstantBuffer;
+    Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_importedModelSolidRasterizer;
+    Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_importedModelWireframeRasterizer;
+    Microsoft::WRL::ComPtr<ID3D11SamplerState> m_importedModelSampler;
+    Microsoft::WRL::ComPtr<ID3D11BlendState> m_importedModelAlphaBlendState;
+    Microsoft::WRL::ComPtr<ID3D11BlendState> m_importedModelAdditiveBlendState;
 
     Microsoft::WRL::ComPtr<ID3D11Texture2D> m_sceneTexture;
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_sceneRTV;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_sceneSRV;
+
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> m_sceneDepthTexture;
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_sceneDSV;
 
     // 2D / UI Resources
     std::unique_ptr<DirectX::SpriteBatch> m_spriteBatch;
@@ -98,6 +136,9 @@ private:
     float m_screenHeight = REF_HEIGHT;
     float m_scaleX = 1.0f;
     float m_scaleY = 1.0f;
+
+    int m_renderWidth = 0;
+    int m_renderHeight = 0;
 
     void CreateUIResources();
     void UpdateScaling();

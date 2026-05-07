@@ -1,43 +1,49 @@
-  cbuffer BillboardConstants : register(b0)
+//---------------------------------------------------------------------------
+//! @file   BillboardVS.hlsl
+//! @brief  Camera-facing quad billboard (SV_VertexID, 4 corners)
+//---------------------------------------------------------------------------
+
+cbuffer BillboardCB : register(b0)
 {
-    matrix ViewProjection;
+    float4x4 ViewProjection;
     float3 WorldPosition;
-    float  BillboardSize;
+    float BillboardSize;
     float3 CameraRight;
-    float  FrameOffsetU;
+    float Pad0;
     float3 CameraUp;
-    float  FrameOffsetV;
-    float  FrameSizeU;
-    float  FrameSizeV;
-    float2 Padding;
+    float Pad1;
+}
+
+struct VS_OUTPUT
+{
+    float4 position : SV_Position;
+    float2 texCoord : TEXCOORD0;
 };
 
-struct VSInput
+VS_OUTPUT main(uint vertexID : SV_VertexID)
 {
-    float3 position : POSITION;
-    float2 uv       : TEXCOORD0;
-};
-
-struct PSInput
-{
-    float4 position : SV_POSITION;
-    float2 uv       : TEXCOORD0;
-};
-
-PSInput main(VSInput input)
-{
-    PSInput output;
-
+    VS_OUTPUT output;
+    
+    // 4 corners: bottom-left, top-left, bottom-right, top-right
+    float2 offsets[4] =
+    {
+        float2(-1, -1),
+        float2(-1, +1),
+        float2(+1, -1),
+        float2(+1, +1)
+    };
+    
+    float2 offset = offsets[vertexID];
+    
+    // Expand quad in world space using camera axes (billboard)
     float3 worldPos = WorldPosition
-          + CameraRight * (input.position.x * BillboardSize)
-          + CameraUp    * (input.position.y * BillboardSize);
-
+    + CameraRight * offset.x * BillboardSize
+    + CameraUp * offset.y * BillboardSize;
+    
     output.position = mul(float4(worldPos, 1.0), ViewProjection);
-
-    output.uv = float2(
-          FrameOffsetU + input.uv.x * FrameSizeU,
-          FrameOffsetV + input.uv.y * FrameSizeV
-      );
-
+    
+    // Map offsets to UV: (-1, -1) > (0, 1), (+1, +1) > (1, 0)
+    output.texCoord = float2(offset.x * 0.5 + 0.5, 0.5 - offset.y * 0.5);
+    
     return output;
 }

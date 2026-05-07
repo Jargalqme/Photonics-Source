@@ -1,3 +1,8 @@
+//---------------------------------------------------------------------------
+//! @file   MenuBackgroundVS.hlsl
+//! @brief  Passthrough vertex shader for menu background effects
+//---------------------------------------------------------------------------
+
 cbuffer MenuConstants : register(b0)
 {
     float  Time;
@@ -11,21 +16,21 @@ cbuffer MenuConstants : register(b0)
     float  Padding;
 };
 
-struct VSInput
+struct VS_INPUT
 {
     float3 position : POSITION;
     float2 uv       : TEXCOORD0;
 };
 
-struct PSInput
+struct VS_OUTPUT
 {
     float4 position : SV_POSITION;
     float2 uv       : TEXCOORD0;
 };
 
-PSInput main(VSInput input)
+VS_OUTPUT main(VS_INPUT input)
 {
-    PSInput output;
+    VS_OUTPUT output;
     output.position = float4(input.position, 1.0);
     output.uv = input.uv;
     return output;

@@ -1,17 +1,111 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "Game.h"
+#include "Source/Render/AssimpModelImporter.h"
+
+#include <algorithm>
+#include <cwchar>
 
 extern void ExitGame() noexcept;
 
 using namespace DirectX;
-
 using Microsoft::WRL::ComPtr;
+
+namespace
+{
+    struct Resolution
+    {
+        int width;
+        int height;
+    };
+
+    constexpr Resolution kDefaultResolution{ 1920, 1080 };
+    constexpr Resolution kSupportedResolutions[] = {
+        { 1920, 1080 },
+        { 1920, 1200 },
+    };
+
+    bool IsSupportedResolution(int width, int height) noexcept
+    {
+        for (const auto& resolution : kSupportedResolutions)
+        {
+            if (resolution.width == width && resolution.height == height)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    void GetSettingsPath(wchar_t (&path)[MAX_PATH]) noexcept
+    {
+        path[0] = L'\0';
+
+        DWORD length = GetEnvironmentVariableW(L"LOCALAPPDATA", path, MAX_PATH);
+        if (length > 0 && length < MAX_PATH)
+        {
+            if (wcscat_s(path, L"\\Photonics") == 0)
+            {
+                CreateDirectoryW(path, nullptr);
+
+                if (wcscat_s(path, L"\\settings.ini") == 0)
+                {
+                    return;
+                }
+            }
+        }
+
+        wcscpy_s(path, L"photonics_settings.ini");
+    }
+
+    Resolution LoadResolutionSettings() noexcept
+    {
+        wchar_t path[MAX_PATH] = {};
+        GetSettingsPath(path);
+
+        const int width = static_cast<int>(GetPrivateProfileIntW(
+            L"Display",
+            L"Width",
+            kDefaultResolution.width,
+            path));
+
+        const int height = static_cast<int>(GetPrivateProfileIntW(
+            L"Display",
+            L"Height",
+            kDefaultResolution.height,
+            path));
+
+        if (IsSupportedResolution(width, height))
+        {
+            return { width, height };
+        }
+
+        return kDefaultResolution;
+    }
+
+    void SaveResolutionSettings(int width, int height) noexcept
+    {
+        wchar_t path[MAX_PATH] = {};
+        GetSettingsPath(path);
+
+        wchar_t value[16] = {};
+
+        swprintf_s(value, L"%d", width);
+        WritePrivateProfileStringW(L"Display", L"Width", value, path);
+
+        swprintf_s(value, L"%d", height);
+        WritePrivateProfileStringW(L"Display", L"Height", value, path);
+    }
+}
 
 Game::Game() noexcept(false)
 {
     m_deviceResources = std::make_unique<DX::DeviceResources>();
     m_input = std::make_unique<InputManager>();
     m_renderer = std::make_unique<Renderer>(m_deviceResources.get());
+    m_shaders = std::make_unique<ShaderCache>();
+    m_meshes = std::make_unique<MeshCache>();
+    m_importedModels = std::make_unique<ImportedModelCache>();
     m_sceneManager = std::make_unique<SceneManager>();
     m_deviceResources->RegisterDeviceNotify(this);
 }
@@ -36,17 +130,42 @@ void Game::Initialize(HWND window, int width, int height)
     m_renderer->CreateWindowSizeDependentResources();
 
     m_input->initialize(window);
-    m_sceneManager->initialize(m_deviceResources.get());
 
-    // Create and add scenes
+    m_shaders->initialize(m_deviceResources->GetD3DDevice());
+    m_meshes->initialize(m_deviceResources->GetD3DDeviceContext());
+    m_importedModels->initialize(m_deviceResources->GetD3DDevice());
+    m_commonStates = std::make_unique<CommonStates>(m_deviceResources->GetD3DDevice());
+
+    m_context.game = this;
+    m_context.device = m_deviceResources.get();
+    m_context.renderer = m_renderer.get();
+    m_context.input = m_input.get();
+    m_context.audio = nullptr;
+    m_context.shaders = m_shaders.get();
+    m_context.meshes = m_meshes.get();
+    m_context.importedModels = m_importedModels.get();
+    m_context.commonStates = m_commonStates.get();
+
+#ifdef _DEBUG
+    const AssimpModelReport rifleReport =
+        AssimpModelImporter::Inspect("Assets/Weapons/Rifle/rifle.glb");
+    AssimpModelImporter::DumpReport(rifleReport);
+    AssimpModelImporter::WriteReportFile(rifleReport, "assimp_model_report.txt");
+#endif
+
+    m_sceneManager->initialize(m_context);
+
     auto introScene = std::make_unique<IntroScene>(m_sceneManager.get());
     m_sceneManager->addScene("Intro", std::move(introScene));
 
     auto mainMenuScene = std::make_unique<MainMenuScene>(m_sceneManager.get());
     m_sceneManager->addScene("MainMenu", std::move(mainMenuScene));
 
-    auto gameScene = std::make_unique<GameScene>(m_sceneManager.get());
-    m_sceneManager->addScene("GameScene", std::move(gameScene));
+    auto bossScene = std::make_unique<BossScene>(m_sceneManager.get());
+    m_sceneManager->addScene("BossScene", std::move(bossScene));
+
+    auto trainingScene = std::make_unique<TrainingScene>(m_sceneManager.get());
+    m_sceneManager->addScene("Training", std::move(trainingScene));
 
     auto victoryScene = std::make_unique<VictoryScene>(m_sceneManager.get());
     m_sceneManager->addScene("Victory", std::move(victoryScene));
@@ -54,25 +173,13 @@ void Game::Initialize(HWND window, int width, int height)
     auto gameOverScene = std::make_unique<GameOverScene>(m_sceneManager.get());
     m_sceneManager->addScene("GameOver", std::move(gameOverScene));
 
-    auto editorScene = std::make_unique<EditorScene>(m_sceneManager.get());
-    m_sceneManager->addScene("Editor", std::move(editorScene));
+    m_sceneManager->transitionTo("MainMenu");
 
-    // Start with main menu
-    m_sceneManager->transitionTo("Editor");
-
-    // TODO: Change the timer settings if you want something other than the default variable timestep mode.
-    // e.g. for 60 FPS fixed timestep update logic, call:
-    /*
-    m_timer.SetFixedTimeStep(true);
-    m_timer.SetTargetElapsedSeconds(1.0 / 60);
-    */
-
-    // Initialize ImGui
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    io.IniFilename = nullptr; // Disable imgui.ini for distribution
+    io.IniFilename = nullptr;
 
     ImGui::StyleColorsDark();
 
@@ -81,80 +188,183 @@ void Game::Initialize(HWND window, int width, int height)
 }
 
 #pragma region Frame Update
-// Executes the basic game loop.
 void Game::Tick()
 {
     m_timer.Tick([&]()
         {
             Update(m_timer);
         });
-    Render(); // Call the Game::Render() method
+    Render();
 }
 
-// Updates the world.
 void Game::Update(DX::StepTimer const& timer)
 {
     float deltaTime = float(timer.GetElapsedSeconds());
 
-    // Update input first!
     m_input->update();
-
-    // Update active scene
     m_sceneManager->update(deltaTime, m_input.get());
 }
-
 #pragma endregion
 
 #pragma region Frame Render
 void Game::Render()
 {
-    // === BEGIN SCENE (sets up render target) ===
     m_renderer->BeginScene();
 
-    // === IMGUI FRAME ===
     ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
 
-    // === RENDER SCENE ===
-    m_sceneManager->render(m_renderer.get());
+    m_sceneManager->render();
 
-    // === END SCENE (copies to backbuffer) ===
     m_renderer->EndScene();
 
-    // === IMGUI RENDER ===
     ImGui::Render();
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
-    // === PRESENT ===
     m_deviceResources->Present();
 }
-
-
 #pragma endregion
 
 #pragma region Message Handlers
-// Message handlers
 void Game::OnActivated()
 {
-    // TODO: Game is becoming active window.
 }
 
 void Game::OnDeactivated()
 {
-    // TODO: Game is becoming background window.
 }
 
 void Game::OnSuspending()
 {
-    // TODO: Game is being power-suspended (or minimized).
 }
 
 void Game::OnResuming()
 {
     m_timer.ResetElapsedTime();
+}
 
-    // TODO: Game is being power-resumed (or returning from minimize).
+void Game::applyResolution(int width, int height)
+{
+    if (!IsSupportedResolution(width, height))
+    {
+        return;
+    }
+
+    ResizeWindowedClient(width, height);
+    SaveResolutionSettings(width, height);
+}
+
+void Game::ResizeWindowedClient(int width, int height)
+{
+    HWND hwnd = m_deviceResources->GetWindow();
+    if (!hwnd)
+    {
+        return;
+    }
+
+    ShowWindow(hwnd, SW_RESTORE);
+
+    const auto style = static_cast<DWORD>(GetWindowLongPtr(hwnd, GWL_STYLE));
+    const auto exStyle = static_cast<DWORD>(GetWindowLongPtr(hwnd, GWL_EXSTYLE));
+
+    RECT windowRect = { 0, 0, width, height };
+    const BOOL hasMenu = GetMenu(hwnd) != nullptr;
+
+    using AdjustWindowRectExForDpiFn = BOOL(WINAPI*)(LPRECT, DWORD, BOOL, DWORD, UINT);
+    using GetDpiForWindowFn = UINT(WINAPI*)(HWND);
+
+    HMODULE user32 = GetModuleHandleW(L"user32.dll");
+    auto adjustForDpi = user32
+        ? reinterpret_cast<AdjustWindowRectExForDpiFn>(
+            GetProcAddress(user32, "AdjustWindowRectExForDpi"))
+        : nullptr;
+    auto getDpiForWindow = user32
+        ? reinterpret_cast<GetDpiForWindowFn>(
+            GetProcAddress(user32, "GetDpiForWindow"))
+        : nullptr;
+
+    if (adjustForDpi && getDpiForWindow)
+    {
+        adjustForDpi(&windowRect, style, hasMenu, exStyle, getDpiForWindow(hwnd));
+    }
+    else
+    {
+        AdjustWindowRectEx(&windowRect, style, hasMenu, exStyle);
+    }
+
+    const int windowWidth = windowRect.right - windowRect.left;
+    const int windowHeight = windowRect.bottom - windowRect.top;
+
+    HMONITOR monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+    MONITORINFO monitorInfo = {};
+    monitorInfo.cbSize = sizeof(MONITORINFO);
+
+    RECT workRect = {};
+    if (GetMonitorInfo(monitor, &monitorInfo))
+    {
+        workRect = monitorInfo.rcWork;
+    }
+    else
+    {
+        SystemParametersInfo(SPI_GETWORKAREA, 0, &workRect, 0);
+    }
+
+    const int workWidth = workRect.right - workRect.left;
+    const int workHeight = workRect.bottom - workRect.top;
+    const int x = workRect.left + std::max(0, (workWidth - windowWidth) / 2);
+    const int y = workRect.top + std::max(0, (workHeight - windowHeight) / 2);
+
+    SetWindowPos(hwnd, nullptr,
+        x, y,
+        windowWidth, windowHeight,
+        SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+
+    using DwmGetWindowAttributeFn = HRESULT(WINAPI*)(HWND, DWORD, PVOID, DWORD);
+    constexpr DWORD DwmwaExtendedFrameBounds = 9;
+
+    HMODULE dwm = LoadLibraryW(L"dwmapi.dll");
+    auto getDwmWindowAttribute = dwm
+        ? reinterpret_cast<DwmGetWindowAttributeFn>(
+            GetProcAddress(dwm, "DwmGetWindowAttribute"))
+        : nullptr;
+
+    RECT visibleFrame = {};
+    RECT actualWindow = {};
+    if (getDwmWindowAttribute
+        && SUCCEEDED(getDwmWindowAttribute(
+            hwnd,
+            DwmwaExtendedFrameBounds,
+            &visibleFrame,
+            sizeof(visibleFrame)))
+        && GetWindowRect(hwnd, &actualWindow))
+    {
+        const int visibleWidth = visibleFrame.right - visibleFrame.left;
+        const int visibleHeight = visibleFrame.bottom - visibleFrame.top;
+        const int visibleX = workRect.left + std::max(0, (workWidth - visibleWidth) / 2);
+        const int visibleY = workRect.top + std::max(0, (workHeight - visibleHeight) / 2);
+
+        const int correctedX = actualWindow.left + (visibleX - visibleFrame.left);
+        const int correctedY = actualWindow.top + (visibleY - visibleFrame.top);
+
+        if (correctedX != actualWindow.left || correctedY != actualWindow.top)
+        {
+            SetWindowPos(hwnd, nullptr,
+                correctedX, correctedY,
+                0, 0,
+                SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+    }
+
+    if (dwm)
+    {
+        FreeLibrary(dwm);
+    }
+
+    RECT clientRect = {};
+    GetClientRect(hwnd, &clientRect);
+    OnWindowSizeChanged(clientRect.right - clientRect.left,
+        clientRect.bottom - clientRect.top);
 }
 
 void Game::OnWindowMoved()
@@ -171,33 +381,29 @@ void Game::OnDisplayChange()
 void Game::OnWindowSizeChanged(int width, int height)
 {
     if (!m_deviceResources->WindowSizeChanged(width, height))
+    {
         return;
+    }
 
     CreateWindowSizeDependentResources();
-
     m_renderer->CreateWindowSizeDependentResources();
-
 }
 
-// Properties
 void Game::GetDefaultSize(int& width, int& height) const noexcept
 {
-    width = 1920;
-    height = 1080;
+    const Resolution resolution = LoadResolutionSettings();
+    width = resolution.width;
+    height = resolution.height;
 }
 #pragma endregion
 
 #pragma region Direct3D Resources
-// These are the resources that depend on the device.
 void Game::CreateDeviceDependentResources()
 {
-    // Device-dependent resources are now created in the Renderer
 }
 
-// Allocate all memory resources that change on a window SizeChanged event.
 void Game::CreateWindowSizeDependentResources()
 {
-    // TODO: Initialize windows-size dependent objects here.
 }
 
 void Game::OnDeviceLost()

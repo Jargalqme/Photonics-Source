@@ -1,24 +1,30 @@
-﻿#pragma once
+#pragma once
 
-#include "DeviceResources.h"     
-#include "StepTimer.h"          
-#include "Renderer.h"      
-#include "Source/InputManager.h" 
-#include "Source/SceneManager.h" 
-#include "Source/GameScene.h"   
-#include "Source/IntroScene.h"
-#include "Source/MainMenuScene.h"
-#include "Source/VictoryScene.h"
-#include "Source/GameOverScene.h"
-#include "Source/EditorScene.h"
+#include "DeviceResources.h"
+#include "StepTimer.h"
+#include "Renderer.h"
+
+#include "Source/Services/SceneContext.h"
+#include "Source/Services/InputManager.h"
+
+#include "Source/Scenes/SceneManager.h"
+#include "Source/Scenes/BossScene.h"
+#include "Source/Scenes/TrainingScene.h"
+#include "Source/Scenes/IntroScene.h"
+#include "Source/Scenes/MainMenuScene.h"
+#include "Source/Scenes/VictoryScene.h"
+#include "Source/Scenes/GameOverScene.h"
+
+#include "Source/Render/ShaderCache.h"
+#include "Source/Render/MeshCache.h"
+#include "Source/Render/ImportedModelCache.h"
 #include <memory>
 
-class Game final : public DX::IDeviceNotify  
+class Game final : public DX::IDeviceNotify
 {
-public: 
-
+public:
     Game() noexcept(false);
-    ~Game();  
+    ~Game();
 
     Game(Game&&) = default;
     Game& operator= (Game&&) = default;
@@ -27,8 +33,9 @@ public:
     Game& operator= (Game const&) = delete;
 
     void Initialize(HWND window, int width, int height);
-
     void Tick();
+
+    void applyResolution(int width, int height);
 
     void OnDeviceLost() override;
     void OnDeviceRestored() override;
@@ -44,20 +51,21 @@ public:
     void GetDefaultSize(int& width, int& height) const noexcept;
 
 private:
-
     void Update(DX::StepTimer const& timer);
     void Render();
 
     void CreateDeviceDependentResources();
     void CreateWindowSizeDependentResources();
+    void ResizeWindowedClient(int width, int height);
 
     std::unique_ptr<DX::DeviceResources>    m_deviceResources;
-
     DX::StepTimer                           m_timer;
-
+    SceneContext                            m_context;
     std::unique_ptr<Renderer>               m_renderer;
-
     std::unique_ptr<InputManager>           m_input;
-
+    std::unique_ptr<ShaderCache>            m_shaders;
+    std::unique_ptr<MeshCache>              m_meshes;
+    std::unique_ptr<ImportedModelCache>     m_importedModels;
+    std::unique_ptr<DirectX::CommonStates>  m_commonStates;
     std::unique_ptr<SceneManager>           m_sceneManager;
 };

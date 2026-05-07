@@ -1,5 +1,8 @@
-// Kishimisu's fractal shader - converted from Shadertoy
-// Original: https://www.shadertoy.com/view/mtyGWy
+//---------------------------------------------------------------------------
+//! @file   FractalPS.hlsl
+//! @brief  Kishimisu fractal (Shadertoy port) + cosine palette + vignette
+//---------------------------------------------------------------------------
+
 cbuffer MenuConstants : register(b0)
 {
     float  Time;
@@ -13,7 +16,7 @@ cbuffer MenuConstants : register(b0)
     float  VignetteStrength;
 };
 
-struct PSInput
+struct PS_INPUT
 {
     float4 position : SV_POSITION;
     float2 uv       : TEXCOORD0;
@@ -30,7 +33,7 @@ float3 palette(float t)
     return a + b * cos(6.28318 * (c * t + d));
 }
 
-float4 main(PSInput input) : SV_TARGET
+float4 main(PS_INPUT input) : SV_TARGET
 {
     float2 fragCoord = input.uv * Resolution;
     float2 uv = (fragCoord * 2.0 - Resolution) / Resolution.y;

@@ -1,3 +1,8 @@
+//---------------------------------------------------------------------------
+//! @file   WarpingPS.hlsl
+//! @brief  Chromatic RGB warping menu background effect
+//---------------------------------------------------------------------------
+
 cbuffer MenuConstants : register(b0)
 {
     float  Time;
@@ -11,7 +16,7 @@ cbuffer MenuConstants : register(b0)
     float  Padding;
 };
 
-struct PSInput
+struct PS_INPUT
 {
     float4 position : SV_POSITION;
     float2 uv : TEXCOORD0;
@@ -22,7 +27,7 @@ float2 mod(float2 x, float y)
     return x - y * floor(x / y);
 }
 
-float4 main(PSInput input) : SV_TARGET
+float4 main(PS_INPUT input) : SV_TARGET
 {
     float2 fragCoord = input.uv * Resolution;
 

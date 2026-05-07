@@ -1,15 +1,18 @@
-Texture2D SpriteSheet : register(t0);
-SamplerState Sampler  : register(s0);
+//---------------------------------------------------------------------------
+//! @file   BillboardPS.hlsl
+//! @brief  Simple texture sample for billboard quads
+//---------------------------------------------------------------------------
 
-struct PSInput
+Texture2D tex : register(t0);
+SamplerState sam : register(s0);
+
+struct PS_INPUT
 {
-    float4 position : SV_POSITION;
-    float2 uv       : TEXCOORD0;
+    float4 position : SV_Position;
+    float2 texCoord : TEXCOORD0;
 };
 
-float4 main(PSInput input) : SV_TARGET
+float4 main(PS_INPUT input) : SV_TARGET
 {
-    float4 color = SpriteSheet.Sample(Sampler, input.uv);
-    clip(color.a - 0.01);
-    return color;
+    return tex.Sample(sam, input.texCoord);
 }

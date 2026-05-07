@@ -1,3 +1,8 @@
+//---------------------------------------------------------------------------
+//! @file   BeamVS.hlsl
+//! @brief  Beam weapon vertex shader — camera-facing quad between start/end
+//---------------------------------------------------------------------------
+
 cbuffer BeamConstants : register(b0)
 {
     matrix ViewProjection;
@@ -10,7 +15,7 @@ cbuffer BeamConstants : register(b0)
     float  Time;
 };
 
-struct PSInput
+struct VS_OUTPUT
 {
     float4 position : SV_POSITION; // System_Value Semantics
     float2 uv       : TEXCOORD0;
@@ -24,9 +29,9 @@ static const float2 quadUVs[6] =
     float2(1, 0), float2(0, 1), float2(1, 1)  // triangle 2
 };
 
-PSInput main(uint id : SV_VertexID)
+VS_OUTPUT main(uint id : SV_VertexID)
 {
-    PSInput output;
+    VS_OUTPUT output;
     float2 uv = quadUVs[id];
 
     float3 beamPos  = lerp(BeamStart, BeamEnd, uv.x);

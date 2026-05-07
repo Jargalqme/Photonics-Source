@@ -30,6 +30,9 @@ ipch/
 # Compiled shaders (regenerated on build)
 *.cso
 
+# Generated diagnostics
+assimp_model_report.txt
+
 # Windows
 Thumbs.db
 desktop.ini

@@ -1,3 +1,8 @@
+//---------------------------------------------------------------------------
+//! @file   PristineGridVS.hlsl
+//! @brief  Grid floor vertex transform — passes world XZ to pixel shader
+//---------------------------------------------------------------------------
+
 cbuffer GridConstants : register(b0)
 {
     matrix worldViewProjection;
@@ -6,20 +11,20 @@ cbuffer GridConstants : register(b0)
     float4 baseColor;
 };
 
-struct VSInput
+struct VS_INPUT
 {
     float3 position : POSITION;
 };
 
-struct PSInput
+struct VS_OUTPUT
 {
     float4 position : SV_POSITION;
     float2 worldPos : TEXCOORD0;
 };
 
-PSInput main(VSInput input)
+VS_OUTPUT main(VS_INPUT input)
 {
-    PSInput output;
+    VS_OUTPUT output;
     output.position = mul(float4(input.position, 1.0), worldViewProjection);
     output.worldPos = input.position.xz;
     return output;
