@@ -311,7 +311,9 @@ xcopy /Y /D "$(ProjectDir)ThirdParty\Assimp\bin\x64\Release\*.dll" "$(TargetDir)
     <ClCompile Include="Source\Common\Camera.cpp" />
     <ClCompile Include="Source\Gameplay\Combat\CollisionSystem.cpp" />
     <ClCompile Include="Source\Render\ColorMaskEffect.cpp" />
-    <ClCompile Include="Source\UI\DebugUI.cpp" />
+    <ClCompile Include="Source\UI\DebugUI.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Source\Gameplay\Dummy.cpp" />
     <ClCompile Include="Source\Gameplay\Boss.cpp" />
     <ClCompile Include="Source\Gameplay\Events\EventBus.cpp" />

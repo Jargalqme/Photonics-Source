@@ -24,20 +24,32 @@ namespace
 
     constexpr int RESOLUTION_COUNT = static_cast<int>(std::size(RESOLUTIONS));
 
-    void DrawSciFiButton(const char* text, bool isSelected, float width, float centerX)
+    bool DrawSciFiButton(const char* text, bool isSelected, float width, float centerX, bool* outHovered = nullptr)
     {
         ImDrawList* drawList = ImGui::GetWindowDrawList();
 
         const float height = 44.0f;
+        const ImVec2 originalCursor = ImGui::GetCursorScreenPos();
         const float x = centerX - width / 2.0f;
-        const float y = ImGui::GetCursorScreenPos().y;
+        const float y = originalCursor.y;
 
-        const ImU32 bgColor = isSelected ? IM_COL32(0, 60, 80, 220) : IM_COL32(0, 20, 30, 200);
-        const ImU32 borderColor = isSelected ? IM_COL32(0, 255, 255, 255) : IM_COL32(0, 150, 150, 180);
-        const ImU32 glowColor = IM_COL32(0, 255, 255, isSelected ? 60 : 0);
-        const ImU32 textColor = isSelected ? IM_COL32(0, 255, 255, 255) : IM_COL32(150, 200, 200, 255);
+        ImGui::SetCursorScreenPos(ImVec2(x, y));
+        ImGui::InvisibleButton(text, ImVec2(width, height));
 
-        if (isSelected)
+        const bool isHovered = ImGui::IsItemHovered();
+        const bool isClicked = ImGui::IsItemClicked(ImGuiMouseButton_Left);
+        const bool isActive = isSelected || isHovered;
+        if (outHovered)
+        {
+            *outHovered = isHovered;
+        }
+
+        const ImU32 bgColor = isActive ? IM_COL32(0, 60, 80, 220) : IM_COL32(0, 20, 30, 200);
+        const ImU32 borderColor = isActive ? IM_COL32(0, 255, 255, 255) : IM_COL32(0, 150, 150, 180);
+        const ImU32 glowColor = IM_COL32(0, 255, 255, isActive ? 60 : 0);
+        const ImU32 textColor = isActive ? IM_COL32(0, 255, 255, 255) : IM_COL32(150, 200, 200, 255);
+
+        if (isActive)
         {
             drawList->AddRectFilled(
                 ImVec2(x - 4, y - 4),
@@ -47,7 +59,7 @@ namespace
         }
 
         drawList->AddRectFilled(ImVec2(x, y), ImVec2(x + width, y + height), bgColor, 4.0f);
-        drawList->AddRect(ImVec2(x, y), ImVec2(x + width, y + height), borderColor, 4.0f, 0, isSelected ? 2.0f : 1.0f);
+        drawList->AddRect(ImVec2(x, y), ImVec2(x + width, y + height), borderColor, 4.0f, 0, isActive ? 2.0f : 1.0f);
 
         const float cornerSize = 8.0f;
         drawList->AddLine(ImVec2(x, y + cornerSize), ImVec2(x, y), borderColor, 2.0f);
@@ -64,7 +76,8 @@ namespace
         const float textY = y + (height - textSize.y) / 2.0f;
         drawList->AddText(ImVec2(textX, textY), textColor, text);
 
-        ImGui::Dummy(ImVec2(width, height + 12.0f));
+        ImGui::SetCursorScreenPos(ImVec2(originalCursor.x, y + height + 12.0f));
+        return isClicked;
     }
 }
 
@@ -98,6 +111,10 @@ void MainMenuScene::enter()
     Scene::enter();
     m_state = State::Root;
     m_selectedIndex = 0;
+    if (m_context && m_context->input)
+    {
+        m_context->input->setCursorVisible(true);
+    }
 
     if (m_audioManager)
     {
@@ -308,7 +325,32 @@ void MainMenuScene::renderRoot()
     const char* menuItems[ROOT_ITEM_COUNT] = { "BOSS FIGHT", "TRAINING", "SETTINGS", "QUIT" };
     for (int i = 0; i < ROOT_ITEM_COUNT; i++)
     {
-        DrawSciFiButton(menuItems[i], i == m_selectedIndex, 280.0f, centerX);
+        bool hovered = false;
+        if (DrawSciFiButton(menuItems[i], i == m_selectedIndex, 280.0f, centerX, &hovered))
+        {
+            m_selectedIndex = i;
+            switch (m_selectedIndex)
+            {
+            case 0:
+                m_sceneManager->transitionTo("BossScene");
+                break;
+            case 1:
+                m_sceneManager->transitionTo("Training");
+                break;
+            case 2:
+                enterSettings();
+                break;
+            case 3:
+                PostQuitMessage(0);
+                break;
+            default:
+                break;
+            }
+        }
+        else if (hovered)
+        {
+            m_selectedIndex = i;
+        }
     }
 
     ImGui::SetWindowFontScale(1.0f);
@@ -370,12 +412,40 @@ void MainMenuScene::renderSettings()
         std::snprintf(rowLabel, sizeof(rowLabel), "RESOLUTION     %s",
             RESOLUTIONS[m_pendingResolutionIndex].label);
     }
-    DrawSciFiButton(rowLabel, m_selectedIndex == 0, 440.0f, centerX);
+    bool hovered = false;
+    if (DrawSciFiButton(rowLabel, m_selectedIndex == 0, 440.0f, centerX, &hovered))
+    {
+        m_selectedIndex = 0;
+        m_pendingResolutionIndex = (m_pendingResolutionIndex + 1) % RESOLUTION_COUNT;
+    }
+    else if (hovered)
+    {
+        m_selectedIndex = 0;
+    }
 
     ImGui::Spacing();
 
-    DrawSciFiButton("APPLY", m_selectedIndex == 1, 280.0f, centerX);
-    DrawSciFiButton("BACK", m_selectedIndex == 2, 280.0f, centerX);
+    hovered = false;
+    if (DrawSciFiButton("APPLY", m_selectedIndex == 1, 280.0f, centerX, &hovered))
+    {
+        m_selectedIndex = 1;
+        applySettings();
+    }
+    else if (hovered)
+    {
+        m_selectedIndex = 1;
+    }
+
+    hovered = false;
+    if (DrawSciFiButton("BACK", m_selectedIndex == 2, 280.0f, centerX, &hovered))
+    {
+        m_state = State::Root;
+        m_selectedIndex = 2;
+    }
+    else if (hovered)
+    {
+        m_selectedIndex = 2;
+    }
 
     ImGui::SetWindowFontScale(1.0f);
 

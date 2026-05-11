@@ -47,14 +47,14 @@ float4 main(PS_INPUT input) : SV_TARGET
   //  col *= ColorTint;
     
     
-    float3 color1 = float3(0.0, 0.4, 1.0); // electric blue
-    float3 color2 = float3(0.6, 0.0, 1.0); // purple
-    float blend = sin(uv.y * 2.0 + Time * 0.3) * 0.5 + 0.5;
-    float3 col = val * lerp(color1, color2, blend);
+    //float3 color1 = float3(0.0, 0.4, 1.0); // electric blue
+    //float3 color2 = float3(0.6, 0.0, 1.0); // purple
+    //float blend = sin(uv.y * 2.0 + Time * 0.3) * 0.5 + 0.5;
+    //float3 col = val * lerp(color1, color2, blend);
     
-    //float pulse = sin(Time * 0.5) * 0.15 + 1.0; // 0.85 to 1.15
-    //float3 col = float3(val * pulse, val * pulse, val * pulse);
-    //col *= ColorTint;
+    float pulse = sin(Time * 0.5) * 0.15 + 1.0; // 0.85 to 1.15
+    float3 col = float3(val * pulse, val * pulse, val * pulse);
+    col *= ColorTint;
     
   //  float hue = uv.x * 0.8 + uv.y * 0.5 + Time * 0.8;
   //  float3 col = val * float3(

@@ -129,6 +129,7 @@ private:
     std::unique_ptr<GameUI> m_gameUI;
     std::unique_ptr<DebugUI> m_debugUI;
     bool m_debugMode = false;
+    bool m_cursorVisibleBeforeDebug = false;
 
     // 入力フィードバック
     float m_hitstopTimer = 0.0f;

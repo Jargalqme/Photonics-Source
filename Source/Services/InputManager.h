@@ -73,6 +73,7 @@ public:
     // カーソル表示切替（マウスモードも連動）
     void setCursorVisible(bool visible);
     bool isCursorVisible() const { return m_cursorVisible; }
+    bool isSystemCursorVisible() const;
 
     // マウスモード切替
     // MODE_RELATIVE: カーソル非表示、FPSカメラ向け

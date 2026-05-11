@@ -111,6 +111,7 @@ void BossScene::initialize(SceneContext& context)
     m_gameUI->setPlayer(m_player.get());
     m_gameUI->setBoss(m_boss.get());
 
+#ifdef _DEBUG
     m_debugUI = std::make_unique<DebugUI>();
     m_debugUI->setCamera(m_camera.get());
     m_debugUI->setLightCycle(m_player.get());
@@ -121,6 +122,7 @@ void BossScene::initialize(SceneContext& context)
     m_debugUI->setBulletPool(&m_bulletPool);
     m_debugUI->setBoss(m_boss.get());
     m_debugUI->setBloom(m_renderer->GetBloom());
+#endif
 }
 
 // === シーン遷移 ===
@@ -129,6 +131,12 @@ void BossScene::enter()
 {
     Scene::enter();
     EventBus::clear();
+    m_debugMode = false;
+    m_cursorVisibleBeforeDebug = false;
+    if (m_context && m_context->input)
+    {
+        m_context->input->setCursorVisible(false);
+    }
 
     // UI が自前で購読する（clear 後に再登録する必要があるためここで呼ぶ）
     m_gameUI->subscribeEvents();
@@ -274,17 +282,28 @@ void BossScene::update(float deltaTime, InputManager* input)
         PostQuitMessage(0);
     }
 
-    if (input->isKeyPressed(Keyboard::Keys::Tab))
+    if (!m_debugMode && input->isKeyPressed(Keyboard::Keys::Tab))
     {
         input->setCursorVisible(!input->isCursorVisible());
     }
 
+#ifdef _DEBUG
     if (input->isKeyPressed(Keyboard::Keys::F3))
     {
         m_debugMode = !m_debugMode;
+        if (m_debugMode)
+        {
+            m_cursorVisibleBeforeDebug = input->isCursorVisible();
+            input->setCursorVisible(true);
+        }
+        else
+        {
+            input->setCursorVisible(m_cursorVisibleBeforeDebug);
+        }
     }
 
     m_debugUI->setInputManager(input);
+#endif
 
     // === ゲームプレイ系統（正準順: Player → Boss → Combat → Camera）===
     const bool victoryReached = m_boss->isActivated() && m_boss->isDead();
@@ -407,8 +426,10 @@ void BossScene::renderViewmodel(const Matrix& view, const Vector3& camPos)
 void BossScene::renderUI(const Matrix& view, const Matrix& proj)
 {
     m_gameUI->render(view, proj);
-    if (m_debugMode)
+#ifdef _DEBUG
+    if (m_debugMode && m_debugUI)
     {
         m_debugUI->render();
     }
+#endif
 }

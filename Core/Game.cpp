@@ -181,6 +181,10 @@ void Game::Initialize(HWND window, int width, int height)
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.IniFilename = nullptr;
 
+    ImFontConfig fontConfig;
+    fontConfig.SizePixels = 15.0f;
+    io.Fonts->AddFontDefault(&fontConfig);
+
     ImGui::StyleColorsDark();
 
     ImGui_ImplWin32_Init(window);

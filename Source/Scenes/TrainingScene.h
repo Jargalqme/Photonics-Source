@@ -109,6 +109,7 @@ private:
     std::unique_ptr<GameUI> m_gameUI;
     std::unique_ptr<DebugUI> m_debugUI;
     bool m_debugMode = false;
+    bool m_cursorVisibleBeforeDebug = false;
 
     // --- ダミー調整パラメータ（ImGui で操作） ---
     int   m_dummyCount         = DEFAULT_DUMMY_COUNT;

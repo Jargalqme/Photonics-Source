@@ -161,9 +161,6 @@ void Bloom::renderFullscreenPass(ID3D11PixelShader* ps,
 {
     auto context = m_deviceResources->GetD3DDeviceContext();
 
-    // レンダーターゲット解除 → 設定
-    ID3D11RenderTargetView* nullRTV = nullptr;
-    context->OMSetRenderTargets(1, &nullRTV, nullptr);
     context->OMSetRenderTargets(1, &outputRTV, nullptr);
 
     // ビューポート設定

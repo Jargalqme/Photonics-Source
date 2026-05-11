@@ -39,6 +39,10 @@ void GameOverScene::enter()
 {
     Scene::enter();
     m_selectedIndex = 0;
+    if (m_context && m_context->input)
+    {
+        m_context->input->setCursorVisible(true);
+    }
 
     if (m_audioManager)
     {
@@ -159,6 +163,31 @@ void GameOverScene::render()
 
     for (int i = 0; i < m_menuItemCount; i++)
     {
+        const float hitWidth = 280.0f;
+        const float hitHeight = ImGui::GetTextLineHeight() + 10.0f;
+        ImGui::SetCursorPosX((windowWidth - hitWidth) / 2.0f);
+        ImVec2 hitPos = ImGui::GetCursorScreenPos();
+        ImGui::InvisibleButton(menuItems[i], ImVec2(hitWidth, hitHeight));
+        if (ImGui::IsItemHovered())
+        {
+            m_selectedIndex = i;
+        }
+        if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
+        {
+            m_selectedIndex = i;
+            switch (m_selectedIndex)
+            {
+            case 0:
+                m_sceneManager->transitionTo("BossScene");
+                break;
+            case 1:
+                m_sceneManager->transitionTo("MainMenu");
+                break;
+            default:
+                break;
+            }
+        }
+
         bool isSelected = (i == m_selectedIndex);
 
         char displayText[64];
@@ -172,15 +201,16 @@ void GameOverScene::render()
         }
 
         float textWidth = ImGui::CalcTextSize(displayText).x;
-        ImGui::SetCursorPosX((windowWidth - textWidth) / 2.0f);
+        ImVec2 textPos(hitPos.x + (hitWidth - textWidth) / 2.0f, hitPos.y + 5.0f);
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
 
         if (isSelected)
         {
-            ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), displayText);
+            drawList->AddText(textPos, IM_COL32(255, 77, 77, 255), displayText);
         }
         else
         {
-            ImGui::TextColored(ImVec4(0.4f, 0.4f, 0.4f, 1.0f), displayText);
+            drawList->AddText(textPos, IM_COL32(102, 102, 102, 255), displayText);
         }
 
         ImGui::Spacing();

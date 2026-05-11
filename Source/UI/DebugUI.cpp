@@ -12,121 +12,171 @@
 #include "Services/InputManager.h"
 #include <imgui.h>
 
-void DebugUI::render()
+namespace
 {
-    ImGui::Begin("PHOTON Debug");
-
-    ImGui::StyleColorsClassic();
-
-    // FPS
-    ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
-    ImGui::Separator();
-
-    bool cursorVisible = m_input ? m_input->isCursorVisible() : false;
-    ImGui::Text("Cursor: %s (Tab to toggle)", cursorVisible ? "VISIBLE" : "HIDDEN");
-
-    // === カメラ ===
-    if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
+    void DrawUnavailable(const char* label)
     {
-        CameraState* follow = m_camera->getFollowStatePtr();
-        ImGui::Text("--- Follow State ---");
-        ImGui::SliderFloat("Follow Height", &follow->height, 0.5f, 10.0f);
-        ImGui::SliderFloat("Follow FOV", &follow->fov, 30.0f, 90.0f);
-
-        CameraState* aim = m_camera->getAimStatePtr();
-        ImGui::Text("--- Aim State ---");
-        ImGui::SliderFloat("Aim Height", &aim->height, 0.5f, 8.0f);
-        ImGui::SliderFloat("Aim FOV", &aim->fov, 20.0f, 70.0f);
-
-        ImGui::Separator();
-        ImGui::SliderFloat("Mouse Sens", m_player->getMouseSensitivityPtr(), 5.0f, 200.0f);
-        ImGui::Checkbox("Rule of Thirds", &m_showThirds);
+        ImGui::TextDisabled("%s unavailable", label);
     }
 
-    ImGui::Separator();
-
-    // === プレイヤー ===
-    if (ImGui::CollapsingHeader("Player", ImGuiTreeNodeFlags_DefaultOpen))
+    void DrawSection(const char* label)
     {
-        Vector3 pos = m_player->getPosition();
-        ImGui::Text("World Pos: %.1f, %.1f, %.1f", pos.x, pos.y, pos.z);
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Text("%s", label);
+    }
 
-        if (ImGui::TreeNode("Transform (SRT)"))
+    void DrawLabelValue(const char* label, const char* value)
+    {
+        ImGui::TextDisabled("%s", label);
+        ImGui::SameLine(160.0f);
+        ImGui::Text("%s", value);
+    }
+}
+
+void DebugUI::render()
+{
+    ImGui::SetNextWindowPos(ImVec2(24.0f, 24.0f), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(460.0f, 700.0f), ImGuiCond_FirstUseEver);
+
+    const bool visible = ImGui::Begin("Debug", nullptr, ImGuiWindowFlags_NoCollapse);
+    if (visible)
+    {
+        ImGuiIO& io = ImGui::GetIO();
+        const float frameMs = io.Framerate > 0.0f ? 1000.0f / io.Framerate : 0.0f;
+        ImGui::Text("FPS: %.1f  (%.2f ms)", io.Framerate, frameMs);
+        ImGui::TextDisabled("F3: close debug");
+
+        if (m_input)
         {
+#ifdef _DEBUG
+            DrawLabelValue("Build", "Debug");
+#else
+            DrawLabelValue("Build", "Release");
+#endif
+            const char* desired = m_input->isCursorVisible() ? "visible / absolute" : "hidden / relative";
+            const char* actual = m_input->isSystemCursorVisible() ? "visible" : "hidden";
+            DrawLabelValue("Cursor mode", desired);
+            DrawLabelValue("OS cursor", actual);
+        }
+        else
+        {
+            DrawUnavailable("Input");
+        }
+
+        DrawSection("Camera");
+        if (m_camera)
+        {
+            CameraState* follow = m_camera->getFollowStatePtr();
+            ImGui::Text("Follow");
+            ImGui::SliderFloat("Follow Height", &follow->height, 0.5f, 10.0f);
+            ImGui::SliderFloat("Follow FOV", &follow->fov, 30.0f, 90.0f);
+
+            ImGui::Spacing();
+            CameraState* aim = m_camera->getAimStatePtr();
+            ImGui::Text("Aim");
+            ImGui::SliderFloat("Aim Height", &aim->height, 0.5f, 8.0f);
+            ImGui::SliderFloat("Aim FOV", &aim->fov, 20.0f, 70.0f);
+
+            ImGui::Spacing();
+            if (m_player)
+            {
+                ImGui::SliderFloat("Mouse Sens", m_player->getMouseSensitivityPtr(), 5.0f, 200.0f);
+            }
+            else
+            {
+                DrawUnavailable("Player mouse tuning");
+            }
+            ImGui::Checkbox("Rule of Thirds Overlay", &m_showThirds);
+        }
+        else
+        {
+            DrawUnavailable("Camera");
+        }
+
+        DrawSection("Player");
+        if (m_player)
+        {
+            Vector3 pos = m_player->getPosition();
+            ImGui::Text("World Position: %.1f, %.1f, %.1f", pos.x, pos.y, pos.z);
             Transform* t = m_player->getTransformPtr();
-
-            ImGui::Text("Scale:    %.2f, %.2f, %.2f", t->scale.x, t->scale.y, t->scale.z);
-            ImGui::Text("Rotation: %.2f, %.2f, %.2f (rad)", t->rotation.x, t->rotation.y, t->rotation.z);
-            ImGui::Text("Position: %.2f, %.2f, %.2f", t->position.x, t->position.y, t->position.z);
-
-            ImGui::Separator();
 
             ImGui::SliderFloat3("Scale", &t->scale.x, 0.1f, 3.0f);
             ImGui::SliderFloat3("Rotation", &t->rotation.x, -3.14f, 3.14f);
             ImGui::SliderFloat3("Position", &t->position.x, -100.0f, 100.0f);
-
-            ImGui::TreePop();
         }
-        ImGui::Separator();
-    }
-
-    // === 武器プロシージャルアニメーション ===
-    if (m_player && ImGui::CollapsingHeader("Weapon"))
-    {
-        WeaponTuning* t = m_player->getViewmodel()->getTuningPtr();
-
-        ImGui::Text("--- Recoil ---");
-        ImGui::SliderFloat("Recoil Impulse Z",    &t->recoilImpulseZ,     -20.0f, 0.0f);
-
-        ImGui::Text("--- Aim Punch ---");
-        ImGui::SliderFloat("Aim Punch Impulse",   &t->aimPunchImpulseDeg, -20.0f, 0.0f);
-
-        ImGui::Text("--- Bob ---");
-        ImGui::SliderFloat("Bob Frequency",       &t->bobFrequency,        0.0f, 20.0f);
-        ImGui::SliderFloat("Bob Amplitude X",     &t->bobAmplitudeX,       0.0f,  0.1f);
-        ImGui::SliderFloat("Bob Amplitude Y",     &t->bobAmplitudeY,       0.0f,  0.1f);
-
-        ImGui::Text("--- Sway ---");
-        ImGui::SliderFloat("Sway Gain",           &t->swayGain,            0.0f,  0.02f);
-
-        ImGui::Text("--- Landing ---");
-        ImGui::SliderFloat("Land Gain Y",         &t->landGainY,           0.0f,  0.1f);
-        ImGui::SliderFloat("Land Gain Pitch",     &t->landGainPitch,       0.0f, 10.0f);
-
-        ImGui::Separator();
-    }
-
-    // === グリッド ===
-    if (ImGui::CollapsingHeader("Grid"))
-    {
-        ImGui::SliderFloat("Line Width X", m_grid->getLineWidthXPtr(), 0.001f, 0.1f);
-        ImGui::SliderFloat("Line Width Y", m_grid->getLineWidthYPtr(), 0.001f, 0.1f);
-        ImGui::SliderFloat("Grid Scale", m_grid->getGridScalePtr(), 0.1f, 5.0f);
-        ImGui::ColorEdit4("Line Color", m_grid->getLineColorPtr());
-        ImGui::ColorEdit4("Base Color", m_grid->getBaseColorPtr());
-    }
-
-    // === オーディオ ===
-    if (ImGui::CollapsingHeader("Audio & Music"))
-    {
-        if (m_audioManager)
+        else
         {
-            ImGui::Text("=== Audio ===");
-            if (ImGui::SliderFloat("Master Volume", m_audioManager->getMasterVolumePtr(), 0.0f, 1.0f))
-            {
-                m_audioManager->setMasterVolume(m_audioManager->getMasterVolume());
-            }
-            ImGui::Separator();
+            DrawUnavailable("Player");
         }
-    }
 
-    // === 弾プール ===
-    if (ImGui::CollapsingHeader("Bullet Pool", ImGuiTreeNodeFlags_DefaultOpen))
-    {
+        DrawSection("Weapon");
+        if (m_player)
+        {
+            WeaponTuning* t = m_player->getViewmodel()->getTuningPtr();
+
+            ImGui::Text("Recoil");
+            ImGui::SliderFloat("Recoil Impulse Z", &t->recoilImpulseZ, -20.0f, 0.0f);
+            ImGui::Spacing();
+
+            ImGui::Text("Aim Punch");
+            ImGui::SliderFloat("Aim Punch Impulse", &t->aimPunchImpulseDeg, -20.0f, 0.0f);
+            ImGui::Spacing();
+
+            ImGui::Text("Bob");
+            ImGui::SliderFloat("Bob Frequency", &t->bobFrequency, 0.0f, 20.0f);
+            ImGui::SliderFloat("Bob Amplitude X", &t->bobAmplitudeX, 0.0f, 0.1f);
+            ImGui::SliderFloat("Bob Amplitude Y", &t->bobAmplitudeY, 0.0f, 0.1f);
+            ImGui::Spacing();
+
+            ImGui::Text("Sway");
+            ImGui::SliderFloat("Sway Gain", &t->swayGain, 0.0f, 0.02f);
+            ImGui::Spacing();
+
+            ImGui::Text("Landing");
+            ImGui::SliderFloat("Land Gain Y", &t->landGainY, 0.0f, 0.1f);
+            ImGui::SliderFloat("Land Gain Pitch", &t->landGainPitch, 0.0f, 10.0f);
+        }
+        else
+        {
+            DrawUnavailable("Weapon");
+        }
+
+        DrawSection("Rendering");
+        if (m_grid)
+        {
+            ImGui::Text("Grid");
+            ImGui::SliderFloat("Line Width X", m_grid->getLineWidthXPtr(), 0.001f, 0.1f);
+            ImGui::SliderFloat("Line Width Y", m_grid->getLineWidthYPtr(), 0.001f, 0.1f);
+            ImGui::SliderFloat("Grid Scale", m_grid->getGridScalePtr(), 0.1f, 5.0f);
+            ImGui::ColorEdit4("Line Color", m_grid->getLineColorPtr());
+            ImGui::ColorEdit4("Base Color", m_grid->getBaseColorPtr());
+        }
+        else
+        {
+            DrawUnavailable("Grid");
+        }
+
+        ImGui::Spacing();
+        if (m_bloom)
+        {
+            ImGui::Text("Bloom");
+            ImGui::Checkbox("Enable", m_bloom->getEnabledPtr());
+            ImGui::SliderFloat("Threshold", m_bloom->getThresholdPtr(), 0.0f, 5.0f);
+            ImGui::SliderFloat("Knee", m_bloom->getKneePtr(), 0.0f, 1.0f);
+            ImGui::SliderFloat("Intensity", m_bloom->getIntensityPtr(), 0.0f, 5.0f);
+            ImGui::SliderFloat("Exposure", m_bloom->getExposurePtr(), 0.0f, 3.0f);
+        }
+        else
+        {
+            DrawUnavailable("Bloom");
+        }
+
+        DrawSection("Combat");
         if (m_bulletPool)
         {
             Bullet* bullets = m_bulletPool->getBullets();
-            int max = m_bulletPool->getMaxBullets();
+            const int max = m_bulletPool->getMaxBullets();
             int activeCount = 0;
             int playerCount = 0;
             int bossCount = 0;
@@ -147,49 +197,63 @@ void DebugUI::render()
                 }
             }
 
-            ImGui::Text("Active: %d / %d", activeCount, max);
-            ImGui::ProgressBar(static_cast<float>(activeCount) / max);
-            ImGui::Text("Player: %d  |  Boss: %d", playerCount, bossCount);
+            ImGui::Text("Active Bullets: %d / %d", activeCount, max);
+            ImGui::ProgressBar(max > 0 ? static_cast<float>(activeCount) / static_cast<float>(max) : 0.0f);
+            ImGui::Text("Player: %d", playerCount);
+            ImGui::SameLine();
+            ImGui::Text("Boss: %d", bossCount);
 
             if (activeCount >= max)
             {
-                ImGui::TextColored(ImVec4(1, 0, 0, 1), "POOL FULL!");
+                ImGui::Text("POOL FULL");
             }
         }
-    }
+        else
+        {
+            DrawUnavailable("Bullet pool");
+        }
 
-    // === ボス ===
-    if (ImGui::CollapsingHeader("Boss"))
-    {
         if (m_boss)
         {
+            ImGui::Spacing();
+            Vector3 pos = m_boss->getPosition();
+            ImGui::Text("Boss");
             ImGui::Text("Activated: %s", m_boss->isActivated() ? "YES" : "NO");
             ImGui::Text("Health: %.0f / %.0f (%.0f%%)",
                 m_boss->getHealth(), m_boss->getMaxHealth(),
                 m_boss->getHealthPercent() * 100.0f);
+            ImGui::ProgressBar(m_boss->getHealthPercent(), ImVec2(-1.0f, 0.0f));
             ImGui::Text("Dead: %s", m_boss->isDead() ? "YES" : "NO");
-            Vector3 pos = m_boss->getPosition();
             ImGui::Text("Position: %.1f, %.1f, %.1f", pos.x, pos.y, pos.z);
+        }
+
+        DrawSection("Audio");
+        if (m_audioManager)
+        {
+            if (ImGui::SliderFloat("Master Volume", m_audioManager->getMasterVolumePtr(), 0.0f, 1.0f))
+            {
+                m_audioManager->setMasterVolume(m_audioManager->getMasterVolume());
+            }
         }
         else
         {
-            ImGui::Text("No boss reference");
+            DrawUnavailable("Audio");
         }
-    }
 
-    // === ブルーム ===
-    if (m_bloom && ImGui::CollapsingHeader("Bloom", ImGuiTreeNodeFlags_DefaultOpen))
-    {
-        ImGui::Checkbox("Enable", m_bloom->getEnabledPtr());
-        ImGui::SliderFloat("Threshold", m_bloom->getThresholdPtr(), 0.0f, 5.0f);
-        ImGui::SliderFloat("Knee", m_bloom->getKneePtr(), 0.0f, 1.0f);
-        ImGui::SliderFloat("Intensity", m_bloom->getIntensityPtr(), 0.0f, 5.0f);
-        ImGui::SliderFloat("Exposure", m_bloom->getExposurePtr(), 0.0f, 3.0f);
+        if (m_beatTracker)
+        {
+            ImGui::Spacing();
+            ImGui::Text("Beat: %d", m_beatTracker->getBeat());
+            ImGui::ProgressBar(m_beatTracker->getBeatProgress(), ImVec2(-1.0f, 0.0f), "Beat progress");
+        }
+        else
+        {
+            ImGui::TextDisabled("No beat tracker in this scene");
+        }
     }
 
     ImGui::End();
 
-    // === 三分割ガイド ===
     if (m_showThirds)
     {
         ImDrawList* draw = ImGui::GetForegroundDrawList();
@@ -210,7 +274,6 @@ void DebugUI::render()
         draw->AddLine(ImVec2(0, y1), ImVec2(screen.x, y1), lineColor, thickness);
         draw->AddLine(ImVec2(0, y2), ImVec2(screen.x, y2), lineColor, thickness);
 
-        // パワーポイント（視線が自然に集まる4交点）
         float dotRadius = 4.0f;
         draw->AddCircleFilled(ImVec2(x1, y1), dotRadius, dotColor);
         draw->AddCircleFilled(ImVec2(x2, y1), dotRadius, dotColor);

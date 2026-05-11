@@ -169,6 +169,11 @@ void InputManager::setCursorVisible(bool visible)
     setMouseMode(visible ? Mouse::MODE_ABSOLUTE : Mouse::MODE_RELATIVE);
 }
 
+bool InputManager::isSystemCursorVisible() const
+{
+    return m_mouse ? m_mouse->IsVisible() : false;
+}
+
 // マウスモード切替
 void InputManager::setMouseMode(Mouse::Mode mode)
 {

@@ -131,6 +131,7 @@ void TrainingScene::initialize(SceneContext& context)
     m_gameUI->setDummies(&m_dummies);
     m_gameUI->setShowWaveIndicator(false);
 
+#ifdef _DEBUG
     m_debugUI = std::make_unique<DebugUI>();
     m_debugUI->setCamera(m_camera.get());
     m_debugUI->setLightCycle(m_player.get());
@@ -138,6 +139,7 @@ void TrainingScene::initialize(SceneContext& context)
     m_debugUI->setBulletPool(&m_bulletPool);
     m_debugUI->setBloom(m_renderer->GetBloom());
     m_debugUI->setAudioManager(m_audioManager.get());
+#endif
 }
 
 void TrainingScene::allocateDummies()
@@ -157,6 +159,12 @@ void TrainingScene::enter()
 {
     Scene::enter();
     EventBus::clear();
+    m_debugMode = false;
+    m_cursorVisibleBeforeDebug = false;
+    if (m_context && m_context->input)
+    {
+        m_context->input->setCursorVisible(false);
+    }
 
     m_gameUI->subscribeEvents();
 
@@ -306,17 +314,28 @@ void TrainingScene::update(float deltaTime, InputManager* input)
         return;
     }
 
-    if (input->isKeyPressed(Keyboard::Keys::Tab))
+    if (!m_debugMode && input->isKeyPressed(Keyboard::Keys::Tab))
     {
         input->setCursorVisible(!input->isCursorVisible());
     }
 
+#ifdef _DEBUG
     if (input->isKeyPressed(Keyboard::Keys::F3))
     {
         m_debugMode = !m_debugMode;
+        if (m_debugMode)
+        {
+            m_cursorVisibleBeforeDebug = input->isCursorVisible();
+            input->setCursorVisible(true);
+        }
+        else
+        {
+            input->setCursorVisible(m_cursorVisibleBeforeDebug);
+        }
     }
 
     m_debugUI->setInputManager(input);
+#endif
 
     // === ゲームプレイ系統（正準順: Player → Dummy → Combat → Camera）===
     PlayerInputState playerInput;
@@ -432,10 +451,12 @@ void TrainingScene::renderUI(const Matrix& view, const Matrix& proj)
 {
     m_gameUI->render(view, proj);
     renderTrainingPanel();
-    if (m_debugMode)
+#ifdef _DEBUG
+    if (m_debugMode && m_debugUI)
     {
         m_debugUI->render();
     }
+#endif
 }
 
 // === トレーニングパネル（常時表示） ===
@@ -446,7 +467,11 @@ void TrainingScene::renderTrainingPanel()
     ImGui::SetNextWindowSize(ImVec2(360.0f, 430.0f), ImGuiCond_FirstUseEver);
     ImGui::Begin("Training");
 
+#ifdef _DEBUG
     ImGui::Text("Esc: menu | Tab: cursor | F3: debug");
+#else
+    ImGui::Text("Esc: menu | Tab: cursor");
+#endif
     ImGui::Separator();
 
     if (ImGui::SliderInt("Dummy Count", &m_dummyCount, 1, MAX_DUMMIES))
