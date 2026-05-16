@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Gameplay/GameObject.h"
+#include "Common/Transform.h"
 #include "Gameplay/Combat/ICombatTarget.h"
 #include <DirectXCollision.h>
 #include <algorithm>
@@ -8,15 +8,15 @@
 class RenderCommandQueue;
 struct SceneContext;
 
-class Dummy : public GameObject, public ICombatTarget
+class Dummy : public ICombatTarget
 {
 public:
     explicit Dummy(SceneContext& context);
 
-    void initialize() override;
-    void update(float deltaTime) override;
+    void initialize();
+    void update(float deltaTime);
     void submitRender(RenderCommandQueue& queue) const;
-    void finalize() override;
+    void finalize();
 
     void spawn(const Vector3& startPos, DirectX::GeometricPrimitive* mesh = nullptr);
     void deactivate();
@@ -76,4 +76,8 @@ private:
     Color m_hitColor = Color(1.0f, 0.55f, 0.0f);
     Color m_color = m_originalColor;
     float m_hitFlashTimer = 0.0f;
+
+    // 旧 GameObject 由来
+    Transform m_transform;
+    bool m_active = true;
 };

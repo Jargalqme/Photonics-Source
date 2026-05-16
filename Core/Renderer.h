@@ -1,8 +1,7 @@
 #pragma once
 
 #include "DeviceResources.h"
-#include "Source/Render/ColorMaskEffect.h"
-#include "Source/Render/Bloom.h"
+#include "Source/Render/SceneRenderer.h"
 #include <memory>
 #include <string>
 #include <SpriteBatch.h>
@@ -33,8 +32,7 @@ public:
     // Helper to get device resources for other systems
     DX::DeviceResources* GetDeviceResources() { return m_deviceResources; }
 
-    ColorMaskEffect* GetColorMaskEffect() { return m_colorMaskEffect.get(); }
-    Bloom* GetBloom() { return m_bloom.get(); }
+    SceneRenderer* GetSceneRenderer() { return m_sceneRenderer.get(); }
 
     void BeginScene();
     void EndScene();
@@ -103,8 +101,7 @@ private:
     // Device resources (not owned by this class)
     DX::DeviceResources* m_deviceResources;
 
-    std::unique_ptr<ColorMaskEffect> m_colorMaskEffect;
-    std::unique_ptr<Bloom> m_bloom;
+    std::unique_ptr<SceneRenderer> m_sceneRenderer;
 
     Microsoft::WRL::ComPtr<ID3D11VertexShader> m_importedModelVS;
     Microsoft::WRL::ComPtr<ID3D11PixelShader> m_importedModelPS;

@@ -5,8 +5,8 @@
 #include "Gameplay/BulletPool.h"
 #include "Gameplay/Combat/CollisionSystem.h"
 #include "Gameplay/Combat/ShotIntent.h"
-#include "Gameplay/Events/EventBus.h"
-#include "Gameplay/Events/EventTypes.h"
+#include "Gameplay/EventBus.h"
+#include "Gameplay/EventTypes.h"
 
 void CombatSystem::update(
     float deltaTime,

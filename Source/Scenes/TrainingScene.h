@@ -13,8 +13,8 @@
 #include "Gameplay/Combat/ICombatTarget.h"
 
 // ゲームプレイ系統
-#include "Gameplay/Systems/CombatSystem.h"
-#include "Gameplay/Systems/PlayerSystem.h"
+#include "Gameplay/CombatSystem.h"
+#include "Gameplay/PlayerSystem.h"
 
 // VFX
 #include "Render/BulletRenderer.h"
@@ -72,8 +72,6 @@ private:
     static constexpr float DEATH_PARTICLE_SPREAD = 1.0f;
 
     // カメラシェイク
-    static constexpr float SHOOT_SHAKE_INTENSITY = 1.2f;
-    static constexpr float SHOOT_SHAKE_DURATION  = 0.1f;
     static constexpr float KILL_SHAKE_INTENSITY  = 0.15f;
     static constexpr float KILL_SHAKE_DURATION   = 0.2f;
 

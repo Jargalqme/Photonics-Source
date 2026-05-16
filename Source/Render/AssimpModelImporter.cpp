@@ -90,9 +90,43 @@ namespace
         return DirectX::SimpleMath::Vector2(value.x, value.y);
     }
 
+    DirectX::SimpleMath::Matrix ToMatrix(const aiMatrix4x4& value)
+    {
+        return DirectX::SimpleMath::Matrix(
+            value.a1, value.b1, value.c1, value.d1,
+            value.a2, value.b2, value.c2, value.d2,
+            value.a3, value.b3, value.c3, value.d3,
+            value.a4, value.b4, value.c4, value.d4);
+    }
+
     DirectX::SimpleMath::Color ToColor(const aiColor4D& value)
     {
         return DirectX::SimpleMath::Color(value.r, value.g, value.b, value.a);
+    }
+
+    bool IsViewmodelNodeName(const std::string& name)
+    {
+        return name.rfind("VM_", 0) == 0;
+    }
+
+    aiVector3D TransformOrigin(const aiMatrix4x4& transform)
+    {
+        return transform * aiVector3D(0.0f, 0.0f, 0.0f);
+    }
+
+    std::array<float, 3> ToArray3(const aiVector3D& value)
+    {
+        return { value.x, value.y, value.z };
+    }
+
+    std::string FormatVector3(const std::array<float, 3>& value)
+    {
+        std::ostringstream out;
+        out << "("
+            << value[0] << ", "
+            << value[1] << ", "
+            << value[2] << ")";
+        return out.str();
     }
 
     std::string FormatHint(const aiTexture& texture)
@@ -452,6 +486,16 @@ namespace
         }
 
         const aiMatrix4x4 nodeTransform = parentTransform * node->mTransformation;
+        const std::string nodeName = ToString(node->mName);
+        if (IsViewmodelNodeName(nodeName))
+        {
+            ImportedModelNode namedNode;
+            namedNode.name = nodeName;
+            namedNode.localTransform = ToMatrix(nodeTransform);
+            namedNode.position = ToVector3(TransformOrigin(nodeTransform));
+            namedNode.meshCount = node->mNumMeshes;
+            outData.namedNodes.push_back(std::move(namedNode));
+        }
 
         for (unsigned int i = 0; i < node->mNumMeshes; ++i)
         {
@@ -465,6 +509,33 @@ namespace
         for (unsigned int i = 0; i < node->mNumChildren; ++i)
         {
             TraverseModelNode(scene, node->mChildren[i], nodeTransform, outData);
+        }
+    }
+
+    void CollectNamedNodeReports(
+        const aiNode* node,
+        const aiMatrix4x4& parentTransform,
+        std::vector<AssimpNamedNodeReport>& outNodes)
+    {
+        if (!node)
+        {
+            return;
+        }
+
+        const aiMatrix4x4 nodeTransform = parentTransform * node->mTransformation;
+        const std::string nodeName = ToString(node->mName);
+        if (IsViewmodelNodeName(nodeName))
+        {
+            AssimpNamedNodeReport nodeReport;
+            nodeReport.name = nodeName;
+            nodeReport.position = ToArray3(TransformOrigin(nodeTransform));
+            nodeReport.meshCount = node->mNumMeshes;
+            outNodes.push_back(std::move(nodeReport));
+        }
+
+        for (unsigned int i = 0; i < node->mNumChildren; ++i)
+        {
+            CollectNamedNodeReports(node->mChildren[i], nodeTransform, outNodes);
         }
     }
 
@@ -492,10 +563,19 @@ namespace
         add("  meshes: " + std::to_string(report.meshCount));
         add("  materials: " + std::to_string(report.materialCount));
         add("  textures: " + std::to_string(report.textureCount));
+        add("  VM nodes: " + std::to_string(report.namedNodes.size()));
 
         if (!report.error.empty())
         {
             add("  warning: " + report.error);
+        }
+
+        for (size_t i = 0; i < report.namedNodes.size(); ++i)
+        {
+            const AssimpNamedNodeReport& node = report.namedNodes[i];
+            add("  VM node[" + std::to_string(i) + "] " + node.name);
+            add("    position: " + FormatVector3(node.position));
+            add("    meshes: " + std::to_string(node.meshCount));
         }
 
         for (size_t i = 0; i < report.meshes.size(); ++i)
@@ -556,6 +636,7 @@ AssimpModelReport AssimpModelImporter::Inspect(const std::filesystem::path& path
     report.meshCount = scene->mNumMeshes;
     report.materialCount = scene->mNumMaterials;
     report.textureCount = scene->mNumTextures;
+    CollectNamedNodeReports(scene->mRootNode, aiMatrix4x4(), report.namedNodes);
 
     if ((scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) != 0)
     {

@@ -102,14 +102,13 @@
     <ClInclude Include="Source\Common\Transform.h" />
     <ClInclude Include="Source\UI\DebugUI.h" />
     <ClInclude Include="Source\Gameplay\Player.h" />
+    <ClInclude Include="Source\Gameplay\PlayerViewmodel.h" />
     <ClInclude Include="Source\Gameplay\Boss.h" />
     <ClInclude Include="ThirdParty\FastNoiseLite.h" />
     <ClInclude Include="Source\Render\Grid.h" />
     <ClInclude Include="Source\Gameplay\Dummy.h" />
     <ClInclude Include="Source\Services\BeatTracker.h" />
     <ClInclude Include="Source\Gameplay\GameObject.h" />
-    <ClInclude Include="Source\Gameplay\Events\EventBus.h" />
-    <ClInclude Include="Source\Gameplay\Events\EventTypes.h" />
     <ClInclude Include="Source\Gameplay\PlayerInputState.h" />
     <ClInclude Include="Source\Common\StateMachine.h" />
     <ClInclude Include="Source\Common\Easing.h" />
@@ -132,14 +131,19 @@
     <ClInclude Include="Source\Render\RenderUtil.h" />
     <ClInclude Include="Source\Render\Tracers.h" />
     <ClInclude Include="Source\Gameplay\Combat\ShotIntent.h" />
-    <ClInclude Include="Source\Gameplay\Systems\CombatSystem.h" />
-    <ClInclude Include="Source\Gameplay\Systems\PlayerSystem.h" />
     <ClInclude Include="Source\Render\RenderCommand.h" />
     <ClInclude Include="Source\Render\RenderCommandQueue.h" />
     <ClInclude Include="Source\Gameplay\Combat\ICombatTarget.h" />
     <ClInclude Include="Source\Render\AssimpModelImporter.h" />
     <ClInclude Include="Source\Render\ImportedModel.h" />
     <ClInclude Include="Source\Render\ImportedModelCache.h" />
+    <ClInclude Include="Source\Render\LayoutLoader.h" />
+    <ClInclude Include="Source\Gameplay\CombatSystem.h" />
+    <ClInclude Include="Source\Gameplay\EventBus.h" />
+    <ClInclude Include="Source\Gameplay\EventTypes.h" />
+    <ClInclude Include="Source\Gameplay\PlayerSystem.h" />
+    <ClInclude Include="Source\Render\SceneCopyPass.h" />
+    <ClInclude Include="Source\Render\SceneRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Common\Camera.cpp" />
@@ -212,11 +216,11 @@
     </ClCompile>
     <ClCompile Include="Source\UI\DebugUI.cpp" />
     <ClCompile Include="Source\Gameplay\Player.cpp" />
+    <ClCompile Include="Source\Gameplay\PlayerViewmodel.cpp" />
     <ClCompile Include="Source\Gameplay\Boss.cpp" />
     <ClCompile Include="Source\Render\Grid.cpp" />
     <ClCompile Include="Source\Gameplay\Dummy.cpp" />
     <ClCompile Include="Source\Services\BeatTracker.cpp" />
-    <ClCompile Include="Source\Gameplay\Events\EventBus.cpp" />
     <ClCompile Include="Source\Gameplay\Bullet.cpp" />
     <ClCompile Include="Source\Gameplay\BulletPool.cpp" />
     <ClCompile Include="Source\Render\ParticleSystem.cpp" />
@@ -233,12 +237,16 @@
     <ClCompile Include="Source\Render\MeshCache.cpp" />
     <ClCompile Include="Source\Render\RenderUtil.cpp" />
     <ClCompile Include="Source\Render\Tracers.cpp" />
-    <ClCompile Include="Source\Gameplay\Systems\CombatSystem.cpp" />
-    <ClCompile Include="Source\Gameplay\Systems\PlayerSystem.cpp" />
     <ClCompile Include="Source\Render\RenderCommandQueue.cpp" />
     <ClCompile Include="Source\Render\AssimpModelImporter.cpp" />
     <ClCompile Include="Source\Render\ImportedModel.cpp" />
     <ClCompile Include="Source\Render\ImportedModelCache.cpp" />
+    <ClCompile Include="Source\Render\LayoutLoader.cpp" />
+    <ClCompile Include="Source\Gameplay\CombatSystem.cpp" />
+    <ClCompile Include="Source\Gameplay\EventBus.cpp" />
+    <ClCompile Include="Source\Gameplay\PlayerSystem.cpp" />
+    <ClCompile Include="Source\Render\SceneCopyPass.cpp" />
+    <ClCompile Include="Source\Render\SceneRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
@@ -317,6 +325,7 @@
     <FxCompile Include="Shaders\BillboardPS.hlsl" />
     <FxCompile Include="Shaders\WaveWorldVS.hlsl" />
     <FxCompile Include="Shaders\WaveWorldPS.hlsl" />
+    <FxCompile Include="Shaders\PS_SceneCopy.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Common.hlsli" />

@@ -3,113 +3,188 @@
 
 using namespace DirectX::SimpleMath;
 
-
-
-void WeaponAnimator::update(float dt)
+namespace
 {
-	WeaponOffset recoil   = computeRecoil(dt);
-	WeaponOffset aimPunch = computeAimPunch(dt);
-	WeaponOffset bob      = computeBob(dt);
-	WeaponOffset sway     = computeSway(dt);
-	WeaponOffset land     = computeLanding(dt);
+    float clamp01(float value)
+    {
+        return std::clamp(value, 0.0f, 1.0f);
+    }
 
-	m_composed.pos    = recoil.pos    + aimPunch.pos    + bob.pos    + sway.pos    + land.pos;
-	m_composed.rotDeg = recoil.rotDeg + aimPunch.rotDeg + bob.rotDeg + sway.rotDeg + land.rotDeg;
+    float normalizedLerpStep(float speed, float deltaTime)
+    {
+        return clamp01(speed * std::max(deltaTime, 0.0f));
+    }
+
+    float lerpFloat(float from, float to, float amount)
+    {
+        return from + (to - from) * amount;
+    }
+
+    Vector3 lerpVector(const Vector3& from, const Vector3& to, float amount)
+    {
+        return from + (to - from) * amount;
+    }
+
+    void addLayer(WeaponAnimationOutput& total, const WeaponAnimationOutput& layer)
+    {
+        total.position += layer.position;
+        total.rotationDegrees += layer.rotationDegrees;
+    }
 }
 
-
-
-void WeaponAnimator::onFire()
+void WeaponAnimator::update(const WeaponAnimationInput& input)
 {
-	m_recoilZ.kick(m_tuning.recoilImpulseZ);
-	m_aimPitch.kick(m_tuning.aimPunchImpulseDeg);
+    const float deltaTime = std::max(input.deltaTime, 0.0f);
+
+    updateAds(deltaTime, input.isAiming);
+
+    m_composed = {};
+    addLayer(m_composed, computeBasePose());
+
+    if (m_tuning.enableSway)
+    {
+        addLayer(m_composed, computeSway(input.lookDeltaDegrees, deltaTime));
+    }
+    else
+    {
+        m_swayPosition = {};
+        m_swayRotationDegrees = {};
+    }
+
+    if (m_tuning.enableBob)
+    {
+        addLayer(m_composed, computeBob(input.moveSpeed01, input.isGrounded, deltaTime));
+    }
+    else
+    {
+        m_bobAmount = 0.0f;
+    }
+
+    if (m_tuning.enableRecoil)
+    {
+        addLayer(m_composed, computeRecoil(deltaTime));
+    }
+    else
+    {
+        m_recoilPosition = {};
+        m_recoilRotationDegrees = {};
+    }
 }
 
+void WeaponAnimator::onWeaponFired()
+{
+    if (!m_tuning.enableRecoil)
+    {
+        return;
+    }
 
+    // Recoil is visual-only. The weapon moves back and pitches up, but gameplay
+    // hits still use the camera ray owned by PlayerSystem.
+    m_recoilPosition.z = std::clamp(
+        m_recoilPosition.z - m_tuning.recoilKickback,
+        -m_tuning.recoilMaxKickback,
+        0.0f);
+
+    m_recoilRotationDegrees.x = std::clamp(
+        m_recoilRotationDegrees.x - m_tuning.recoilPitchDegrees,
+        -m_tuning.recoilMaxPitchDegrees,
+        m_tuning.recoilMaxPitchDegrees);
+}
 
 void WeaponAnimator::reset()
 {
-	m_recoilZ.reset();
-	m_aimPitch.reset();
-	m_bobPhase  = 0.0f;
-	m_bobAmount = 0.0f;
-	m_swayX.reset();
-	m_swayY.reset();
-	m_landY.reset();
-	m_landPitch.reset();
-	m_composed = {};
+    m_adsAlpha = 0.0f;
+    m_swayPosition = {};
+    m_swayRotationDegrees = {};
+    m_bobPhase = 0.0f;
+    m_bobAmount = 0.0f;
+    m_recoilPosition = {};
+    m_recoilRotationDegrees = {};
+    m_composed = {};
 }
 
-
-
-void WeaponAnimator::onLand(float fallSpeed)
+void WeaponAnimator::updateAds(float deltaTime, bool isAiming)
 {
-	if (fallSpeed < m_landMinSpeed) return;                // 小さな跳ねは無視
-	fallSpeed = std::min(fallSpeed, m_landMaxSpeed);
-	m_landY.kick(-fallSpeed * m_tuning.landGainY);         // 武器を下へ沈める
-	m_landPitch.kick(fallSpeed * m_tuning.landGainPitch);  // 視点を下へ
+    const float target = (m_tuning.enableAds && isAiming) ? 1.0f : 0.0f;
+    const float step = normalizedLerpStep(m_tuning.adsBlendSpeed, deltaTime);
+    m_adsAlpha = lerpFloat(m_adsAlpha, target, step);
 }
 
-
-
-void WeaponAnimator::addLookDelta(float yawDeg, float pitchDeg)
+WeaponAnimationOutput WeaponAnimator::computeBasePose() const
 {
-	yawDeg   = std::clamp(yawDeg,   -m_swayMaxKick, m_swayMaxKick);
-	pitchDeg = std::clamp(pitchDeg, -m_swayMaxKick, m_swayMaxKick);
-	m_swayX.kick(-yawDeg   * m_tuning.swayGain);   // 視点が右なら武器は左へ遅れる
-	m_swayY.kick(-pitchDeg * m_tuning.swayGain);
+    // The base pose is the weapon's rest position. ADS is just a readable blend
+    // between the hip pose and the aimed pose; no procedural layer should know
+    // where those authored poses live.
+    WeaponAnimationOutput output;
+    output.position = lerpVector(m_tuning.hipPosition, m_tuning.adsPosition, m_adsAlpha);
+    output.rotationDegrees = lerpVector(
+        m_tuning.hipRotationDegrees,
+        m_tuning.adsRotationDegrees,
+        m_adsAlpha);
+    return output;
 }
 
-
-
-WeaponOffset WeaponAnimator::computeRecoil(float dt)
+WeaponAnimationOutput WeaponAnimator::computeSway(const Vector2& lookDeltaDegrees, float deltaTime)
 {
-	m_recoilZ.update(0.0f, dt);
-	return { Vector3(0.0f, 0.0f, m_recoilZ.x), Vector3::Zero };
+    const float maxLookDelta = std::max(m_tuning.swayMaxLookDeltaDegrees, 0.0f);
+    const float yawDelta = std::clamp(lookDeltaDegrees.x, -maxLookDelta, maxLookDelta);
+    const float pitchDelta = std::clamp(lookDeltaDegrees.y, -maxLookDelta, maxLookDelta);
+
+    // Sway is weapon lag. When the camera turns right, the weapon trails left.
+    // The target is small and directly proportional to this frame's look delta.
+    const Vector3 targetPosition(
+        -yawDelta * m_tuning.swayPositionAmount,
+        -pitchDelta * m_tuning.swayPositionAmount,
+        0.0f);
+
+    const Vector3 targetRotationDegrees(
+        -pitchDelta * m_tuning.swayRotationAmountDegrees,
+        -yawDelta * m_tuning.swayRotationAmountDegrees,
+        0.0f);
+
+    const float step = normalizedLerpStep(m_tuning.swayReturnSpeed, deltaTime);
+    m_swayPosition = lerpVector(m_swayPosition, targetPosition, step);
+    m_swayRotationDegrees = lerpVector(m_swayRotationDegrees, targetRotationDegrees, step);
+
+    return { m_swayPosition, m_swayRotationDegrees };
 }
 
-
-
-WeaponOffset WeaponAnimator::computeAimPunch(float dt)
+WeaponAnimationOutput WeaponAnimator::computeBob(float moveSpeed01, bool isGrounded, float deltaTime)
 {
-	m_aimPitch.update(0.0f, dt);
-	return { Vector3::Zero, Vector3(m_aimPitch.x, 0.0f, 0.0f) };
+    const float speed01 = clamp01(moveSpeed01);
+    const float targetAmount = (isGrounded && speed01 > 0.0f) ? speed01 : 0.0f;
+
+    // Bob fades in and out instead of popping when movement starts/stops.
+    const float blendStep = normalizedLerpStep(m_tuning.bobBlendSpeed, deltaTime);
+    m_bobAmount = lerpFloat(m_bobAmount, targetAmount, blendStep);
+
+    // Phase only advances from movement speed, so an idle weapon settles instead
+    // of crawling through the walk cycle while standing still.
+    m_bobPhase += m_tuning.bobSpeed * speed01 * deltaTime;
+
+    const float horizontal = std::sin(m_bobPhase);
+    const float vertical = std::sin(m_bobPhase * 2.0f);
+
+    WeaponAnimationOutput output;
+    output.position = Vector3(
+        horizontal * m_tuning.bobHorizontalAmount * m_bobAmount,
+        vertical * m_tuning.bobVerticalAmount * m_bobAmount,
+        0.0f);
+    output.rotationDegrees = Vector3(
+        0.0f,
+        0.0f,
+        horizontal * m_tuning.bobRollDegrees * m_bobAmount);
+    return output;
 }
 
-
-
-WeaponOffset WeaponAnimator::computeBob(float dt)
+WeaponAnimationOutput WeaponAnimator::computeRecoil(float deltaTime)
 {
-	constexpr float kMaxSpeed = 15.0f;   // Player::m_speed と一致
+    // Simple recovery: each frame pulls the current recoil offset back to zero.
+    // This is intentionally not a physical spring; the baseline needs obvious,
+    // predictable behavior before we add more nuance.
+    const float step = normalizedLerpStep(m_tuning.recoilReturnSpeed, deltaTime);
+    m_recoilPosition = lerpVector(m_recoilPosition, Vector3::Zero, step);
+    m_recoilRotationDegrees = lerpVector(m_recoilRotationDegrees, Vector3::Zero, step);
 
-	// 移動・接地時のみアクティブ
-	float speedN = std::clamp(m_game.moveSpeed / kMaxSpeed, 0.0f, 1.0f);
-	float target = (m_game.grounded && speedN > 0.05f) ? speedN : 0.0f;
-	m_bobAmount += (target - m_bobAmount) * std::min(1.0f, m_bobFalloff * dt);
-
-	// フェーズは実効速度でのみ進める（停止中は凍結）
-	m_bobPhase += m_tuning.bobFrequency * speedN * dt;
-
-	float x = std::sin(m_bobPhase)        * m_tuning.bobAmplitudeX * m_bobAmount;
-	float y = std::cos(m_bobPhase * 2.0f) * m_tuning.bobAmplitudeY * m_bobAmount;
-
-	return { Vector3(x, y, 0.0f), Vector3::Zero };
-}
-
-
-
-WeaponOffset WeaponAnimator::computeSway(float dt)
-{
-	m_swayX.update(0.0f, dt);
-	m_swayY.update(0.0f, dt);
-	return { Vector3(m_swayX.x, m_swayY.x, 0.0f), Vector3::Zero };
-}
-
-
-
-WeaponOffset WeaponAnimator::computeLanding(float dt)
-{
-	m_landY.update(0.0f, dt);
-	m_landPitch.update(0.0f, dt);
-	return { Vector3(0.0f, m_landY.x, 0.0f), Vector3(m_landPitch.x, 0.0f, 0.0f) };
+    return { m_recoilPosition, m_recoilRotationDegrees };
 }

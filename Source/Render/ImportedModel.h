@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <string>
+#include <string_view>
 #include <vector>
 
 inline constexpr int32_t IMPORTED_TEXTURE_NONE = -1;
@@ -46,6 +47,14 @@ struct ImportedTextureData
     bool srgb = false;
 };
 
+struct ImportedModelNode
+{
+    std::string name;
+    DirectX::SimpleMath::Matrix localTransform = DirectX::SimpleMath::Matrix::Identity;
+    DirectX::SimpleMath::Vector3 position = DirectX::SimpleMath::Vector3::Zero;
+    uint32_t meshCount = 0;
+};
+
 struct ImportedModelData
 {
     std::filesystem::path sourcePath;
@@ -54,6 +63,7 @@ struct ImportedModelData
     std::vector<ImportedSubmesh> submeshes;
     std::vector<ImportedMaterial> materials;
     std::vector<ImportedTextureData> textures;
+    std::vector<ImportedModelNode> namedNodes;
 };
 
 class ImportedModel
@@ -66,6 +76,8 @@ public:
     const std::vector<ImportedSubmesh>& submeshes() const { return m_data.submeshes; }
     const std::vector<ImportedMaterial>& materials() const { return m_data.materials; }
     const std::vector<ImportedTextureData>& textures() const { return m_data.textures; }
+    const std::vector<ImportedModelNode>& namedNodes() const { return m_data.namedNodes; }
+    const ImportedModelNode* findNamedNode(std::string_view name) const;
 
     ID3D11Buffer* vertexBuffer() const { return m_vertexBuffer.Get(); }
     ID3D11Buffer* indexBuffer() const { return m_indexBuffer.Get(); }

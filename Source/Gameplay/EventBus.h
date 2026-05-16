@@ -3,7 +3,7 @@
 //=============================================================================
 #pragma once
 
-#include "Gameplay/Events/EventTypes.h"
+#include "Gameplay/EventTypes.h"
 
 #include <functional>
 #include <type_traits>

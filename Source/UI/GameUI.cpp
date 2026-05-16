@@ -4,8 +4,8 @@
 #include "Gameplay/Player.h"
 #include "Gameplay/Dummy.h"
 #include "Gameplay/Boss.h"
-#include "Gameplay/Events/EventBus.h"
-#include "Gameplay/Events/EventTypes.h"
+#include "Gameplay/EventBus.h"
+#include "Gameplay/EventTypes.h"
 #include <imgui.h>
 
 GameUI::GameUI()

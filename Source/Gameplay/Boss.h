@@ -3,7 +3,7 @@
 #include "Gameplay/BossAttackManager.h"
 #include "Gameplay/Combat/ICombatTarget.h"
 #include "Common/StateMachine.h"
-#include "Gameplay/GameObject.h"
+#include "Common/Transform.h"
 #include "Render/Billboard.h"
 
 class BulletPool;
@@ -17,16 +17,16 @@ enum class BossPhase
     phase1, phase2, phase3
 };
 
-class Boss : public GameObject, public ICombatTarget
+class Boss : public ICombatTarget
 {
 public:
     Boss(SceneContext& context);
 
     // --- ライフサイクル ---
-    void initialize() override;
-    void update(float deltaTime) override;
+    void initialize();
+    void update(float deltaTime);
     void submitRender(RenderCommandQueue& queue) const;
-    void finalize() override;
+    void finalize();
 
     // --- アクティベーション ---
     void activate();
@@ -139,4 +139,8 @@ private:
     Camera* m_camera = nullptr;
     const Vector3* m_playerTarget = nullptr;
     BulletPool* m_bulletPool = nullptr;
+
+    // 旧 GameObject 由来
+    Transform m_transform;
+    bool m_active = true;
 };

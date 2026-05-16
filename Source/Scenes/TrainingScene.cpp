@@ -3,9 +3,11 @@
 #include "Common/Camera.h"
 #include "DeviceResources.h"
 #include "Gameplay/Combat/ShotIntent.h"
-#include "Gameplay/Events/EventBus.h"
-#include "Gameplay/Events/EventTypes.h"
+#include "Gameplay/EventBus.h"
+#include "Gameplay/EventTypes.h"
 #include "Renderer.h"
+#include "Render/Bloom.h"
+#include "Render/SceneRenderer.h"
 #include "Services/InputManager.h"
 #include "Render/ImportedModelCache.h"
 #include <imgui.h>
@@ -100,8 +102,6 @@ void TrainingScene::initialize(SceneContext& context)
     // プレイヤー
     m_player = std::make_unique<Player>(*m_context);
     m_player->initialize();
-    m_camera->setViewmodel(m_player->getViewmodel());
-    m_player->getWeapon()->setDependencies(m_player->getViewmodel());
 
     m_audioManager = std::make_unique<AudioManager>();
     m_audioManager->initialize();
@@ -137,7 +137,7 @@ void TrainingScene::initialize(SceneContext& context)
     m_debugUI->setLightCycle(m_player.get());
     m_debugUI->setGrid(m_grid.get());
     m_debugUI->setBulletPool(&m_bulletPool);
-    m_debugUI->setBloom(m_renderer->GetBloom());
+    m_debugUI->setBloom(m_renderer->GetSceneRenderer()->getBloom());
     m_debugUI->setAudioManager(m_audioManager.get());
 #endif
 }
@@ -175,9 +175,8 @@ void TrainingScene::enter()
             IMPACT_PARTICLE_LIFE, IMPACT_PARTICLE_SPREAD);
     });
 
-    // 射撃 → カメラシェイク
+    // Weapon shot audio.
     EventBus::subscribe<WeaponShotEvent>([this](const WeaponShotEvent&) {
-        m_camera->triggerShake(SHOOT_SHAKE_INTENSITY, SHOOT_SHAKE_DURATION);
         m_audioManager->playRandomSound(RIFLE_FIRE_GROUP, RIFLE_FIRE_VOLUME, RIFLE_FIRE_PITCH_JITTER);
     });
 
@@ -214,18 +213,8 @@ void TrainingScene::enter()
         m_combatTargets.push_back(dummy.get());
     }
 
-    // カラーマスクリセット
-    if (m_renderer)
-    {
-        ColorMaskEffect* colorMask = m_renderer->GetColorMaskEffect();
-        if (colorMask)
-        {
-            colorMask->resetMask();
-        }
-    }
-
     // ブルーム有効化（exit() で disable されるため毎エントリで再有効化）
-    m_renderer->GetBloom()->setEnabled(true);
+    m_renderer->GetSceneRenderer()->getBloom()->setEnabled(true);
 }
 
 void TrainingScene::exit()
@@ -235,12 +224,7 @@ void TrainingScene::exit()
 
     if (m_renderer)
     {
-        ColorMaskEffect* colorMask = m_renderer->GetColorMaskEffect();
-        if (colorMask)
-        {
-            colorMask->resetMask();
-        }
-        m_renderer->GetBloom()->setEnabled(false);
+        m_renderer->GetSceneRenderer()->getBloom()->setEnabled(false);
     }
 }
 

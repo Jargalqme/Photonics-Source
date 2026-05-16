@@ -113,29 +113,41 @@ void DebugUI::render()
         DrawSection("Weapon");
         if (m_player)
         {
-            WeaponTuning* t = m_player->getViewmodel()->getTuningPtr();
+            WeaponAnimationTuning* t = m_player->getViewmodel()->getTuningPtr();
 
-            ImGui::Text("Recoil");
-            ImGui::SliderFloat("Recoil Impulse Z", &t->recoilImpulseZ, -20.0f, 0.0f);
-            ImGui::Spacing();
-
-            ImGui::Text("Aim Punch");
-            ImGui::SliderFloat("Aim Punch Impulse", &t->aimPunchImpulseDeg, -20.0f, 0.0f);
-            ImGui::Spacing();
-
-            ImGui::Text("Bob");
-            ImGui::SliderFloat("Bob Frequency", &t->bobFrequency, 0.0f, 20.0f);
-            ImGui::SliderFloat("Bob Amplitude X", &t->bobAmplitudeX, 0.0f, 0.1f);
-            ImGui::SliderFloat("Bob Amplitude Y", &t->bobAmplitudeY, 0.0f, 0.1f);
+            ImGui::Text("ADS");
+            ImGui::Checkbox("ADS Enabled", &t->enableAds);
+            ImGui::SliderFloat3("Hip Position", &t->hipPosition.x, -1.0f, 1.0f);
+            ImGui::SliderFloat3("Hip Rotation", &t->hipRotationDegrees.x, -30.0f, 30.0f);
+            ImGui::SliderFloat3("ADS Position", &t->adsPosition.x, -1.0f, 1.0f);
+            ImGui::SliderFloat3("ADS Rotation", &t->adsRotationDegrees.x, -30.0f, 30.0f);
+            ImGui::SliderFloat("ADS Blend Speed", &t->adsBlendSpeed, 0.0f, 30.0f);
             ImGui::Spacing();
 
             ImGui::Text("Sway");
-            ImGui::SliderFloat("Sway Gain", &t->swayGain, 0.0f, 0.02f);
+            ImGui::Checkbox("Sway Enabled", &t->enableSway);
+            ImGui::SliderFloat("Sway Max Look Delta", &t->swayMaxLookDeltaDegrees, 0.0f, 60.0f);
+            ImGui::SliderFloat("Sway Position Amount", &t->swayPositionAmount, 0.0f, 0.02f);
+            ImGui::SliderFloat("Sway Rotation Amount", &t->swayRotationAmountDegrees, 0.0f, 1.0f);
+            ImGui::SliderFloat("Sway Return Speed", &t->swayReturnSpeed, 0.0f, 30.0f);
             ImGui::Spacing();
 
-            ImGui::Text("Landing");
-            ImGui::SliderFloat("Land Gain Y", &t->landGainY, 0.0f, 0.1f);
-            ImGui::SliderFloat("Land Gain Pitch", &t->landGainPitch, 0.0f, 10.0f);
+            ImGui::Text("Movement Bob");
+            ImGui::Checkbox("Bob Enabled", &t->enableBob);
+            ImGui::SliderFloat("Bob Speed", &t->bobSpeed, 0.0f, 20.0f);
+            ImGui::SliderFloat("Bob Horizontal Amount", &t->bobHorizontalAmount, 0.0f, 0.1f);
+            ImGui::SliderFloat("Bob Vertical Amount", &t->bobVerticalAmount, 0.0f, 0.1f);
+            ImGui::SliderFloat("Bob Roll", &t->bobRollDegrees, 0.0f, 5.0f);
+            ImGui::SliderFloat("Bob Blend Speed", &t->bobBlendSpeed, 0.0f, 30.0f);
+            ImGui::Spacing();
+
+            ImGui::Text("Recoil");
+            ImGui::Checkbox("Recoil Enabled", &t->enableRecoil);
+            ImGui::SliderFloat("Recoil Kickback", &t->recoilKickback, 0.0f, 0.3f);
+            ImGui::SliderFloat("Recoil Pitch", &t->recoilPitchDegrees, 0.0f, 20.0f);
+            ImGui::SliderFloat("Recoil Return Speed", &t->recoilReturnSpeed, 0.0f, 40.0f);
+            ImGui::SliderFloat("Recoil Max Kickback", &t->recoilMaxKickback, 0.0f, 0.5f);
+            ImGui::SliderFloat("Recoil Max Pitch", &t->recoilMaxPitchDegrees, 0.0f, 30.0f);
         }
         else
         {

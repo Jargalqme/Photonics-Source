@@ -173,3 +173,16 @@ ID3D11ShaderResourceView* ImportedModel::textureSRV(int32_t textureIndex) const
 
     return m_textureSRVs[textureIndex].Get();
 }
+
+const ImportedModelNode* ImportedModel::findNamedNode(std::string_view name) const
+{
+    for (const ImportedModelNode& node : m_data.namedNodes)
+    {
+        if (node.name == name)
+        {
+            return &node;
+        }
+    }
+
+    return nullptr;
+}

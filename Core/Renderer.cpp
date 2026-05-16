@@ -82,10 +82,9 @@ namespace
 }
 
 Renderer::Renderer(DX::DeviceResources* deviceResources)
-	: m_deviceResources(deviceResources)
+    : m_deviceResources(deviceResources)
+    , m_sceneRenderer(std::make_unique<SceneRenderer>(deviceResources))
 {
-	m_colorMaskEffect = std::make_unique<ColorMaskEffect>(deviceResources);
-    m_bloom = std::make_unique<Bloom>(deviceResources);
 }
 
 void Renderer::Clear()
@@ -115,20 +114,17 @@ void Renderer::Clear()
 
 void Renderer::CreateDeviceDependentResources()
 {
-	m_colorMaskEffect->createDeviceDependentResources();
-    m_bloom->createDeviceDependentResources();
+    m_sceneRenderer->createDeviceDependentResources();
     CreateImportedModelResources();
-	CreateUIResources();
+    CreateUIResources();
 }
 
 void Renderer::CreateWindowSizeDependentResources()
 {
-    m_colorMaskEffect->createWindowSizeDependentResources();
-
     // シーン HDR テクスチャ + ブルームはレンダー解像度ベース
     int renderW = GetRenderWidth();
     int renderH = GetRenderHeight();
-    m_bloom->createWindowSizeDependentResources(renderW, renderH);
+    m_sceneRenderer->createWindowSizeDependentResources(renderW, renderH);
 
     auto device = m_deviceResources->GetD3DDevice();
     UINT width = static_cast<UINT>(renderW);
@@ -207,23 +203,14 @@ int Renderer::GetRenderHeight() const
 
 void Renderer::ApplyPostProcess()
 {
-    auto backbuffer = m_deviceResources->GetRenderTargetView();
-
-    if (m_bloom->isEnabled())
-    {
-        m_bloom->render(m_sceneSRV.Get());
-        m_colorMaskEffect->process(m_bloom->getOutputSRV(), backbuffer);
-    }
-    else
-    {
-        m_colorMaskEffect->process(m_sceneSRV.Get(), backbuffer);
-    }
+    m_sceneRenderer->renderPostProcess(
+        m_sceneSRV.Get(),
+        m_deviceResources->GetRenderTargetView());
 }
 
 void Renderer::OnDeviceLost()
 {
-    m_colorMaskEffect->finalize();
-    m_bloom->finalize();
+    m_sceneRenderer->onDeviceLost();
     m_sceneTexture.Reset();
     m_sceneRTV.Reset();
     m_sceneSRV.Reset();
@@ -286,7 +273,7 @@ void Renderer::EndScene()
     ID3D11RenderTargetView* nullRTV = nullptr;
     context->OMSetRenderTargets(1, &nullRTV, nullptr);
 
-    // Copy to backbuffer via ColorMask
+    // Hand the HDR scene to SceneRenderer for post-process + backbuffer copy.
     ApplyPostProcess();
 }
 

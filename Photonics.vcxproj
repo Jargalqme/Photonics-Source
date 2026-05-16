@@ -204,9 +204,15 @@ xcopy /Y /D "$(ProjectDir)ThirdParty\Assimp\bin\x64\Release\*.dll" "$(TargetDir)
     <ClInclude Include="ImGui\imstb_rectpack.h" />
     <ClInclude Include="ImGui\imstb_textedit.h" />
     <ClInclude Include="ImGui\imstb_truetype.h" />
+    <ClInclude Include="Source\Gameplay\CombatSystem.h" />
     <ClInclude Include="Source\Gameplay\Combat\ICombatTarget.h" />
+    <ClInclude Include="Source\Gameplay\EventBus.h" />
+    <ClInclude Include="Source\Gameplay\EventTypes.h" />
+    <ClInclude Include="Source\Gameplay\PlayerSystem.h" />
     <ClInclude Include="Source\Render\ArenaFloor.h" />
     <ClInclude Include="Source\Render\AssimpModelImporter.h" />
+    <ClInclude Include="Source\Render\SceneCopyPass.h" />
+    <ClInclude Include="Source\Render\SceneRenderer.h" />
     <ClInclude Include="Source\Services\AudioManager.h" />
     <ClInclude Include="Source\Render\Billboard.h" />
     <ClInclude Include="Source\Render\Bloom.h" />
@@ -222,16 +228,16 @@ xcopy /Y /D "$(ProjectDir)ThirdParty\Assimp\bin\x64\Release\*.dll" "$(TargetDir)
     <ClInclude Include="Source\Common\Easing.h" />
     <ClInclude Include="Source\Gameplay\Dummy.h" />
     <ClInclude Include="Source\Gameplay\Boss.h" />
-    <ClInclude Include="Source\Gameplay\Events\EventBus.h" />
     <ClInclude Include="Source\Gameplay\GameObject.h" />
     <ClInclude Include="Source\Scenes\GameOverScene.h" />
     <ClInclude Include="Source\Scenes\BossScene.h" />
     <ClInclude Include="Source\UI\GameUI.h" />
-    <ClInclude Include="Source\Gameplay\Events\EventTypes.h" />
     <ClInclude Include="Source\Gameplay\PlayerInputState.h" />
+    <ClInclude Include="Source\Gameplay\PlayerViewmodel.h" />
     <ClInclude Include="Source\Render\Grid.h" />
     <ClInclude Include="Source\Render\ImportedModel.h" />
     <ClInclude Include="Source\Render\ImportedModelCache.h" />
+    <ClInclude Include="Source\Render\LayoutLoader.h" />
     <ClInclude Include="Source\Services\InputManager.h" />
     <ClInclude Include="Source\Scenes\IntroScene.h" />
     <ClInclude Include="Source\Scenes\MainMenuScene.h" />
@@ -239,8 +245,6 @@ xcopy /Y /D "$(ProjectDir)ThirdParty\Assimp\bin\x64\Release\*.dll" "$(TargetDir)
     <ClInclude Include="Source\Render\ParticleSystem.h" />
     <ClInclude Include="Source\Gameplay\Player.h" />
     <ClInclude Include="Source\Gameplay\Combat\ShotIntent.h" />
-    <ClInclude Include="Source\Gameplay\Systems\CombatSystem.h" />
-    <ClInclude Include="Source\Gameplay\Systems\PlayerSystem.h" />
     <ClInclude Include="Source\Render\MeshCache.h" />
     <ClInclude Include="Source\Render\RenderCommand.h" />
     <ClInclude Include="Source\Render\RenderCommandQueue.h" />
@@ -298,8 +302,13 @@ xcopy /Y /D "$(ProjectDir)ThirdParty\Assimp\bin\x64\Release\*.dll" "$(TargetDir)
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Source\Gameplay\CombatSystem.cpp" />
+    <ClCompile Include="Source\Gameplay\EventBus.cpp" />
+    <ClCompile Include="Source\Gameplay\PlayerSystem.cpp" />
     <ClCompile Include="Source\Render\ArenaFloor.cpp" />
     <ClCompile Include="Source\Render\AssimpModelImporter.cpp" />
+    <ClCompile Include="Source\Render\SceneCopyPass.cpp" />
+    <ClCompile Include="Source\Render\SceneRenderer.cpp" />
     <ClCompile Include="Source\Services\AudioManager.cpp" />
     <ClCompile Include="Source\Render\Billboard.cpp" />
     <ClCompile Include="Source\Render\Bloom.cpp" />
@@ -316,21 +325,20 @@ xcopy /Y /D "$(ProjectDir)ThirdParty\Assimp\bin\x64\Release\*.dll" "$(TargetDir)
     </ClCompile>
     <ClCompile Include="Source\Gameplay\Dummy.cpp" />
     <ClCompile Include="Source\Gameplay\Boss.cpp" />
-    <ClCompile Include="Source\Gameplay\Events\EventBus.cpp" />
     <ClCompile Include="Source\Scenes\GameOverScene.cpp" />
     <ClCompile Include="Source\Scenes\BossScene.cpp" />
     <ClCompile Include="Source\UI\GameUI.cpp" />
     <ClCompile Include="Source\Render\Grid.cpp" />
     <ClCompile Include="Source\Render\ImportedModel.cpp" />
     <ClCompile Include="Source\Render\ImportedModelCache.cpp" />
+    <ClCompile Include="Source\Render\LayoutLoader.cpp" />
     <ClCompile Include="Source\Services\InputManager.cpp" />
     <ClCompile Include="Source\Scenes\IntroScene.cpp" />
     <ClCompile Include="Source\Scenes\MainMenuScene.cpp" />
     <ClCompile Include="Source\Scenes\MenuBackground.cpp" />
     <ClCompile Include="Source\Render\ParticleSystem.cpp" />
     <ClCompile Include="Source\Gameplay\Player.cpp" />
-    <ClCompile Include="Source\Gameplay\Systems\CombatSystem.cpp" />
-    <ClCompile Include="Source\Gameplay\Systems\PlayerSystem.cpp" />
+    <ClCompile Include="Source\Gameplay\PlayerViewmodel.cpp" />
     <ClCompile Include="Source\Render\MeshCache.cpp" />
     <ClCompile Include="Source\Render\RenderCommandQueue.cpp" />
     <ClCompile Include="Source\Render\RenderUtil.cpp" />
@@ -386,6 +394,16 @@ xcopy /Y /D "$(ProjectDir)ThirdParty\Assimp\bin\x64\Release\*.dll" "$(TargetDir)
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)%(RelativeDir)%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)%(RelativeDir)%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shaders\PS_SceneCopy.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)%(RelativeDir)%(Filename).cso</ObjectFileOutput>

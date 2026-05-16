@@ -27,6 +27,13 @@ struct AssimpMaterialReport
     std::string diffuseTexture;
 };
 
+struct AssimpNamedNodeReport
+{
+    std::string name;
+    std::array<float, 3> position = { 0.0f, 0.0f, 0.0f };
+    uint32_t meshCount = 0;
+};
+
 struct AssimpModelReport
 {
     bool loaded = false;
@@ -39,6 +46,7 @@ struct AssimpModelReport
     uint32_t textureCount = 0;
     std::vector<AssimpMeshReport> meshes;
     std::vector<AssimpMaterialReport> materials;
+    std::vector<AssimpNamedNodeReport> namedNodes;
 };
 
 class AssimpModelImporter

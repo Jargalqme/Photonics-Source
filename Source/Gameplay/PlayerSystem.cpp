@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "Gameplay/Systems/PlayerSystem.h"
+#include "Gameplay/PlayerSystem.h"
 
 #include "Gameplay/Player.h"
 
@@ -13,11 +13,12 @@ void PlayerSystem::update(
     std::vector<ShotIntent>& outIntents,
     float deltaTime)
 {
+    Vector2 weaponLookDeltaDeg = Vector2::Zero;
     if (input.cursorHidden)
     {
         Vector2 look = input.lookDelta;
         float sens = player.getMouseSensitivity();
-        player.applyLookDelta(look.x * sens, look.y * sens);
+        weaponLookDeltaDeg = player.applyLookDelta(look.x * sens, look.y * sens);
     }
 
     player.setAiming(input.cursorHidden && input.aimHeld);
@@ -57,7 +58,7 @@ void PlayerSystem::update(
         }
     }
 
-    player.tick(deltaTime);
+    player.tick(deltaTime, weaponLookDeltaDeg);
 
     const Vector3 hitScanDirection = player.getLookForward();
     const Vector3 hitScanOrigin = player.getEyePosition();

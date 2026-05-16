@@ -2,11 +2,13 @@
 #include "Scenes/BossScene.h"
 #include "Common/Camera.h"
 #include "DeviceResources.h"
-#include "Gameplay/Events/EventBus.h"
+#include "Gameplay/EventBus.h"
 #include "Services/InputManager.h"
 #include "Renderer.h"
+#include "Render/Bloom.h"
+#include "Render/SceneRenderer.h"
 #include "Gameplay/Combat/ShotIntent.h"
-#include "Gameplay/Events/EventTypes.h"
+#include "Gameplay/EventTypes.h"
 
 namespace
 {
@@ -58,8 +60,6 @@ void BossScene::initialize(SceneContext& context)
     m_player = std::make_unique<Player>(*m_context);
     m_player->initialize();
 
-    m_camera->setViewmodel(m_player->getViewmodel());
-
     // VFX
     m_particleSystem = std::make_unique<ParticleSystem>(m_deviceResources);
     m_particleSystem->initialize();
@@ -75,8 +75,6 @@ void BossScene::initialize(SceneContext& context)
     m_boss->initialize();
     m_boss->setParticles(m_particleSystem.get());
     m_boss->setCamera(m_camera.get());
-
-    m_player->getWeapon()->setDependencies(m_player->getViewmodel());
 
     // オーディオ
     m_audioManager = std::make_unique<AudioManager>();
@@ -121,7 +119,7 @@ void BossScene::initialize(SceneContext& context)
     m_debugUI->setBeatTracker(m_beatTracker.get());
     m_debugUI->setBulletPool(&m_bulletPool);
     m_debugUI->setBoss(m_boss.get());
-    m_debugUI->setBloom(m_renderer->GetBloom());
+    m_debugUI->setBloom(m_renderer->GetSceneRenderer()->getBloom());
 #endif
 }
 
@@ -149,9 +147,8 @@ void BossScene::enter()
     });
 
     EventBus::subscribe<WeaponShotEvent>([this](const WeaponShotEvent&) {
-        m_camera->triggerShake(SHOOT_SHAKE_INTENSITY, SHOOT_SHAKE_DURATION);
         m_audioManager->playRandomSound(RIFLE_FIRE_GROUP, RIFLE_FIRE_VOLUME, RIFLE_FIRE_PITCH_JITTER);
-        });
+    });
 
     // ヒットスキャン解決時 → トレーサー描画
     EventBus::subscribe<ShotResolvedEvent>([this](const ShotResolvedEvent& event) {
@@ -210,18 +207,8 @@ void BossScene::enter()
     m_beatTracker->reset();
     m_audioManager->playMusic("Gameplay");
 
-    // カラーマスクリセット
-    if (m_renderer)
-    {
-        ColorMaskEffect* colorMask = m_renderer->GetColorMaskEffect();
-        if (colorMask)
-        {
-            colorMask->resetMask();
-        }
-    }
-
     // ブルーム有効化（exit() で disable されるため毎エントリで再有効化）
-    m_renderer->GetBloom()->setEnabled(true);
+    m_renderer->GetSceneRenderer()->getBloom()->setEnabled(true);
 }
 
 void BossScene::exit()
@@ -232,16 +219,7 @@ void BossScene::exit()
 
     if (m_renderer)
     {
-        ColorMaskEffect* colorMask = m_renderer->GetColorMaskEffect();
-        if (colorMask)
-        {
-            colorMask->resetMask();
-        }
-    }
-
-    if (m_renderer)
-    {
-        m_renderer->GetBloom()->setEnabled(false);
+        m_renderer->GetSceneRenderer()->getBloom()->setEnabled(false);
     }
 }
 

@@ -58,7 +58,18 @@ const ImportedModel* ImportedModelCache::get(const std::string& path)
         + " vertices=" + std::to_string(result->vertexCount())
         + " indices=" + std::to_string(result->indexCount())
         + " submeshes=" + std::to_string(result->submeshes().size())
-        + " textures=" + std::to_string(result->textures().size()));
+        + " textures=" + std::to_string(result->textures().size())
+        + " VM nodes=" + std::to_string(result->namedNodes().size()));
+
+    for (const ImportedModelNode& node : result->namedNodes())
+    {
+        TraceLine("[ImportedModelCache]   " + node.name
+            + " pos=("
+            + std::to_string(node.position.x) + ", "
+            + std::to_string(node.position.y) + ", "
+            + std::to_string(node.position.z) + ")"
+            + " meshes=" + std::to_string(node.meshCount));
+    }
 
     return result;
 }

@@ -1,84 +1,91 @@
 #pragma once
-#include "Common/Spring.h"
+
 #include <SimpleMath.h>
 
-struct WeaponOffset
+struct WeaponAnimationInput
 {
-    DirectX::SimpleMath::Vector3 pos;      // right, down, forward
-    DirectX::SimpleMath::Vector3 rotDeg;   // pitch, yaw, roll（度）
+    float deltaTime = 0.0f;
+
+    // Camera/player look change for this frame, in degrees.
+    // This is visual lag only; gameplay aim still comes from the camera.
+    DirectX::SimpleMath::Vector2 lookDeltaDegrees = {};
+
+    // Player horizontal movement speed normalized to 0..1.
+    float moveSpeed01 = 0.0f;
+
+    bool isGrounded = true;
+    bool isAiming = false;
 };
 
-struct WeaponGameParams
+struct WeaponAnimationOutput
 {
-    float moveSpeed = 0.0f;   // 水平移動速度 m/s
-    bool  grounded  = true;
+    // Camera-local pose: +X right, +Y up, +Z forward.
+    DirectX::SimpleMath::Vector3 position = {};
+
+    // Degrees keep tuning readable in DebugUI: pitch, yaw, roll.
+    DirectX::SimpleMath::Vector3 rotationDegrees = {};
 };
 
-// DebugUI でライブ調整するフィール値（ImGui スライダー用）
-struct WeaponTuning
+struct WeaponAnimationTuning
 {
-    // Recoil
-    float recoilImpulseZ     = -8.0f;
+    bool enableAds = true;
+    bool enableSway = true;
+    bool enableBob = true;
+    bool enableRecoil = true;
 
-    // Aim punch
-    float aimPunchImpulseDeg = -6.0f;
+    DirectX::SimpleMath::Vector3 hipPosition = { 0.30f, -0.25f, 0.70f };
+    DirectX::SimpleMath::Vector3 hipRotationDegrees = { 0.0f, 0.0f, 0.0f };
+    DirectX::SimpleMath::Vector3 adsPosition = { 0.0f, -0.085f, 0.35f };
+    DirectX::SimpleMath::Vector3 adsRotationDegrees = { 0.0f, 0.0f, 0.0f };
+    float adsBlendSpeed = 10.0f;
 
-    // Bob
-    float bobFrequency       = 8.0f;
-    float bobAmplitudeX      = 0.02f;
-    float bobAmplitudeY      = 0.015f;
+    float swayMaxLookDeltaDegrees = 20.0f;
+    float swayPositionAmount = 0.003f;
+    float swayRotationAmountDegrees = 0.18f;
+    float swayReturnSpeed = 12.0f;
 
-    // Sway
-    float swayGain           = 0.003f;
+    float bobSpeed = 8.0f;
+    float bobHorizontalAmount = 0.020f;
+    float bobVerticalAmount = 0.015f;
+    float bobRollDegrees = 0.60f;
+    float bobBlendSpeed = 8.0f;
 
-    // Landing
-    float landGainY          = 0.012f;
-    float landGainPitch      = 1.0f;
+    float recoilKickback = 0.080f;
+    float recoilPitchDegrees = 4.0f;
+    float recoilReturnSpeed = 14.0f;
+    float recoilMaxKickback = 0.160f;
+    float recoilMaxPitchDegrees = 10.0f;
 };
 
 class WeaponAnimator
 {
 public:
-    void update(float dt);
-    void onFire();
-    void onLand(float fallSpeed);
+    void update(const WeaponAnimationInput& input);
+    void onWeaponFired();
     void reset();
 
-    void setGameParams(const WeaponGameParams& p) { m_game = p; }
-    void addLookDelta(float yawDeg, float pitchDeg);
-    WeaponOffset  getOffset()    const { return m_composed; }
-    WeaponTuning* getTuningPtr()       { return &m_tuning; }
+    WeaponAnimationOutput getOutput() const { return m_composed; }
+    WeaponAnimationTuning* getTuningPtr() { return &m_tuning; }
 
 private:
-    WeaponOffset computeRecoil(float dt);
-    WeaponOffset computeAimPunch(float dt);
-    WeaponOffset computeBob(float dt);
-    WeaponOffset computeSway(float dt);
-    WeaponOffset computeLanding(float dt);
+    void updateAds(float deltaTime, bool isAiming);
 
-    // Recoil
-    Spring1D m_recoilZ;
+    WeaponAnimationOutput computeBasePose() const;
+    WeaponAnimationOutput computeSway(const DirectX::SimpleMath::Vector2& lookDeltaDegrees, float deltaTime);
+    WeaponAnimationOutput computeBob(float moveSpeed01, bool isGrounded, float deltaTime);
+    WeaponAnimationOutput computeRecoil(float deltaTime);
 
-    // Aim punch
-    Spring1D m_aimPitch { .zeta = 0.6f, .omega = 30.0f };
+    float m_adsAlpha = 0.0f;
 
-    // Bob
-    float m_bobPhase   = 0.0f;
-    float m_bobAmount  = 0.0f;
-    float m_bobFalloff = 5.0f;   // 停止時のフェード速度
+    DirectX::SimpleMath::Vector3 m_swayPosition = {};
+    DirectX::SimpleMath::Vector3 m_swayRotationDegrees = {};
 
-    // Sway — 視点回転に対する慣性（カメラから deg 差分を受け取る）
-    Spring1D m_swayX { .zeta = 0.7f, .omega = 12.0f };
-    Spring1D m_swayY { .zeta = 0.7f, .omega = 12.0f };
-    float m_swayMaxKick = 20.0f;     // 瞬時スナップ上限（度/frame）
+    float m_bobPhase = 0.0f;
+    float m_bobAmount = 0.0f;
 
-    // Landing kick — 着地衝撃
-    Spring1D m_landY     { .zeta = 0.5f, .omega = 12.0f };   // 位置Y（下へ沈む）
-    Spring1D m_landPitch { .zeta = 0.6f, .omega = 14.0f };   // 視点ピッチ（下へ）
-    float m_landMaxSpeed = 30.0f;    // 衝撃上限
-    float m_landMinSpeed = 1.0f;     // 小落下は無視
+    DirectX::SimpleMath::Vector3 m_recoilPosition = {};
+    DirectX::SimpleMath::Vector3 m_recoilRotationDegrees = {};
 
-    WeaponTuning     m_tuning;
-    WeaponGameParams m_game;
-    WeaponOffset     m_composed;
+    WeaponAnimationTuning m_tuning;
+    WeaponAnimationOutput m_composed;
 };

@@ -2,7 +2,7 @@
 // @brief Typed deferred gameplay event bus implementation.
 //=============================================================================
 #include "pch.h"
-#include "Gameplay/Events/EventBus.h"
+#include "Gameplay/EventBus.h"
 
 #include <cassert>
 

@@ -4,12 +4,12 @@
 class WeaponRifle : public Weapon
 {
 public:
-	void initialize() override;
+    void initialize() override;
 
 protected:
-	bool shoot(
-		const Vector3& hitScanOrigin,
-		const Vector3& hitScanDirection,
-		const Vector3& tracerStart,
-		std::vector<ShotIntent>& outIntents) override;
+    bool shoot(
+        const DirectX::SimpleMath::Vector3& hitScanOrigin,
+        const DirectX::SimpleMath::Vector3& hitScanDirection,
+        const DirectX::SimpleMath::Vector3& tracerStart,
+        std::vector<ShotIntent>& outIntents) override;
 };

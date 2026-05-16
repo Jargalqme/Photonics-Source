@@ -2,12 +2,14 @@
 #include <SimpleMath.h>
 #include <vector>
 
-using namespace DirectX::SimpleMath;
-
 class BulletPool;
 
 class BossAttackManager
 {
+private:
+    using Vector3 = DirectX::SimpleMath::Vector3;
+    using Vector4 = DirectX::SimpleMath::Vector4;
+
 public:
     void initialize(BulletPool* pool);
     void update(float deltaTime);
