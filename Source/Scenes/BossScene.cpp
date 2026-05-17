@@ -130,7 +130,6 @@ void BossScene::enter()
     Scene::enter();
     EventBus::clear();
     m_debugMode = false;
-    m_cursorVisibleBeforeDebug = false;
     if (m_context && m_context->input)
     {
         m_context->input->setCursorVisible(false);
@@ -260,23 +259,20 @@ void BossScene::update(float deltaTime, InputManager* input)
         PostQuitMessage(0);
     }
 
-    if (!m_debugMode && input->isKeyPressed(Keyboard::Keys::Tab))
-    {
-        input->setCursorVisible(!input->isCursorVisible());
-    }
-
 #ifdef _DEBUG
+    bool debugToggledThisFrame = false;
     if (input->isKeyPressed(Keyboard::Keys::F3))
     {
+        debugToggledThisFrame = true;
         m_debugMode = !m_debugMode;
         if (m_debugMode)
         {
-            m_cursorVisibleBeforeDebug = input->isCursorVisible();
             input->setCursorVisible(true);
+            m_player->clearInputState();
         }
         else
         {
-            input->setCursorVisible(m_cursorVisibleBeforeDebug);
+            input->setCursorVisible(false);
         }
     }
 
@@ -290,31 +286,13 @@ void BossScene::update(float deltaTime, InputManager* input)
     std::vector<ShotIntent> shotIntents;
     if (!victoryReached)
     {
-        PlayerInputState playerInput;
-        playerInput.cursorHidden = !input->isCursorVisible();
-        playerInput.lookDelta = input->getLookInput();
-        playerInput.aimHeld = input->isRightMouseDown();
-        playerInput.fireHeld = input->isLeftMouseDown();
-        playerInput.reloadPressed = input->isKeyPressed(Keyboard::Keys::R);
-        playerInput.jumpPressed = input->isKeyPressed(Keyboard::Keys::Space);
-        if (input->isKeyDown(Keyboard::Keys::W))
+#ifdef _DEBUG
+        if (!m_debugMode && !debugToggledThisFrame)
+#endif
         {
-            playerInput.move.y += 1.0f;
-        }
-        if (input->isKeyDown(Keyboard::Keys::S))
-        {
-            playerInput.move.y -= 1.0f;
-        }
-        if (input->isKeyDown(Keyboard::Keys::A))
-        {
-            playerInput.move.x -= 1.0f;
-        }
-        if (input->isKeyDown(Keyboard::Keys::D))
-        {
-            playerInput.move.x += 1.0f;
+            m_player->update(*input, deltaTime, shotIntents);
         }
 
-        m_playerSystem.update(*m_player, playerInput, shotIntents, deltaTime);
         if (m_boss->isActivated())
         {
             m_boss->update(deltaTime);
@@ -397,7 +375,7 @@ void BossScene::renderViewmodel(const Matrix& view, const Vector3& camPos)
     m_renderer->BeginViewmodelPass();   // 深度クリアして常に最前面に描画
 
     m_renderQueue.clear();
-    m_player->submitViewmodel(m_renderQueue, view);
+    m_player->renderWeapon(m_renderQueue, view);
     m_renderer->ExecuteRenderCommands(m_renderQueue, view, m_camera->getViewModelProjection(), camPos);
 }
 

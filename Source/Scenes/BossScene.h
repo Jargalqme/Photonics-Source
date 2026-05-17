@@ -16,7 +16,6 @@
 
 // ゲームプレイ系統
 #include "Gameplay/CombatSystem.h"
-#include "Gameplay/PlayerSystem.h"
 
 // VFX
 #include "Render/BulletRenderer.h"
@@ -102,8 +101,6 @@ private:
     std::vector<ICombatTarget*> m_combatTargets;
 
     // ゲームプレイ系統
-    PlayerSystem m_playerSystem;
-
     // 戦闘
     BulletPool m_bulletPool;
     CombatSystem m_combatSystem;
@@ -127,7 +124,6 @@ private:
     std::unique_ptr<GameUI> m_gameUI;
     std::unique_ptr<DebugUI> m_debugUI;
     bool m_debugMode = false;
-    bool m_cursorVisibleBeforeDebug = false;
 
     // 入力フィードバック
     float m_hitstopTimer = 0.0f;

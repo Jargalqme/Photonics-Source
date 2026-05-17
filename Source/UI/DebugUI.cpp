@@ -81,7 +81,7 @@ void DebugUI::render()
             ImGui::Spacing();
             if (m_player)
             {
-                ImGui::SliderFloat("Mouse Sens", m_player->getMouseSensitivityPtr(), 5.0f, 200.0f);
+                ImGui::SliderFloat("Mouse Sens", m_player->getMouseSensitivityPtr(), 0.005f, 0.200f, "%.3f");
             }
             else
             {
@@ -113,7 +113,7 @@ void DebugUI::render()
         DrawSection("Weapon");
         if (m_player)
         {
-            WeaponAnimationTuning* t = m_player->getViewmodel()->getTuningPtr();
+            WeaponAnimationTuning* t = m_player->getViewmodelAnimator()->getTuningPtr();
 
             ImGui::Text("ADS");
             ImGui::Checkbox("ADS Enabled", &t->enableAds);

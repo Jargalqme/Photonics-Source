@@ -109,7 +109,6 @@
     <ClInclude Include="Source\Gameplay\Dummy.h" />
     <ClInclude Include="Source\Services\BeatTracker.h" />
     <ClInclude Include="Source\Gameplay\GameObject.h" />
-    <ClInclude Include="Source\Gameplay\PlayerInputState.h" />
     <ClInclude Include="Source\Common\StateMachine.h" />
     <ClInclude Include="Source\Common\Easing.h" />
     <ClInclude Include="Source\Gameplay\Bullet.h" />
@@ -141,7 +140,6 @@
     <ClInclude Include="Source\Gameplay\CombatSystem.h" />
     <ClInclude Include="Source\Gameplay\EventBus.h" />
     <ClInclude Include="Source\Gameplay\EventTypes.h" />
-    <ClInclude Include="Source\Gameplay\PlayerSystem.h" />
     <ClInclude Include="Source\Render\SceneCopyPass.h" />
     <ClInclude Include="Source\Render\SceneRenderer.h" />
   </ItemGroup>
@@ -244,7 +242,6 @@
     <ClCompile Include="Source\Render\LayoutLoader.cpp" />
     <ClCompile Include="Source\Gameplay\CombatSystem.cpp" />
     <ClCompile Include="Source\Gameplay\EventBus.cpp" />
-    <ClCompile Include="Source\Gameplay\PlayerSystem.cpp" />
     <ClCompile Include="Source\Render\SceneCopyPass.cpp" />
     <ClCompile Include="Source\Render\SceneRenderer.cpp" />
   </ItemGroup>

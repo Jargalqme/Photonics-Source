@@ -14,7 +14,6 @@
 
 // ゲームプレイ系統
 #include "Gameplay/CombatSystem.h"
-#include "Gameplay/PlayerSystem.h"
 
 // VFX
 #include "Render/BulletRenderer.h"
@@ -89,7 +88,6 @@ private:
     std::vector<ICombatTarget*> m_combatTargets;
 
     // ゲームプレイ系統
-    PlayerSystem m_playerSystem;
     BulletPool m_bulletPool;          // 訓練ではほぼ未使用（ダミーは射撃しない）
     CombatSystem m_combatSystem;
 
@@ -107,7 +105,6 @@ private:
     std::unique_ptr<GameUI> m_gameUI;
     std::unique_ptr<DebugUI> m_debugUI;
     bool m_debugMode = false;
-    bool m_cursorVisibleBeforeDebug = false;
 
     // --- ダミー調整パラメータ（ImGui で操作） ---
     int   m_dummyCount         = DEFAULT_DUMMY_COUNT;

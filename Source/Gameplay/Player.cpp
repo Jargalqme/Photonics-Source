@@ -4,10 +4,51 @@
 #include "Gameplay/EventBus.h"
 #include "Gameplay/EventTypes.h"
 #include "Services/SceneContext.h"
+#include "Services/InputManager.h"
 #include "Render/RenderCommandQueue.h"
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
+
+namespace
+{
+    Vector2 playerReadMoveInput(const InputManager& input)
+    {
+        Vector2 move = Vector2::Zero;
+
+        if (input.isKeyDown(Keyboard::Keys::W))
+        {
+            move.y += 1.0f;
+        }
+        if (input.isKeyDown(Keyboard::Keys::S))
+        {
+            move.y -= 1.0f;
+        }
+        if (input.isKeyDown(Keyboard::Keys::A))
+        {
+            move.x -= 1.0f;
+        }
+        if (input.isKeyDown(Keyboard::Keys::D))
+        {
+            move.x += 1.0f;
+        }
+
+        return move;
+    }
+
+    Vector3 playerMovementDirection(Player& player, const Vector2& move)
+    {
+        Vector3 lookForward = player.getLookForward();
+        lookForward.y = 0.0f;
+        lookForward.Normalize();
+
+        Vector3 lookRight = player.getLookRight();
+        lookRight.y = 0.0f;
+        lookRight.Normalize();
+
+        return lookForward * move.y + lookRight * move.x;
+    }
+}
 
 Player::Player(SceneContext& context)
     : m_context(&context)
@@ -64,24 +105,86 @@ void Player::applyMovement(const Vector3& direction, float aimYaw, float deltaTi
     m_transform.position.z = std::clamp(m_transform.position.z, -ARENA_HALF_SIZE, ARENA_HALF_SIZE);
 }
 
-void Player::tick(float deltaTime, const Vector2& weaponLookDeltaDeg)
+void Player::update(InputManager& input, float deltaTime, std::vector<ShotIntent>& outIntents)
 {
-    updateTimers(deltaTime);
-    updateGravity(deltaTime);
+    const Vector2 mouseDelta = input.getMouseDelta();
+    const Vector2 weaponLookDeltaDegrees = applyLookDelta(
+        mouseDelta.x * m_mouseSensitivity,
+        mouseDelta.y * m_mouseSensitivity);
 
-    Vector3 delta = m_transform.position - m_lastPosition;
-    delta.y = 0.0f;
-    const float horizSpeed = (deltaTime > 0.0f) ? delta.Length() / deltaTime : 0.0f;
-    m_lastPosition = m_transform.position;
+    setAiming(input.isRightMouseDown());
+    setFiring(input.isLeftMouseDown());
+
+    if (input.isKeyPressed(Keyboard::Keys::R))
+    {
+        reload();
+    }
+
+    const Vector2 move = playerReadMoveInput(input);
+    applyMovement(
+        playerMovementDirection(*this, move),
+        XMConvertToRadians(m_lookYaw),
+        deltaTime);
+
+    if (input.isKeyPressed(Keyboard::Keys::Space))
+    {
+        jump();
+    }
+
+    updateInvincibility(deltaTime);
+    updateVerticalMovement(deltaTime);
+    updateWeaponAnimation(deltaTime, weaponLookDeltaDegrees);
+
+    const Vector3 hitScanDirection = getLookForward();
+    const Vector3 hitScanOrigin = getEyePosition();
+    const Vector3 tracerStart = getMuzzlePosition();
+    updateWeapon(deltaTime, hitScanOrigin, hitScanDirection, tracerStart, outIntents);
+}
+
+void Player::setFiring(bool firing)
+{
+    if (firing)
+    {
+        m_weapon->startFire();
+    }
+    else
+    {
+        m_weapon->stopFire();
+    }
+}
+
+void Player::clearInputState()
+{
+    setFiring(false);
+    setAiming(false);
+}
+
+void Player::updateWeaponAnimation(float deltaTime, const Vector2& lookDeltaDegrees)
+{
+    const float moveSpeed01 = calculateMoveSpeed01(deltaTime);
 
     WeaponAnimationInput animationInput;
     animationInput.deltaTime = deltaTime;
-    animationInput.lookDeltaDegrees = weaponLookDeltaDeg;
-    animationInput.moveSpeed01 = m_speed > 0.0f ? horizSpeed / m_speed : 0.0f;
+    animationInput.lookDeltaDegrees = lookDeltaDegrees;
+    animationInput.moveSpeed01 = moveSpeed01;
     animationInput.isGrounded = m_isGrounded;
     animationInput.isAiming = m_isAiming;
 
     m_viewmodelAnimator.update(animationInput);
+}
+
+float Player::calculateMoveSpeed01(float deltaTime)
+{
+    Vector3 delta = m_transform.position - m_lastPosition;
+    delta.y = 0.0f;
+    m_lastPosition = m_transform.position;
+
+    if (deltaTime <= 0.0f || m_speed <= 0.0f)
+    {
+        return 0.0f;
+    }
+
+    return std::clamp((delta.Length() / deltaTime) / m_speed, 0.0f, 1.0f);
 }
 
 void Player::updateWeapon(
@@ -106,7 +209,7 @@ void Player::jump()
     }
 }
 
-void Player::updateTimers(float deltaTime)
+void Player::updateInvincibility(float deltaTime)
 {
     if (m_invincibleTimer > 0.0f)
     {
@@ -118,7 +221,7 @@ void Player::updateTimers(float deltaTime)
     }
 }
 
-void Player::updateGravity(float deltaTime)
+void Player::updateVerticalMovement(float deltaTime)
 {
     if (!m_isGrounded)
     {
@@ -185,7 +288,7 @@ void Player::takeDamage(float amount)
     m_invincibleTimer = INVINCIBLE_DURATION;
 }
 
-void Player::submitViewmodel(RenderCommandQueue& queue, const Matrix& view)
+void Player::renderWeapon(RenderCommandQueue& queue, const Matrix& view)
 {
     const Matrix cameraWorld = view.Invert();
     m_viewmodelMesh.submit(queue, createViewmodelRootWorldMatrix(cameraWorld));
@@ -268,6 +371,7 @@ void Player::reset()
     m_isAiming = false;
     m_lookYaw = 0.0f;
     m_lookPitch = 0.0f;
+    m_lastPosition = m_transform.position;
     m_viewmodelAnimator.reset();
     m_weapon->initialize();
 }

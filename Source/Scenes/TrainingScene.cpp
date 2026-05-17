@@ -160,7 +160,6 @@ void TrainingScene::enter()
     Scene::enter();
     EventBus::clear();
     m_debugMode = false;
-    m_cursorVisibleBeforeDebug = false;
     if (m_context && m_context->input)
     {
         m_context->input->setCursorVisible(false);
@@ -298,23 +297,20 @@ void TrainingScene::update(float deltaTime, InputManager* input)
         return;
     }
 
-    if (!m_debugMode && input->isKeyPressed(Keyboard::Keys::Tab))
-    {
-        input->setCursorVisible(!input->isCursorVisible());
-    }
-
 #ifdef _DEBUG
+    bool debugToggledThisFrame = false;
     if (input->isKeyPressed(Keyboard::Keys::F3))
     {
+        debugToggledThisFrame = true;
         m_debugMode = !m_debugMode;
         if (m_debugMode)
         {
-            m_cursorVisibleBeforeDebug = input->isCursorVisible();
             input->setCursorVisible(true);
+            m_player->clearInputState();
         }
         else
         {
-            input->setCursorVisible(m_cursorVisibleBeforeDebug);
+            input->setCursorVisible(false);
         }
     }
 
@@ -322,32 +318,13 @@ void TrainingScene::update(float deltaTime, InputManager* input)
 #endif
 
     // === ゲームプレイ系統（正準順: Player → Dummy → Combat → Camera）===
-    PlayerInputState playerInput;
-    playerInput.cursorHidden = !input->isCursorVisible();
-    playerInput.lookDelta = input->getLookInput();
-    playerInput.aimHeld = input->isRightMouseDown();
-    playerInput.fireHeld = input->isLeftMouseDown();
-    playerInput.reloadPressed = input->isKeyPressed(Keyboard::Keys::R);
-    playerInput.jumpPressed = input->isKeyPressed(Keyboard::Keys::Space);
-    if (input->isKeyDown(Keyboard::Keys::W))
-    {
-        playerInput.move.y += 1.0f;
-    }
-    if (input->isKeyDown(Keyboard::Keys::S))
-    {
-        playerInput.move.y -= 1.0f;
-    }
-    if (input->isKeyDown(Keyboard::Keys::A))
-    {
-        playerInput.move.x -= 1.0f;
-    }
-    if (input->isKeyDown(Keyboard::Keys::D))
-    {
-        playerInput.move.x += 1.0f;
-    }
-
     std::vector<ShotIntent> shotIntents;
-    m_playerSystem.update(*m_player, playerInput, shotIntents, deltaTime);
+#ifdef _DEBUG
+    if (!m_debugMode && !debugToggledThisFrame)
+#endif
+    {
+        m_player->update(*input, deltaTime, shotIntents);
+    }
 
     for (auto& dummy : m_dummies)
     {
@@ -427,7 +404,7 @@ void TrainingScene::renderViewmodel(const Matrix& view, const Vector3& camPos)
     m_renderer->BeginViewmodelPass();   // 深度クリアして常に最前面に描画
 
     m_renderQueue.clear();
-    m_player->submitViewmodel(m_renderQueue, view);
+    m_player->renderWeapon(m_renderQueue, view);
     m_renderer->ExecuteRenderCommands(m_renderQueue, view, m_camera->getViewModelProjection(), camPos);
 }
 
@@ -452,9 +429,9 @@ void TrainingScene::renderTrainingPanel()
     ImGui::Begin("Training");
 
 #ifdef _DEBUG
-    ImGui::Text("Esc: menu | Tab: cursor | F3: debug");
+    ImGui::Text("Esc: menu | F3: debug");
 #else
-    ImGui::Text("Esc: menu | Tab: cursor");
+    ImGui::Text("Esc: menu");
 #endif
     ImGui::Separator();
 

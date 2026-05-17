@@ -79,7 +79,7 @@ void WeaponAnimator::onWeaponFired()
     }
 
     // Recoil is visual-only. The weapon moves back and pitches up, but gameplay
-    // hits still use the camera ray owned by PlayerSystem.
+    // hits still use the camera ray owned by Player.
     m_recoilPosition.z = std::clamp(
         m_recoilPosition.z - m_tuning.recoilKickback,
         -m_tuning.recoilMaxKickback,

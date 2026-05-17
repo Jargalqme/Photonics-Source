@@ -208,7 +208,6 @@ xcopy /Y /D "$(ProjectDir)ThirdParty\Assimp\bin\x64\Release\*.dll" "$(TargetDir)
     <ClInclude Include="Source\Gameplay\Combat\ICombatTarget.h" />
     <ClInclude Include="Source\Gameplay\EventBus.h" />
     <ClInclude Include="Source\Gameplay\EventTypes.h" />
-    <ClInclude Include="Source\Gameplay\PlayerSystem.h" />
     <ClInclude Include="Source\Render\ArenaFloor.h" />
     <ClInclude Include="Source\Render\AssimpModelImporter.h" />
     <ClInclude Include="Source\Render\SceneCopyPass.h" />
@@ -232,7 +231,6 @@ xcopy /Y /D "$(ProjectDir)ThirdParty\Assimp\bin\x64\Release\*.dll" "$(TargetDir)
     <ClInclude Include="Source\Scenes\GameOverScene.h" />
     <ClInclude Include="Source\Scenes\BossScene.h" />
     <ClInclude Include="Source\UI\GameUI.h" />
-    <ClInclude Include="Source\Gameplay\PlayerInputState.h" />
     <ClInclude Include="Source\Gameplay\PlayerViewmodel.h" />
     <ClInclude Include="Source\Render\Grid.h" />
     <ClInclude Include="Source\Render\ImportedModel.h" />
@@ -304,7 +302,6 @@ xcopy /Y /D "$(ProjectDir)ThirdParty\Assimp\bin\x64\Release\*.dll" "$(TargetDir)
     </ClCompile>
     <ClCompile Include="Source\Gameplay\CombatSystem.cpp" />
     <ClCompile Include="Source\Gameplay\EventBus.cpp" />
-    <ClCompile Include="Source\Gameplay\PlayerSystem.cpp" />
     <ClCompile Include="Source\Render\ArenaFloor.cpp" />
     <ClCompile Include="Source\Render\AssimpModelImporter.cpp" />
     <ClCompile Include="Source\Render\SceneCopyPass.cpp" />
