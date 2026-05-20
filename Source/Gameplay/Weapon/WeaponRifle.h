@@ -1,5 +1,5 @@
 #pragma once
-#include "Gameplay/Combat/Weapon.h"
+#include "Gameplay/Weapon/Weapon.h"
 
 class WeaponRifle : public Weapon
 {
@@ -11,5 +11,5 @@ protected:
         const DirectX::SimpleMath::Vector3& hitScanOrigin,
         const DirectX::SimpleMath::Vector3& hitScanDirection,
         const DirectX::SimpleMath::Vector3& tracerStart,
-        std::vector<ShotIntent>& outIntents) override;
+        std::vector<WeaponShot>& outShots) override;
 };

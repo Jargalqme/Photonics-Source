@@ -2,6 +2,7 @@
 #include "UI/DebugUI.h"
 #include "Common/Camera.h"
 #include "Gameplay/Player.h"
+#include "Gameplay/Weapon/PlayerWeapon.h"
 #include "Render/Grid.h"
 #include "Render/Skybox.h"
 #include "Services/AudioManager.h"
@@ -113,41 +114,31 @@ void DebugUI::render()
         DrawSection("Weapon");
         if (m_player)
         {
-            WeaponAnimationTuning* t = m_player->getViewmodelAnimator()->getTuningPtr();
+            WeaponMotionTuning* t = m_player->getWeapon().getMotionTuning();
 
-            ImGui::Text("ADS");
-            ImGui::Checkbox("ADS Enabled", &t->enableAds);
+            ImGui::Text("Pose");
             ImGui::SliderFloat3("Hip Position", &t->hipPosition.x, -1.0f, 1.0f);
-            ImGui::SliderFloat3("Hip Rotation", &t->hipRotationDegrees.x, -30.0f, 30.0f);
             ImGui::SliderFloat3("ADS Position", &t->adsPosition.x, -1.0f, 1.0f);
-            ImGui::SliderFloat3("ADS Rotation", &t->adsRotationDegrees.x, -30.0f, 30.0f);
             ImGui::SliderFloat("ADS Blend Speed", &t->adsBlendSpeed, 0.0f, 30.0f);
             ImGui::Spacing();
 
             ImGui::Text("Sway");
-            ImGui::Checkbox("Sway Enabled", &t->enableSway);
-            ImGui::SliderFloat("Sway Max Look Delta", &t->swayMaxLookDeltaDegrees, 0.0f, 60.0f);
-            ImGui::SliderFloat("Sway Position Amount", &t->swayPositionAmount, 0.0f, 0.02f);
-            ImGui::SliderFloat("Sway Rotation Amount", &t->swayRotationAmountDegrees, 0.0f, 1.0f);
+            ImGui::SliderFloat("Sway Max Delta", &t->swayMaxDeltaDeg, 0.0f, 60.0f);
+            ImGui::SliderFloat("Sway Position Gain", &t->swayPositionGain, 0.0f, 0.02f);
+            ImGui::SliderFloat("Sway Rotation Gain", &t->swayRotationGain, 0.0f, 1.0f);
             ImGui::SliderFloat("Sway Return Speed", &t->swayReturnSpeed, 0.0f, 30.0f);
             ImGui::Spacing();
 
             ImGui::Text("Movement Bob");
-            ImGui::Checkbox("Bob Enabled", &t->enableBob);
-            ImGui::SliderFloat("Bob Speed", &t->bobSpeed, 0.0f, 20.0f);
-            ImGui::SliderFloat("Bob Horizontal Amount", &t->bobHorizontalAmount, 0.0f, 0.1f);
-            ImGui::SliderFloat("Bob Vertical Amount", &t->bobVerticalAmount, 0.0f, 0.1f);
-            ImGui::SliderFloat("Bob Roll", &t->bobRollDegrees, 0.0f, 5.0f);
-            ImGui::SliderFloat("Bob Blend Speed", &t->bobBlendSpeed, 0.0f, 30.0f);
+            ImGui::SliderFloat("Bob Frequency", &t->bobFrequency, 0.0f, 20.0f);
+            ImGui::SliderFloat("Bob Amplitude X", &t->bobAmplitudeX, 0.0f, 0.1f);
+            ImGui::SliderFloat("Bob Amplitude Y", &t->bobAmplitudeY, 0.0f, 0.1f);
+            ImGui::SliderFloat("Bob Falloff", &t->bobFalloff, 0.0f, 30.0f);
             ImGui::Spacing();
 
             ImGui::Text("Recoil");
-            ImGui::Checkbox("Recoil Enabled", &t->enableRecoil);
-            ImGui::SliderFloat("Recoil Kickback", &t->recoilKickback, 0.0f, 0.3f);
-            ImGui::SliderFloat("Recoil Pitch", &t->recoilPitchDegrees, 0.0f, 20.0f);
-            ImGui::SliderFloat("Recoil Return Speed", &t->recoilReturnSpeed, 0.0f, 40.0f);
-            ImGui::SliderFloat("Recoil Max Kickback", &t->recoilMaxKickback, 0.0f, 0.5f);
-            ImGui::SliderFloat("Recoil Max Pitch", &t->recoilMaxPitchDegrees, 0.0f, 30.0f);
+            ImGui::SliderFloat("Recoil Kickback", &t->recoilKickback, -30.0f, 0.0f);
+            ImGui::SliderFloat("Recoil Pitch", &t->recoilPitchDeg, -30.0f, 0.0f);
         }
         else
         {
@@ -190,30 +181,17 @@ void DebugUI::render()
             Bullet* bullets = m_bulletPool->getBullets();
             const int max = m_bulletPool->getMaxBullets();
             int activeCount = 0;
-            int playerCount = 0;
-            int bossCount = 0;
 
             for (int i = 0; i < max; i++)
             {
                 if (bullets[i].isActive())
                 {
                     activeCount++;
-                    if (bullets[i].getFaction() == CombatFaction::Player)
-                    {
-                        playerCount++;
-                    }
-                    else
-                    {
-                        bossCount++;
-                    }
                 }
             }
 
             ImGui::Text("Active Bullets: %d / %d", activeCount, max);
             ImGui::ProgressBar(max > 0 ? static_cast<float>(activeCount) / static_cast<float>(max) : 0.0f);
-            ImGui::Text("Player: %d", playerCount);
-            ImGui::SameLine();
-            ImGui::Text("Boss: %d", bossCount);
 
             if (activeCount >= max)
             {

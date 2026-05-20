@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "Gameplay/Combat/CollisionSystem.h"
+#include "Gameplay/CollisionSystem.h"
 
 namespace CollisionSystem
 {

@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "Gameplay/PlayerViewmodel.h"
+#include "Gameplay/Weapon/WeaponModel.h"
 #include "Render/ImportedModel.h"
 #include "Render/ImportedModelCache.h"
 #include "Render/RenderCommandQueue.h"
@@ -50,7 +50,7 @@ namespace
     Matrix createImportedRifleLocalMatrix(
         const Vector3& center,
         float longestSide,
-        const ImportedRifleViewmodelSettings& settings)
+        const RifleModelSettings& settings)
     {
         const float scale = settings.targetLength / std::max(longestSide, 0.001f);
         const Vector3 rotationRadians(
@@ -68,7 +68,7 @@ namespace
     }
 }
 
-bool PlayerViewmodel::loadImportedRifle(SceneContext& context, const std::string& path)
+bool WeaponModel::loadRifle(SceneContext& context, const std::string& path)
 {
     m_importedRifle = nullptr;
     m_importedRifleCenter = Vector3::Zero;
@@ -92,7 +92,7 @@ bool PlayerViewmodel::loadImportedRifle(SceneContext& context, const std::string
     return true;
 }
 
-void PlayerViewmodel::submit(RenderCommandQueue& queue, const Matrix& rootWorld) const
+void WeaponModel::submit(RenderCommandQueue& queue, const Matrix& rootWorld) const
 {
     if (m_importedRifle)
     {
@@ -105,7 +105,7 @@ void PlayerViewmodel::submit(RenderCommandQueue& queue, const Matrix& rootWorld)
     }
 }
 
-Matrix PlayerViewmodel::buildModelWorldMatrix(const Matrix& rootWorld) const
+Matrix WeaponModel::buildModelWorldMatrix(const Matrix& rootWorld) const
 {
     if (!m_importedRifle)
     {
@@ -115,10 +115,10 @@ Matrix PlayerViewmodel::buildModelWorldMatrix(const Matrix& rootWorld) const
     return createImportedRifleLocalMatrix(
         m_importedRifleCenter,
         m_importedRifleLongestSide,
-        m_importedRifleSettings) * rootWorld;
+        m_rifleSettings) * rootWorld;
 }
 
-Vector3 PlayerViewmodel::getMuzzleLocalPosition() const
+Vector3 WeaponModel::getMuzzleLocalPosition() const
 {
     if (m_importedRifle)
     {
@@ -131,14 +131,14 @@ Vector3 PlayerViewmodel::getMuzzleLocalPosition() const
     return Vector3(0.0f, 0.0f, kFallbackMuzzleZ);
 }
 
-void PlayerViewmodel::finalize()
+void WeaponModel::finalize()
 {
     m_importedRifle = nullptr;
     m_importedRifleCenter = Vector3::Zero;
     m_importedRifleLongestSide = 1.0f;
 }
 
-void PlayerViewmodel::resetSettings()
+void WeaponModel::resetRifleSettings()
 {
-    m_importedRifleSettings = ImportedRifleViewmodelSettings{};
+    m_rifleSettings = RifleModelSettings{};
 }

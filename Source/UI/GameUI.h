@@ -56,7 +56,6 @@ private:
     ImU32 m_beatColor = IM_COL32(0, 255, 255, 255);
 
     // === 描画関数 ===
-    void drawMinimap();
     void drawCrosshair();
     void drawWaveIndicator();
     void drawPlayerHealth();

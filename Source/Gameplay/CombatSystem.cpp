@@ -3,51 +3,50 @@
 
 #include "Gameplay/Bullet.h"
 #include "Gameplay/BulletPool.h"
-#include "Gameplay/Combat/CollisionSystem.h"
-#include "Gameplay/Combat/ShotIntent.h"
+#include "Gameplay/CollisionSystem.h"
+#include "Gameplay/Weapon/WeaponShot.h"
 #include "Gameplay/EventBus.h"
 #include "Gameplay/EventTypes.h"
 
 void CombatSystem::update(
     float deltaTime,
-    std::vector<ICombatTarget*>& targets,
+    std::vector<ICombatTarget*>& shotTargets,
+    std::vector<ICombatTarget*>& bulletTargets,
     BulletPool& bullets,
-    std::vector<ShotIntent>& shotIntents)
+    std::vector<WeaponShot>& weaponShots)
 {
     bullets.update(deltaTime);
-    collectColliders(targets);
-    resolveShotIntents(shotIntents);
+    collectColliders(shotTargets, m_shotColliders);
+    collectColliders(bulletTargets, m_bulletColliders);
+    resolveWeaponShots(weaponShots);
     resolveBullets(bullets);
 }
 
-void CombatSystem::collectColliders(std::vector<ICombatTarget*>& targets)
+void CombatSystem::collectColliders(
+    std::vector<ICombatTarget*>& targets,
+    std::vector<CombatHitCollider>& out)
 {
-    m_colliders.clear();
+    out.clear();
     for (ICombatTarget* target : targets)
     {
         if (target)
         {
-            target->collectHitColliders(m_colliders);
+            target->collectHitColliders(out);
         }
     }
 }
 
-void CombatSystem::resolveShotIntents(std::vector<ShotIntent>& intents)
+void CombatSystem::resolveWeaponShots(std::vector<WeaponShot>& shots)
 {
-    for (const auto& intent : intents)
+    for (const auto& shot : shots)
     {
-        float closest = intent.maxRange;
+        float closest = shot.maxRange;
         const CombatHitCollider* hitCollider = nullptr;
 
-        for (const auto& collider : m_colliders)
+        for (const auto& collider : m_shotColliders)
         {
-            if (collider.faction == intent.faction)
-            {
-                continue;  // フレンドリーファイア除外
-            }
-
             float dist = 0.0f;
-            if (CollisionSystem::checkRaySphere(intent.hitScanOrigin, intent.hitScanDirection, collider.bounds, dist)
+            if (CollisionSystem::checkRaySphere(shot.hitScanOrigin, shot.hitScanDirection, collider.bounds, dist)
                 && dist < closest)
             {
                 closest = dist;
@@ -56,25 +55,24 @@ void CombatSystem::resolveShotIntents(std::vector<ShotIntent>& intents)
         }
 
         const Vector3 hitPoint = hitCollider
-            ? (intent.hitScanOrigin + intent.hitScanDirection * closest)
-            : (intent.hitScanOrigin + intent.hitScanDirection * intent.maxRange);
+            ? (shot.hitScanOrigin + shot.hitScanDirection * closest)
+            : (shot.hitScanOrigin + shot.hitScanDirection * shot.maxRange);
 
         if (hitCollider)
         {
             CombatHit hit;
             hit.part = hitCollider->part;
             hit.point = hitPoint;
-            hit.direction = intent.hitScanDirection;
-            hit.rawDamage = intent.damage;
-            hit.finalDamage = intent.damage * hitCollider->damageMultiplier;
+            hit.direction = shot.hitScanDirection;
+            hit.rawDamage = shot.damage;
+            hit.finalDamage = shot.damage * hitCollider->damageMultiplier;
             hitCollider->target->onHit(hit);
         }
 
-        // ヒット有無に関わらずトレーサー発行（外れたら最大射程まで線を描く）
-        EventBus::publish(ShotResolvedEvent{ intent.tracerStart, hitPoint, intent.tracerColor });
+        EventBus::publish(ShotResolvedEvent{ shot.tracerStart, hitPoint, shot.tracerColor });
     }
 
-    intents.clear();
+    shots.clear();
 }
 
 void CombatSystem::resolveBullets(BulletPool& bullets)
@@ -89,15 +87,8 @@ void CombatSystem::resolveBullets(BulletPool& bullets)
             continue;
         }
 
-        const CombatFaction bulletFaction = arr[i].getFaction();
-
-        for (const auto& collider : m_colliders)
+        for (const auto& collider : m_bulletColliders)
         {
-            if (collider.faction == bulletFaction)
-            {
-                continue;  // フレンドリーファイア除外
-            }
-
             if (CollisionSystem::checkSphereSphere(arr[i].getBoundingSphere(), collider.bounds))
             {
                 CombatHit hit;
@@ -108,7 +99,7 @@ void CombatSystem::resolveBullets(BulletPool& bullets)
                 hit.finalDamage = arr[i].getDamage() * collider.damageMultiplier;
                 collider.target->onHit(hit);
                 arr[i].deactivate();
-                break;  // 1発の弾は1ターゲットにのみヒット
+                break;
             }
         }
     }

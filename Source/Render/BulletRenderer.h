@@ -1,41 +1,32 @@
-//=============================================================================
-/// @file    BulletRenderer.h
-/// @brief   弾の描画（プレイヤー: シリンダー軌跡、敵: 六角形オーブ）
-//=============================================================================
 #pragma once
+
 #include "DeviceResources.h"
+
+#include <cstdint>
 
 class BulletPool;
 
 class BulletRenderer
 {
 public:
-    BulletRenderer(DX::DeviceResources* deviceResources);
+    explicit BulletRenderer(DX::DeviceResources* deviceResources);
     ~BulletRenderer() = default;
 
     void initialize();
     void update(float deltaTime);
-    void render(BulletPool* bulletPool,
+    void render(
+        BulletPool* bulletPool,
         const DirectX::SimpleMath::Matrix& view,
         const DirectX::SimpleMath::Matrix& projection,
         const DirectX::SimpleMath::Vector3& cameraPosition);
     void finalize();
 
 private:
-    // --- 定数 ---
-    static constexpr uint32_t MAX_BOLTS = 256;
-    static constexpr uint32_t VERTS_PER_BOLT = 108;
-    static constexpr uint32_t VERTS_PER_ORB  = 6;
+    static constexpr uint32_t MAX_BULLETS_TO_RENDER = 256;
+    static constexpr uint32_t VERTICES_PER_ORB = 6;
+    static constexpr float BULLET_ORB_RADIUS = 0.5f;
 
-    // プレイヤー弾の外観
-    static constexpr float PLAYER_BOLT_LENGTH = 1.0f;
-    static constexpr float PLAYER_BOLT_WIDTH  = 0.05f;
-
-    // 敵弾の外観
-    static constexpr float ENEMY_ORB_RADIUS   = 0.5f;
-
-    // HLSL と完全一致（48 バイト）
-    struct BoltData
+    struct BulletRenderData
     {
         DirectX::SimpleMath::Vector3 position;
         float speed;
@@ -44,8 +35,7 @@ private:
         DirectX::SimpleMath::Vector4 color;
     };
 
-    // HLSL と完全一致（96 バイト）
-    struct BoltCB
+    struct BulletRenderConstants
     {
         DirectX::SimpleMath::Matrix viewProjection;
         DirectX::SimpleMath::Vector3 cameraPosition;
@@ -56,25 +46,17 @@ private:
         float padding;
     };
 
-    // デバイス（非所有）
-    DX::DeviceResources* m_deviceResources;
+    DX::DeviceResources* m_deviceResources = nullptr;
     float m_time = 0.0f;
 
-    // GPU リソース
-    Microsoft::WRL::ComPtr<ID3D11Buffer> m_boltBuffer;
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_boltSRV;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> m_bulletBuffer;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_bulletSRV;
     Microsoft::WRL::ComPtr<ID3D11Buffer> m_constantBuffer;
-    BoltData m_boltData[MAX_BOLTS];
+    BulletRenderData m_bulletData[MAX_BULLETS_TO_RENDER] = {};
 
-    // シェーダー — プレイヤー弾
     Microsoft::WRL::ComPtr<ID3D11VertexShader> m_vertexShader;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader> m_playerPS;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pixelShader;
 
-    // シェーダー — 敵弾
-    Microsoft::WRL::ComPtr<ID3D11VertexShader> m_orbVertexShader;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader> m_enemyPS;
-
-    // レンダーステート（共通）
     Microsoft::WRL::ComPtr<ID3D11BlendState> m_blendState;
     Microsoft::WRL::ComPtr<ID3D11DepthStencilState> m_depthStencilState;
     Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_rasterizerState;

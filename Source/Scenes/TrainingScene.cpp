@@ -2,9 +2,10 @@
 #include "Scenes/TrainingScene.h"
 #include "Common/Camera.h"
 #include "DeviceResources.h"
-#include "Gameplay/Combat/ShotIntent.h"
+#include "Gameplay/Weapon/WeaponShot.h"
 #include "Gameplay/EventBus.h"
 #include "Gameplay/EventTypes.h"
+#include "Gameplay/Weapon/PlayerWeapon.h"
 #include "Renderer.h"
 #include "Render/Bloom.h"
 #include "Render/SceneRenderer.h"
@@ -206,11 +207,12 @@ void TrainingScene::enter()
     applyDummyParameters();
 
     // 戦闘ターゲット = ダミーのみ。Player を含めない = 永久無敵。
-    m_combatTargets.clear();
+    m_shotTargets.clear();
     for (auto& dummy : m_dummies)
     {
-        m_combatTargets.push_back(dummy.get());
+        m_shotTargets.push_back(dummy.get());
     }
+    m_bulletTargets.clear();
 
     // ブルーム有効化（exit() で disable されるため毎エントリで再有効化）
     m_renderer->GetSceneRenderer()->getBloom()->setEnabled(true);
@@ -318,12 +320,12 @@ void TrainingScene::update(float deltaTime, InputManager* input)
 #endif
 
     // === ゲームプレイ系統（正準順: Player → Dummy → Combat → Camera）===
-    std::vector<ShotIntent> shotIntents;
+    std::vector<WeaponShot> weaponShots;
 #ifdef _DEBUG
     if (!m_debugMode && !debugToggledThisFrame)
 #endif
     {
-        m_player->update(*input, deltaTime, shotIntents);
+        m_player->update(*input, deltaTime, weaponShots);
     }
 
     for (auto& dummy : m_dummies)
@@ -331,7 +333,7 @@ void TrainingScene::update(float deltaTime, InputManager* input)
         dummy->update(deltaTime);
     }
 
-    m_combatSystem.update(deltaTime, m_combatTargets, m_bulletPool, shotIntents);
+    m_combatSystem.update(deltaTime, m_shotTargets, m_bulletTargets, m_bulletPool, weaponShots);
 
     EventBus::dispatchQueued();
 
@@ -404,14 +406,13 @@ void TrainingScene::renderViewmodel(const Matrix& view, const Vector3& camPos)
     m_renderer->BeginViewmodelPass();   // 深度クリアして常に最前面に描画
 
     m_renderQueue.clear();
-    m_player->renderWeapon(m_renderQueue, view);
+    m_player->getWeapon().render(m_renderQueue, view);
     m_renderer->ExecuteRenderCommands(m_renderQueue, view, m_camera->getViewModelProjection(), camPos);
 }
 
 void TrainingScene::renderUI(const Matrix& view, const Matrix& proj)
 {
     m_gameUI->render(view, proj);
-    renderTrainingPanel();
 #ifdef _DEBUG
     if (m_debugMode && m_debugUI)
     {
@@ -420,77 +421,3 @@ void TrainingScene::renderUI(const Matrix& view, const Matrix& proj)
 #endif
 }
 
-// === トレーニングパネル（常時表示） ===
-
-void TrainingScene::renderTrainingPanel()
-{
-    ImGui::SetNextWindowPos(ImVec2(20.0f, 220.0f), ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSize(ImVec2(360.0f, 430.0f), ImGuiCond_FirstUseEver);
-    ImGui::Begin("Training");
-
-#ifdef _DEBUG
-    ImGui::Text("Esc: menu | F3: debug");
-#else
-    ImGui::Text("Esc: menu");
-#endif
-    ImGui::Separator();
-
-    if (ImGui::SliderInt("Dummy Count", &m_dummyCount, 1, MAX_DUMMIES))
-    {
-        resetAllDummies();
-        applyDummyParameters();
-    }
-
-    if (ImGui::Button("Reset All"))
-    {
-        resetAllDummies();
-        applyDummyParameters();
-    }
-
-    ImGui::Separator();
-    ImGui::Text("Movement");
-
-    if (ImGui::Checkbox("Moving", &m_dummyMoving))
-    {
-        applyDummyParameters();
-    }
-    if (ImGui::SliderFloat("Amplitude", &m_dummyMoveAmplitude, 0.0f, 8.0f))
-    {
-        applyDummyParameters();
-    }
-    if (ImGui::SliderFloat("Frequency", &m_dummyMoveFrequency, 0.0f, 5.0f))
-    {
-        applyDummyParameters();
-    }
-
-    ImGui::Separator();
-    ImGui::Text("Behavior");
-
-    if (ImGui::Checkbox("Invulnerable", &m_dummyInvulnerable))
-    {
-        applyDummyParameters();
-    }
-    if (ImGui::SliderFloat("Respawn Delay", &m_dummyRespawnDelay, 0.0f, 5.0f))
-    {
-        applyDummyParameters();
-    }
-
-    if (m_player && m_player->hasImportedRifleViewmodel())
-    {
-        ImportedRifleViewmodelSettings& rifleSettings =
-            m_player->getImportedRifleViewmodelSettings();
-
-        ImGui::Separator();
-        ImGui::Text("Imported Rifle");
-        ImGui::DragFloat("Length", &rifleSettings.targetLength, 0.005f, 0.01f, 5.0f, "%.3f");
-        ImGui::DragFloat3("Position", &rifleSettings.position.x, 0.005f, -5.0f, 5.0f, "%.3f");
-        ImGui::DragFloat3("Rotation", &rifleSettings.rotationDegrees.x, 0.25f, -360.0f, 360.0f, "%.1f");
-
-        if (ImGui::Button("Reset Rifle Viewmodel"))
-        {
-            m_player->resetImportedRifleViewmodelSettings();
-        }
-    }
-
-    ImGui::End();
-}

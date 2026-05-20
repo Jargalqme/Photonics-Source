@@ -36,5 +36,5 @@ float4 main(PS_INPUT input) : SV_TARGET
         baseColor *= BaseColorTexture.Sample(BaseColorSampler, input.texCoord);
     }
 
-    return float4(baseColor.rgb * lighting, baseColor.a);
+    return float4(baseColor.rgb, baseColor.a);
 }

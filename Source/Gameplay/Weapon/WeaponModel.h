@@ -7,7 +7,7 @@ class ImportedModel;
 class RenderCommandQueue;
 struct SceneContext;
 
-struct ImportedRifleViewmodelSettings
+struct RifleModelSettings
 {
     float targetLength = 1.68f;
     DirectX::SimpleMath::Vector3 position = DirectX::SimpleMath::Vector3(-0.015f, -0.195f, 0.180f);
@@ -15,23 +15,23 @@ struct ImportedRifleViewmodelSettings
 };
 
 // First-person imported weapon model.
-class PlayerViewmodel
+class WeaponModel
 {
 public:
-    bool loadImportedRifle(SceneContext& context, const std::string& path);
+    bool loadRifle(SceneContext& context, const std::string& path);
     void submit(RenderCommandQueue& queue, const DirectX::SimpleMath::Matrix& rootWorld) const;
     DirectX::SimpleMath::Matrix buildModelWorldMatrix(const DirectX::SimpleMath::Matrix& rootWorld) const;
     DirectX::SimpleMath::Vector3 getMuzzleLocalPosition() const;
     void finalize();
 
-    bool hasImportedRifle() const { return m_importedRifle != nullptr; }
-    ImportedRifleViewmodelSettings& settings() { return m_importedRifleSettings; }
-    const ImportedRifleViewmodelSettings& settings() const { return m_importedRifleSettings; }
-    void resetSettings();
+    bool hasRifle() const { return m_importedRifle != nullptr; }
+    RifleModelSettings& rifleSettings() { return m_rifleSettings; }
+    const RifleModelSettings& rifleSettings() const { return m_rifleSettings; }
+    void resetRifleSettings();
 
 private:
     const ImportedModel* m_importedRifle = nullptr;
-    ImportedRifleViewmodelSettings m_importedRifleSettings;
+    RifleModelSettings m_rifleSettings;
     DirectX::SimpleMath::Vector3 m_importedRifleCenter = DirectX::SimpleMath::Vector3::Zero;
     float m_importedRifleLongestSide = 1.0f;
 

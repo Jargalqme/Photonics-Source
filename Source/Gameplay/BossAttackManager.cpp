@@ -152,7 +152,6 @@ void BossAttackManager::fireRainRing(int count, float expandSpeed, float angleOf
             expandSpeed,
             RAIN_TOTAL_LIFETIME,
             BULLET_DAMAGE,
-            CombatFaction::Enemy,
             RAIN_COLOR
         );
 
@@ -190,7 +189,6 @@ void BossAttackManager::fireBurstBullet()
         BURST_BULLET_SPEED,
         BULLET_LIFETIME,
         BULLET_DAMAGE,
-        CombatFaction::Enemy,
         BURST_COLOR
     );
 }
@@ -217,7 +215,6 @@ void BossAttackManager::fireTorus()
             TORUS_SPEED,
             BULLET_LIFETIME,
             BULLET_DAMAGE,
-            CombatFaction::Enemy,
             TORUS_COLOR
         );
     }

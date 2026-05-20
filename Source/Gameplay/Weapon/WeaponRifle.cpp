@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "Gameplay/Combat/WeaponRifle.h"
-#include "Gameplay/Combat/ShotIntent.h"
+#include "Gameplay/Weapon/WeaponRifle.h"
+#include "Gameplay/Weapon/WeaponShot.h"
 
 void WeaponRifle::initialize()
 {
@@ -16,16 +16,15 @@ bool WeaponRifle::shoot(
     const Vector3& hitScanOrigin,
     const Vector3& hitScanDirection,
     const Vector3& tracerStart,
-    std::vector<ShotIntent>& outIntents)
+    std::vector<WeaponShot>& outShots)
 {
-    outIntents.push_back(ShotIntent{
+    outShots.push_back(WeaponShot{
         hitScanOrigin,
         hitScanDirection,
         tracerStart,
         m_damage,
         m_maxRange,
         Vector4(0.4f, 0.85f, 1.0f, 1.0f),
-        CombatFaction::Player,
     });
 
     return true;

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Gameplay/Combat/ICombatTarget.h"
+#include "Gameplay/ICombatTarget.h"
 
 #include <vector>
 
 class BulletPool;
-struct ShotIntent;
+struct WeaponShot;
 
 class CombatSystem
 {
@@ -14,14 +14,16 @@ public:
 
     void update(
         float deltaTime,
-        std::vector<ICombatTarget*>& targets,
+        std::vector<ICombatTarget*>& shotTargets,
+        std::vector<ICombatTarget*>& bulletTargets,
         BulletPool& bullets,
-        std::vector<ShotIntent>& shotIntents);
+        std::vector<WeaponShot>& weaponShots);
 
 private:
-    void collectColliders(std::vector<ICombatTarget*>& targets);
-    void resolveShotIntents(std::vector<ShotIntent>& intents);
+    void collectColliders(std::vector<ICombatTarget*>& targets, std::vector<CombatHitCollider>& out);
+    void resolveWeaponShots(std::vector<WeaponShot>& shots);
     void resolveBullets(BulletPool& bullets);
 
-    std::vector<CombatHitCollider> m_colliders;  // フレーム内再利用、毎フレームクリア
+    std::vector<CombatHitCollider> m_shotColliders;
+    std::vector<CombatHitCollider> m_bulletColliders;
 };

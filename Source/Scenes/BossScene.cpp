@@ -7,8 +7,9 @@
 #include "Renderer.h"
 #include "Render/Bloom.h"
 #include "Render/SceneRenderer.h"
-#include "Gameplay/Combat/ShotIntent.h"
+#include "Gameplay/Weapon/WeaponShot.h"
 #include "Gameplay/EventTypes.h"
+#include "Gameplay/Weapon/PlayerWeapon.h"
 
 namespace
 {
@@ -198,9 +199,11 @@ void BossScene::enter()
     EventBus::publish(WaveChangedEvent{ 3 });
 
     // 戦闘ターゲットリスト構築 — Player + Boss
-    m_combatTargets.clear();
-    m_combatTargets.push_back(m_player.get());
-    m_combatTargets.push_back(m_boss.get());
+    m_shotTargets.clear();
+    m_shotTargets.push_back(m_boss.get());
+
+    m_bulletTargets.clear();
+    m_bulletTargets.push_back(m_player.get());
 
     // オーディオリセット
     m_beatTracker->reset();
@@ -283,21 +286,21 @@ void BossScene::update(float deltaTime, InputManager* input)
     const bool victoryReached = m_boss->isActivated() && m_boss->isDead();
 
     // 1フレーム内の射撃インテントは Player 側で積み、Combat 側で解決して空にする
-    std::vector<ShotIntent> shotIntents;
+    std::vector<WeaponShot> weaponShots;
     if (!victoryReached)
     {
 #ifdef _DEBUG
         if (!m_debugMode && !debugToggledThisFrame)
 #endif
         {
-            m_player->update(*input, deltaTime, shotIntents);
+            m_player->update(*input, deltaTime, weaponShots);
         }
 
         if (m_boss->isActivated())
         {
             m_boss->update(deltaTime);
         }
-        m_combatSystem.update(deltaTime, m_combatTargets, m_bulletPool, shotIntents);
+        m_combatSystem.update(deltaTime, m_shotTargets, m_bulletTargets, m_bulletPool, weaponShots);
     }
 
     EventBus::dispatchQueued();
@@ -375,7 +378,7 @@ void BossScene::renderViewmodel(const Matrix& view, const Vector3& camPos)
     m_renderer->BeginViewmodelPass();   // 深度クリアして常に最前面に描画
 
     m_renderQueue.clear();
-    m_player->renderWeapon(m_renderQueue, view);
+    m_player->getWeapon().render(m_renderQueue, view);
     m_renderer->ExecuteRenderCommands(m_renderQueue, view, m_camera->getViewModelProjection(), camPos);
 }
 

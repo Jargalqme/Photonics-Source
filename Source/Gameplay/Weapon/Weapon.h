@@ -3,7 +3,7 @@
 #include <SimpleMath.h>
 #include <vector>
 
-struct ShotIntent;
+struct WeaponShot;
 
 class Weapon
 {
@@ -18,7 +18,7 @@ public:
         const DirectX::SimpleMath::Vector3& hitScanOrigin,
         const DirectX::SimpleMath::Vector3& hitScanDirection,
         const DirectX::SimpleMath::Vector3& tracerStart,
-        std::vector<ShotIntent>& outIntents);
+        std::vector<WeaponShot>& outShots);
 
     void startFire();
     void stopFire();
@@ -38,7 +38,7 @@ protected:
         const DirectX::SimpleMath::Vector3& hitScanOrigin,
         const DirectX::SimpleMath::Vector3& hitScanDirection,
         const DirectX::SimpleMath::Vector3& tracerStart,
-        std::vector<ShotIntent>& outIntents) = 0;
+        std::vector<WeaponShot>& outShots) = 0;
 
     int m_ammo = 0;
     int m_clipSize = 30;

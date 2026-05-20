@@ -1,11 +1,10 @@
 #include "pch.h"
 #include "Gameplay/Player.h"
-#include "Gameplay/Combat/WeaponRifle.h"
 #include "Gameplay/EventBus.h"
 #include "Gameplay/EventTypes.h"
+#include "Gameplay/Weapon/PlayerWeapon.h"
 #include "Services/SceneContext.h"
 #include "Services/InputManager.h"
-#include "Render/RenderCommandQueue.h"
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
@@ -51,14 +50,14 @@ namespace
 }
 
 Player::Player(SceneContext& context)
-    : m_context(&context)
-    , m_weapon(std::make_unique<WeaponRifle>())
+    : m_weapon(std::make_unique<PlayerWeapon>(context))
 {
 }
 
+Player::~Player() = default;
+
 void Player::initialize()
 {
-    m_viewmodelMesh.loadImportedRifle(*m_context, IMPORTED_RIFLE_VIEWMODEL_PATH);
     m_weapon->initialize();
 }
 
@@ -67,32 +66,18 @@ Vector2 Player::applyLookDelta(float deltaYaw, float deltaPitch)
     const float previousPitch = m_lookPitch;
 
     m_lookYaw += deltaYaw;
-    if (m_lookYaw > 360.0f)
-    {
-        m_lookYaw -= 360.0f;
-    }
-    if (m_lookYaw < 0.0f)
-    {
-        m_lookYaw += 360.0f;
-    }
+    if (m_lookYaw > 360.0f) { m_lookYaw -= 360.0f; }
+    if (m_lookYaw < 0.0f)   { m_lookYaw += 360.0f; }
 
     m_lookPitch += deltaPitch;
-    if (m_lookPitch > LOOK_PITCH_CLAMP)
-    {
-        m_lookPitch = LOOK_PITCH_CLAMP;
-    }
-    if (m_lookPitch < -LOOK_PITCH_CLAMP)
-    {
-        m_lookPitch = -LOOK_PITCH_CLAMP;
-    }
+    if (m_lookPitch > LOOK_PITCH_CLAMP)  { m_lookPitch = LOOK_PITCH_CLAMP; }
+    if (m_lookPitch < -LOOK_PITCH_CLAMP) { m_lookPitch = -LOOK_PITCH_CLAMP;}
 
     return Vector2(deltaYaw, m_lookPitch - previousPitch);
 }
 
-void Player::applyMovement(const Vector3& direction, float aimYaw, float deltaTime)
+void Player::updateMovement(const Vector3& direction, float deltaTime)
 {
-    m_transform.rotation.y = aimYaw;
-
     Vector3 moveDir = direction;
     moveDir.y = 0.0f;
     if (moveDir.LengthSquared() > MOVE_THRESHOLD)
@@ -105,26 +90,20 @@ void Player::applyMovement(const Vector3& direction, float aimYaw, float deltaTi
     m_transform.position.z = std::clamp(m_transform.position.z, -ARENA_HALF_SIZE, ARENA_HALF_SIZE);
 }
 
-void Player::update(InputManager& input, float deltaTime, std::vector<ShotIntent>& outIntents)
+void Player::update(InputManager& input, float deltaTime, std::vector<WeaponShot>& outShots)
 {
     const Vector2 mouseDelta = input.getMouseDelta();
-    const Vector2 weaponLookDeltaDegrees = applyLookDelta(
+    const Vector2 viewDeltaDegrees = applyLookDelta(
         mouseDelta.x * m_mouseSensitivity,
         mouseDelta.y * m_mouseSensitivity);
 
-    setAiming(input.isRightMouseDown());
-    setFiring(input.isLeftMouseDown());
-
-    if (input.isKeyPressed(Keyboard::Keys::R))
-    {
-        reload();
-    }
+    const bool fireHeld = input.isLeftMouseDown();
+    const bool adsHeld = input.isRightMouseDown();
+    const bool reloadPressed = input.isKeyPressed(Keyboard::Keys::R);
+    setAiming(adsHeld);
 
     const Vector2 move = playerReadMoveInput(input);
-    applyMovement(
-        playerMovementDirection(*this, move),
-        XMConvertToRadians(m_lookYaw),
-        deltaTime);
+    updateMovement(playerMovementDirection(*this, move), deltaTime);
 
     if (input.isKeyPressed(Keyboard::Keys::Space))
     {
@@ -133,71 +112,51 @@ void Player::update(InputManager& input, float deltaTime, std::vector<ShotIntent
 
     updateInvincibility(deltaTime);
     updateVerticalMovement(deltaTime);
-    updateWeaponAnimation(deltaTime, weaponLookDeltaDegrees);
 
-    const Vector3 hitScanDirection = getLookForward();
-    const Vector3 hitScanOrigin = getEyePosition();
-    const Vector3 tracerStart = getMuzzlePosition();
-    updateWeapon(deltaTime, hitScanOrigin, hitScanDirection, tracerStart, outIntents);
-}
-
-void Player::setFiring(bool firing)
-{
-    if (firing)
-    {
-        m_weapon->startFire();
-    }
-    else
-    {
-        m_weapon->stopFire();
-    }
+    PlayerWeaponFrame weaponFrame;
+    weaponFrame.deltaTime = deltaTime;
+    weaponFrame.hitScanOrigin = getEyePosition();
+    weaponFrame.hitScanDirection = getLookForward();
+    weaponFrame.viewDeltaDegrees = viewDeltaDegrees;
+    weaponFrame.moveSpeed = movementSpeed(deltaTime);
+    weaponFrame.fireHeld = fireHeld;
+    weaponFrame.adsHeld = adsHeld;
+    weaponFrame.reloadPressed = reloadPressed;
+    weaponFrame.isGrounded = m_isGrounded;
+    weaponFrame.cameraWorld = createGameplayCameraWorldMatrix();
+    m_weapon->update(weaponFrame, outShots);
 }
 
 void Player::clearInputState()
 {
-    setFiring(false);
+    m_weapon->clearInputState();
     setAiming(false);
 }
 
-void Player::updateWeaponAnimation(float deltaTime, const Vector2& lookDeltaDegrees)
+PlayerWeapon& Player::getWeapon()
 {
-    const float moveSpeed01 = calculateMoveSpeed01(deltaTime);
-
-    WeaponAnimationInput animationInput;
-    animationInput.deltaTime = deltaTime;
-    animationInput.lookDeltaDegrees = lookDeltaDegrees;
-    animationInput.moveSpeed01 = moveSpeed01;
-    animationInput.isGrounded = m_isGrounded;
-    animationInput.isAiming = m_isAiming;
-
-    m_viewmodelAnimator.update(animationInput);
+    return *m_weapon;
 }
 
-float Player::calculateMoveSpeed01(float deltaTime)
+const PlayerWeapon& Player::getWeapon() const
 {
-    Vector3 delta = m_transform.position - m_lastPosition;
-    delta.y = 0.0f;
-    m_lastPosition = m_transform.position;
+    return *m_weapon;
+}
 
+float Player::movementSpeed(float deltaTime)
+{
     if (deltaTime <= 0.0f || m_speed <= 0.0f)
     {
+        m_lastPosition = m_transform.position;
         return 0.0f;
     }
 
-    return std::clamp((delta.Length() / deltaTime) / m_speed, 0.0f, 1.0f);
-}
+    Vector3 delta = m_transform.position - m_lastPosition;
+    delta.y = 0.0f;
 
-void Player::updateWeapon(
-    float deltaTime,
-    const Vector3& hitScanOrigin,
-    const Vector3& hitScanDirection,
-    const Vector3& tracerStart,
-    std::vector<ShotIntent>& outIntents)
-{
-    if (m_weapon->update(deltaTime, hitScanOrigin, hitScanDirection, tracerStart, outIntents))
-    {
-        m_viewmodelAnimator.onWeaponFired();
-    }
+    m_lastPosition = m_transform.position;
+
+    return delta.Length() / deltaTime;
 }
 
 void Player::jump()
@@ -246,7 +205,6 @@ void Player::collectHitColliders(std::vector<CombatHitCollider>& out)
 
     CombatHitCollider c;
     c.target = this;
-    c.faction = CombatFaction::Player;
     c.part = HitPart::Body;
     c.bounds.Center = XMFLOAT3(
         m_transform.position.x,
@@ -288,15 +246,9 @@ void Player::takeDamage(float amount)
     m_invincibleTimer = INVINCIBLE_DURATION;
 }
 
-void Player::renderWeapon(RenderCommandQueue& queue, const Matrix& view)
-{
-    const Matrix cameraWorld = view.Invert();
-    m_viewmodelMesh.submit(queue, createViewmodelRootWorldMatrix(cameraWorld));
-}
-
 void Player::finalize()
 {
-    m_viewmodelMesh.finalize();
+    m_weapon->finalize();
 }
 
 Matrix Player::createGameplayCameraWorldMatrix() const
@@ -309,24 +261,6 @@ Matrix Player::createGameplayCameraWorldMatrix() const
 
     const Matrix view = XMMatrixLookAtLH(eyePosition, eyePosition + forward, up);
     return view.Invert();
-}
-
-Matrix Player::createViewmodelRootWorldMatrix(const Matrix& cameraWorld) const
-{
-    const WeaponAnimationOutput animation = m_viewmodelAnimator.getOutput();
-    const Vector3 rotationRadians(
-        XMConvertToRadians(animation.rotationDegrees.x),
-        XMConvertToRadians(animation.rotationDegrees.y),
-        XMConvertToRadians(animation.rotationDegrees.z));
-
-    const Matrix animationRotation = Matrix::CreateFromYawPitchRoll(
-        rotationRadians.y,
-        rotationRadians.x,
-        rotationRadians.z);
-
-    return animationRotation
-        * Matrix::CreateTranslation(animation.position)
-        * cameraWorld;
 }
 
 Vector3 Player::getLookForward() const
@@ -349,17 +283,19 @@ Vector3 Player::getLookRight() const
     return right;
 }
 
-Vector3 Player::getMuzzlePosition() const
+bool Player::isReloading() const
 {
-    const Matrix cameraWorld = createGameplayCameraWorldMatrix();
-    const Matrix rootWorld = createViewmodelRootWorldMatrix(cameraWorld);
-    const Matrix modelWorld = m_viewmodelMesh.buildModelWorldMatrix(rootWorld);
-    return Vector3::Transform(m_viewmodelMesh.getMuzzleLocalPosition(), modelWorld);
+    return m_weapon->isReloading();
 }
 
-Vector3 Player::getForward() const
+int Player::getAmmo() const
 {
-    return Vector3(std::sin(m_transform.rotation.y), 0.0f, std::cos(m_transform.rotation.y));
+    return m_weapon->getAmmo();
+}
+
+int Player::getMaxAmmo() const
+{
+    return m_weapon->getMaxAmmo();
 }
 
 void Player::reset()
@@ -369,9 +305,10 @@ void Player::reset()
     m_health = m_maxHealth;
     m_invincibleTimer = 0.0f;
     m_isAiming = false;
+    m_isGrounded = true;
+    m_verticalVelocity = 0.0f;
     m_lookYaw = 0.0f;
     m_lookPitch = 0.0f;
     m_lastPosition = m_transform.position;
-    m_viewmodelAnimator.reset();
-    m_weapon->initialize();
+    m_weapon->reset();
 }

@@ -10,7 +10,6 @@ public:
         float speed,
         float lifetime,
         float damage,
-        CombatFaction faction,
         const Vector4& color = Vector4(1.0f, 1.0f, 1.0f, 1.0f));
 
     void update(float deltaTime);

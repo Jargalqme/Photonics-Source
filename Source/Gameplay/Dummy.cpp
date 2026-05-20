@@ -99,7 +99,6 @@ void Dummy::collectHitColliders(std::vector<CombatHitCollider>& out)
     {
         CombatHitCollider c;
         c.target = this;
-        c.faction = CombatFaction::Enemy;
         c.part = HitPart::Body;
         c.bounds.Center = XMFLOAT3(
             m_transform.position.x,
@@ -114,7 +113,6 @@ void Dummy::collectHitColliders(std::vector<CombatHitCollider>& out)
     {
         CombatHitCollider c;
         c.target = this;
-        c.faction = CombatFaction::Enemy;
         c.part = HitPart::Head;
         c.bounds.Center = XMFLOAT3(
             m_transform.position.x,

@@ -1,7 +1,7 @@
 #pragma once
 #include <SimpleMath.h>
 #include <DirectXCollision.h>
-#include "Gameplay/Combat/ICombatTarget.h"
+#include "Gameplay/ICombatTarget.h"
 
 using namespace DirectX::SimpleMath;
 
@@ -15,7 +15,6 @@ public:
         float speed,
         float lifetime,
         float damage,
-        CombatFaction faction,
         const Vector4& color = Vector4(1.0f, 1.0f, 1.0f, 1.0f));
 
     void update(float deltaTime);
@@ -30,7 +29,6 @@ public:
     void deactivate() { m_active = false; }
 
     // --- ゲッター ---
-    CombatFaction getFaction() const { return m_faction; }
     float getDamage() const { return m_damage; }
     Vector3 getPosition() const { return m_position; }
     Vector3 getDirection() const { return m_direction; }
@@ -64,7 +62,6 @@ private:
     float m_phaseSpeed = 0.0f;
     bool m_hasPhaseSwitch = false;
 
-    CombatFaction m_faction = CombatFaction::Player;
     Vector4 m_color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
     DirectX::BoundingSphere m_boundingSphere = { XMFLOAT3(0.0f, 0.0f, 0.0f), 0.0f };
 };

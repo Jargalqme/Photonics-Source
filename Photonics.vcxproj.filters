@@ -20,7 +20,7 @@
     <Filter Include="Core">
       <UniqueIdentifier>{92e8d192-ff71-4d91-bdc2-c982c5455198}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Collision">
+    <Filter Include="Weapon">
       <UniqueIdentifier>{aeb4da6f-a85e-4b15-8321-f46cb773bf3b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -96,19 +96,21 @@
     <ClInclude Include="Core\DeviceResources.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Gameplay\Combat\CollisionSystem.h">
-      <Filter>Collision</Filter>
-    </ClInclude>
+    <ClInclude Include="Source\Gameplay\CollisionSystem.h" />
     <ClInclude Include="Source\Common\Transform.h" />
     <ClInclude Include="Source\UI\DebugUI.h" />
     <ClInclude Include="Source\Gameplay\Player.h" />
-    <ClInclude Include="Source\Gameplay\PlayerViewmodel.h" />
+    <ClInclude Include="Source\Gameplay\Weapon\PlayerWeapon.h">
+      <Filter>Weapon</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Gameplay\Weapon\WeaponModel.h">
+      <Filter>Weapon</Filter>
+    </ClInclude>
     <ClInclude Include="Source\Gameplay\Boss.h" />
     <ClInclude Include="ThirdParty\FastNoiseLite.h" />
     <ClInclude Include="Source\Render\Grid.h" />
     <ClInclude Include="Source\Gameplay\Dummy.h" />
     <ClInclude Include="Source\Services\BeatTracker.h" />
-    <ClInclude Include="Source\Gameplay\GameObject.h" />
     <ClInclude Include="Source\Common\StateMachine.h" />
     <ClInclude Include="Source\Common\Easing.h" />
     <ClInclude Include="Source\Gameplay\Bullet.h" />
@@ -121,18 +123,26 @@
     <ClInclude Include="Source\Gameplay\BossAttackManager.h" />
     <ClInclude Include="Source\Render\ArenaFloor.h" />
     <ClInclude Include="Source\Common\Spring.h" />
-    <ClInclude Include="Source\Gameplay\Combat\WeaponAnimator.h" />
-    <ClInclude Include="Source\Gameplay\Combat\Weapon.h" />
-    <ClInclude Include="Source\Gameplay\Combat\WeaponRifle.h" />
+    <ClInclude Include="Source\Gameplay\Weapon\WeaponMotion.h">
+      <Filter>Weapon</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Gameplay\Weapon\Weapon.h">
+      <Filter>Weapon</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Gameplay\Weapon\WeaponRifle.h">
+      <Filter>Weapon</Filter>
+    </ClInclude>
     <ClInclude Include="Source\Services\SceneContext.h" />
     <ClInclude Include="Source\Render\ShaderCache.h" />
     <ClInclude Include="Source\Render\MeshCache.h" />
     <ClInclude Include="Source\Render\RenderUtil.h" />
     <ClInclude Include="Source\Render\Tracers.h" />
-    <ClInclude Include="Source\Gameplay\Combat\ShotIntent.h" />
+    <ClInclude Include="Source\Gameplay\Weapon\WeaponShot.h">
+      <Filter>Weapon</Filter>
+    </ClInclude>
     <ClInclude Include="Source\Render\RenderCommand.h" />
     <ClInclude Include="Source\Render\RenderCommandQueue.h" />
-    <ClInclude Include="Source\Gameplay\Combat\ICombatTarget.h" />
+    <ClInclude Include="Source\Gameplay\ICombatTarget.h" />
     <ClInclude Include="Source\Render\AssimpModelImporter.h" />
     <ClInclude Include="Source\Render\ImportedModel.h" />
     <ClInclude Include="Source\Render\ImportedModelCache.h" />
@@ -206,15 +216,18 @@
     <ClCompile Include="Core\DeviceResources.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Gameplay\Combat\CollisionSystem.cpp">
-      <Filter>Collision</Filter>
-    </ClCompile>
+    <ClCompile Include="Source\Gameplay\CollisionSystem.cpp" />
     <ClCompile Include="Core\Main.cpp">
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="Source\UI\DebugUI.cpp" />
     <ClCompile Include="Source\Gameplay\Player.cpp" />
-    <ClCompile Include="Source\Gameplay\PlayerViewmodel.cpp" />
+    <ClCompile Include="Source\Gameplay\Weapon\PlayerWeapon.cpp">
+      <Filter>Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Gameplay\Weapon\WeaponModel.cpp">
+      <Filter>Weapon</Filter>
+    </ClCompile>
     <ClCompile Include="Source\Gameplay\Boss.cpp" />
     <ClCompile Include="Source\Render\Grid.cpp" />
     <ClCompile Include="Source\Gameplay\Dummy.cpp" />
@@ -228,9 +241,15 @@
     <ClCompile Include="Source\Render\Billboard.cpp" />
     <ClCompile Include="Source\Gameplay\BossAttackManager.cpp" />
     <ClCompile Include="Source\Render\ArenaFloor.cpp" />
-    <ClCompile Include="Source\Gameplay\Combat\WeaponAnimator.cpp" />
-    <ClCompile Include="Source\Gameplay\Combat\Weapon.cpp" />
-    <ClCompile Include="Source\Gameplay\Combat\WeaponRifle.cpp" />
+    <ClCompile Include="Source\Gameplay\Weapon\WeaponMotion.cpp">
+      <Filter>Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Gameplay\Weapon\Weapon.cpp">
+      <Filter>Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Gameplay\Weapon\WeaponRifle.cpp">
+      <Filter>Weapon</Filter>
+    </ClCompile>
     <ClCompile Include="Source\Render\ShaderCache.cpp" />
     <ClCompile Include="Source\Render\MeshCache.cpp" />
     <ClCompile Include="Source\Render\RenderUtil.cpp" />

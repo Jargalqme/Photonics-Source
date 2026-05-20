@@ -6,12 +6,6 @@
 
 class ICombatTarget;
 
-enum class CombatFaction
-{
-    Player,
-    Enemy
-};
-
 enum class HitPart
 {
     Body,
@@ -24,7 +18,6 @@ enum class HitPart
 struct CombatHitCollider
 {
     ICombatTarget*           target           = nullptr;
-    CombatFaction            faction          = CombatFaction::Enemy;
     HitPart                  part             = HitPart::Body;
     DirectX::BoundingSphere  bounds;
     float                    damageMultiplier = 1.0f;

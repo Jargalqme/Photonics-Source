@@ -11,7 +11,6 @@ void Bullet::initialize(
     float speed,
     float lifetime,
     float damage,
-    CombatFaction faction,
     const Vector4& color)
 {
     m_position = position;
@@ -22,7 +21,6 @@ void Bullet::initialize(
     m_totalLifetime = lifetime;
     m_lifetime = lifetime;
     m_damage = damage;
-    m_faction = faction;
     m_color = color;
     m_active = true;
 

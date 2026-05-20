@@ -1,7 +1,7 @@
 #pragma once
 #include <DirectXCollision.h>
 #include "Gameplay/BossAttackManager.h"
-#include "Gameplay/Combat/ICombatTarget.h"
+#include "Gameplay/ICombatTarget.h"
 #include "Common/StateMachine.h"
 #include "Common/Transform.h"
 #include "Render/Billboard.h"

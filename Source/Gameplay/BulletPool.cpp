@@ -7,14 +7,13 @@ Bullet* BulletPool::acquire(
     float speed,
     float lifetime,
     float damage,
-    CombatFaction faction,
     const Vector4& color)
 {
     for (int i = 0; i < MAX_BULLETS; i++)
     {
         if (!m_bullets[i].isActive())
         {
-            m_bullets[i].initialize(position, direction, speed, lifetime, damage, faction, color);
+            m_bullets[i].initialize(position, direction, speed, lifetime, damage, color);
             return &m_bullets[i];
         }
     }

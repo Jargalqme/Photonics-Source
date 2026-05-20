@@ -54,7 +54,6 @@ void GameUI::update(float deltaTime)
 void GameUI::render(const Matrix& view, const Matrix& proj)
 {
     drawDummyHealthBar(view, proj);
-    drawMinimap();
     drawCrosshair();
     if (m_showWaveIndicator)
     {
@@ -90,107 +89,6 @@ void GameUI::drawWaveIndicator()
     float y = 10.0f;
 
     drawList->AddText(font, 36.0f, ImVec2(x, y), IM_COL32(0, 255, 255, 255), text);
-}
-
-// === ミニマップ ===
-
-void GameUI::drawMinimap()
-{
-    auto size = m_deviceResources->GetOutputSize();
-    float screenWidth = static_cast<float>(size.right - size.left);
-
-    // ミニマップ配置（円形）
-    float mapRadius = 120.0f;
-    float mapCenterX = screenWidth - mapRadius - 30.0f;
-    float mapCenterY = mapRadius + 30.0f;
-    float worldSize = 100.0f;
-
-    ImDrawList* drawList = ImGui::GetForegroundDrawList();
-
-    // 円形背景
-    drawList->AddCircleFilled(
-        ImVec2(mapCenterX, mapCenterY),
-        mapRadius,
-        IM_COL32(20, 20, 20, 200),
-        32
-    );
-
-    // 枠線
-    drawList->AddCircle(
-        ImVec2(mapCenterX, mapCenterY),
-        mapRadius,
-        IM_COL32(100, 100, 100, 255),
-        32,
-        2.0f
-    );
-
-    // プレイヤー相対回転
-    Vector3 playerPos = m_player->getPosition();
-    Vector3 fwd = m_player->getForward();
-    float sinYaw = fwd.x;
-    float cosYaw = fwd.z;
-
-    auto worldToMinimap = [&](Vector3 worldPos) -> ImVec2
-    {
-        // プレイヤーからのオフセット（プレイヤーが中心）
-        float dx = worldPos.x - playerPos.x;
-        float dz = worldPos.z - playerPos.z;
-
-        // ヨーの逆回転（プレイヤーの前方が上向き）
-        float rx = dx * cosYaw - dz * sinYaw;
-        float ry = dx * sinYaw + dz * cosYaw;
-
-        float x = (rx / worldSize) * mapRadius + mapCenterX;
-        float y = (-ry / worldSize) * mapRadius + mapCenterY;
-        return ImVec2(x, y);
-    };
-
-    auto isInsideCircle = [&](ImVec2 pos) -> bool
-    {
-        float dx = pos.x - mapCenterX;
-        float dy = pos.y - mapCenterY;
-        return (dx * dx + dy * dy) <= (mapRadius * mapRadius);
-    };
-
-    // 敵（黄色の点）
-    if (m_dummies)
-    {
-        for (auto& dummy : *m_dummies)
-        {
-            if (dummy->isActive())
-            {
-                ImVec2 pos = worldToMinimap(dummy->getPosition());
-                if (isInsideCircle(pos))
-                {
-                    drawList->AddCircleFilled(pos, 2.0f, IM_COL32(255, 255, 0, 255));
-                }
-            }
-        }
-    }
-
-    // ボス（マゼンタ）
-    if (m_boss && m_boss->isActivated() && !m_boss->isDead())
-    {
-        ImVec2 pos = worldToMinimap(m_boss->getPosition());
-        if (isInsideCircle(pos))
-        {
-            drawList->AddCircleFilled(pos, 5.0f, IM_COL32(255, 0, 255, 255));
-        }
-    }
-
-    // プレイヤー（シアン三角形）
-    if (m_player)
-    {
-        float triSize = 8.0f;
-        ImVec2 center(mapCenterX, mapCenterY);
-
-        drawList->AddTriangleFilled(
-            ImVec2(center.x, center.y - triSize),
-            ImVec2(center.x - triSize * 0.6f, center.y + triSize * 0.5f),
-            ImVec2(center.x + triSize * 0.6f, center.y + triSize * 0.5f),
-            IM_COL32(0, 255, 255, 255)
-        );
-    }
 }
 
 // === 照準 ===

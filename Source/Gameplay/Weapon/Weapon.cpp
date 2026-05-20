@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "Gameplay/Combat/Weapon.h"
+#include "Gameplay/Weapon/Weapon.h"
 #include "Gameplay/EventBus.h"
 #include "Gameplay/EventTypes.h"
 
@@ -17,7 +17,7 @@ bool Weapon::update(
     const Vector3& hitScanOrigin,
     const Vector3& hitScanDirection,
     const Vector3& tracerStart,
-    std::vector<ShotIntent>& outIntents)
+    std::vector<WeaponShot>& outShots)
 {
     if (m_nextShotTime > 0.0f)
     {
@@ -37,7 +37,7 @@ bool Weapon::update(
 
     if (m_firing && canFire())
     {
-        if (shoot(hitScanOrigin, hitScanDirection, tracerStart, outIntents))
+        if (shoot(hitScanOrigin, hitScanDirection, tracerStart, outShots))
         {
             m_nextShotTime = m_fireInterval;
             --m_ammo;

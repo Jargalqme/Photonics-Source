@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Common/Transform.h"
-#include "Gameplay/Combat/ICombatTarget.h"
+#include "Gameplay/ICombatTarget.h"
 #include <DirectXCollision.h>
 #include <algorithm>
 
