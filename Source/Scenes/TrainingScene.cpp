@@ -12,6 +12,7 @@
 #include "Services/InputManager.h"
 #include "Render/ImportedModelCache.h"
 #include <imgui.h>
+#include <filesystem>
 #include <limits>
 
 namespace
@@ -19,6 +20,7 @@ namespace
     constexpr const char* RIFLE_FIRE_GROUP = "rifle_fire";
     constexpr float RIFLE_FIRE_VOLUME = 0.35f;
     constexpr float RIFLE_FIRE_PITCH_JITTER = 0.015f;
+    constexpr const wchar_t* ENVIRONMENT_LAYOUT_PATH = L"Environment/environment.json";
 
 #ifdef _DEBUG
     constexpr bool SHOW_IMPORTED_RIFLE_WORLD_PREVIEW = false;
@@ -78,6 +80,11 @@ namespace
             audio.addSoundToGroup(RIFLE_FIRE_GROUP, fallbackName);
         }
     }
+
+    std::string getAssetPathString(const wchar_t* relativePath)
+    {
+        return std::filesystem::path(GetAssetPath(relativePath)).string();
+    }
 }
 
 TrainingScene::TrainingScene(SceneManager* sceneManager)
@@ -121,15 +128,20 @@ void TrainingScene::initialize(SceneContext& context)
     // ワールド
     m_grid = std::make_unique<Grid>(m_deviceResources);
     m_grid->initialize();
+    LayoutLoader::loadLayout(
+        *m_context,
+        getAssetPathString(ENVIRONMENT_LAYOUT_PATH),
+        m_environmentLayout);
 
-    // ダミー（最大数を確保し、enter() で必要数だけアクティブ化）
-    allocateDummies();
+    // ダミー
+    m_dummy = std::make_unique<Dummy>(*m_context);
+    m_dummy->initialize();
 
     // UI
     m_gameUI = std::make_unique<GameUI>();
     m_gameUI->initialize(m_deviceResources);
     m_gameUI->setPlayer(m_player.get());
-    m_gameUI->setDummies(&m_dummies);
+    m_gameUI->setDummy(m_dummy.get());
     m_gameUI->setShowWaveIndicator(false);
 
 #ifdef _DEBUG
@@ -139,19 +151,10 @@ void TrainingScene::initialize(SceneContext& context)
     m_debugUI->setGrid(m_grid.get());
     m_debugUI->setBulletPool(&m_bulletPool);
     m_debugUI->setBloom(m_renderer->GetSceneRenderer()->getBloom());
+    m_debugUI->setExposurePtr(m_camera->getExposurePtr());
+    m_renderer->GetSceneRenderer()->setActiveCamera(m_camera.get());
     m_debugUI->setAudioManager(m_audioManager.get());
 #endif
-}
-
-void TrainingScene::allocateDummies()
-{
-    m_dummies.clear();
-    m_dummies.reserve(MAX_DUMMIES);
-    for (int i = 0; i < MAX_DUMMIES; i++)
-    {
-        m_dummies.push_back(std::make_unique<Dummy>(*m_context));
-        m_dummies.back()->initialize();
-    }
 }
 
 // === シーン遷移 ===
@@ -202,16 +205,12 @@ void TrainingScene::enter()
         m_bulletPool.getBullets()[i].deactivate();
     }
 
-    // ダミー初期化 — m_dummyCount 体だけ初期位置にスポーン
-    resetAllDummies();
-    applyDummyParameters();
+    // ダミーをスポーン
+    m_dummy->spawn(Vector3(0.0f, 0.0f, DUMMY_SPAWN_Z));
 
     // 戦闘ターゲット = ダミーのみ。Player を含めない = 永久無敵。
     m_shotTargets.clear();
-    for (auto& dummy : m_dummies)
-    {
-        m_shotTargets.push_back(dummy.get());
-    }
+    m_shotTargets.push_back(m_dummy.get());
     m_bulletTargets.clear();
 
     // ブルーム有効化（exit() で disable されるため毎エントリで再有効化）
@@ -236,12 +235,9 @@ void TrainingScene::finalize()
     if (m_particleSystem) { m_particleSystem->finalize(); }
     if (m_bulletRenderer) { m_bulletRenderer->finalize(); }
     if (m_tracers) { m_tracers->finalize(); }
-    for (auto& dummy : m_dummies)
-    {
-        dummy->finalize();
-    }
+    if (m_dummy) { m_dummy->finalize(); }
 
-    m_dummies.clear();
+    m_dummy.reset();
     m_particleSystem.reset();
     m_bulletRenderer.reset();
     m_tracers.reset();
@@ -250,42 +246,6 @@ void TrainingScene::finalize()
     m_grid.reset();
     m_audioManager.reset();
     m_debugUI.reset();
-}
-
-// === ダミーヘルパー ===
-
-Vector3 TrainingScene::dummyGridPosition(int index) const
-{
-    const int col = index % DUMMY_COLUMNS;
-    const int row = index / DUMMY_COLUMNS;
-    const float x = (float(col) - (DUMMY_COLUMNS - 1) * 0.5f) * DUMMY_SPACING_X;
-    const float z = DUMMY_BASE_Z + float(row) * DUMMY_SPACING_Z;
-    return Vector3(x, 0.0f, z);
-}
-
-void TrainingScene::resetAllDummies()
-{
-    for (int i = 0; i < MAX_DUMMIES; i++)
-    {
-        if (i < m_dummyCount)
-        {
-            m_dummies[i]->spawn(dummyGridPosition(i));
-        }
-        else
-        {
-            m_dummies[i]->deactivate();
-        }
-    }
-}
-
-void TrainingScene::applyDummyParameters()
-{
-    for (auto& dummy : m_dummies)
-    {
-        dummy->setMoving(m_dummyMoving, m_dummyMoveAmplitude, m_dummyMoveFrequency);
-        dummy->setInvulnerable(m_dummyInvulnerable);
-        dummy->setRespawnDelay(m_dummyRespawnDelay);
-    }
 }
 
 // === 更新 ===
@@ -328,10 +288,7 @@ void TrainingScene::update(float deltaTime, InputManager* input)
         m_player->update(*input, deltaTime, weaponShots);
     }
 
-    for (auto& dummy : m_dummies)
-    {
-        dummy->update(deltaTime);
-    }
+    m_dummy->update(deltaTime);
 
     m_combatSystem.update(deltaTime, m_shotTargets, m_bulletTargets, m_bulletPool, weaponShots);
 
@@ -369,9 +326,15 @@ void TrainingScene::renderWorld(const Matrix& view, const Matrix& proj, const Ve
     m_grid->render(view, proj);
 
     m_renderQueue.clear();
-    for (const auto& dummy : m_dummies)
+    m_dummy->submitRender(m_renderQueue);
+
+    for (const PrimitiveLayoutPart& part : m_environmentLayout.parts)
     {
-        dummy->submitRender(m_renderQueue);
+        MeshCommand command;
+        command.mesh = part.primitive;
+        command.world = part.localTransform.getMatrix();
+        command.color = part.color;
+        m_renderQueue.submit(command);
     }
 
 #ifdef _DEBUG

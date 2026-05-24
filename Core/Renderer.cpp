@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Renderer.h"
 #include "Source/Render/RenderCommandQueue.h"
 #include "Source/Render/Billboard.h"
@@ -55,6 +55,20 @@ namespace
         }
 
         return materials[submesh.materialIndex].baseColorTextureIndex;
+    }
+
+    Color ApplyEmissiveIntensity(Color color, float emissiveIntensity)
+    {
+        if (emissiveIntensity <= 0.0f)
+        {
+            return color;
+        }
+
+        const float multiplier = 1.0f + emissiveIntensity;
+        color.x *= multiplier;
+        color.y *= multiplier;
+        color.z *= multiplier;
+        return color;
     }
 
     void SetImportedModelBlendState(
@@ -282,8 +296,8 @@ void Renderer::CreateImportedModelResources()
     auto* device = m_deviceResources->GetD3DDevice();
 
     ComPtr<ID3DBlob> vsBlob;
-    m_importedModelVS = RenderUtil::loadVS(device, L"ImportedModelVS.cso", &vsBlob);
-    m_importedModelPS = RenderUtil::loadPS(device, L"ImportedModelPS.cso");
+    m_importedModelVS = RenderUtil::loadVS(device, L"VS_ImportedModel.cso", &vsBlob);
+    m_importedModelPS = RenderUtil::loadPS(device, L"PS_ImportedModel.cso");
 
     const D3D11_INPUT_ELEMENT_DESC inputElements[] =
     {
@@ -407,7 +421,7 @@ void Renderer::DrawImportedModelCommand(
     if (submeshes.empty())
     {
         cb.color = Vector4(command.color.x, command.color.y, command.color.z, command.color.w);
-        cb.materialFlags = Vector4::Zero;
+        cb.materialFlags = Vector4(0.0f, command.emissiveIntensity, 0.0f, 0.0f);
 
         ID3D11ShaderResourceView* nullTexture = nullptr;
         context->PSSetShaderResources(0, 1, &nullTexture);
@@ -432,7 +446,7 @@ void Renderer::DrawImportedModelCommand(
         cb.color = CombineImportedModelColor(command, model, submesh);
         const int32_t textureIndex = GetImportedModelBaseColorTextureIndex(model, submesh);
         ID3D11ShaderResourceView* textureSRV = model.textureSRV(textureIndex);
-        cb.materialFlags = Vector4(textureSRV ? 1.0f : 0.0f, 0.0f, 0.0f, 0.0f);
+        cb.materialFlags = Vector4(textureSRV ? 1.0f : 0.0f, command.emissiveIntensity, 0.0f, 0.0f);
         context->PSSetShaderResources(0, 1, &textureSRV);
 
         D3D11_MAPPED_SUBRESOURCE mapped = {};
@@ -467,7 +481,7 @@ void Renderer::ExecuteRenderCommands(
             command.world,
             view,
             projection,
-            command.color,
+            ApplyEmissiveIntensity(command.color, command.emissiveIntensity),
             nullptr,
             command.wireframe);
     };

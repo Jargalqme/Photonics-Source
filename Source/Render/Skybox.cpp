@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Skybox.h"
 #include "WICTextureLoader.h"
 
@@ -87,14 +87,14 @@ void Skybox::initialize()
     // シェーダー読み込み
     ComPtr<ID3DBlob> vsBlob;
     DX::ThrowIfFailed(D3DReadFileToBlob(
-        GetShaderPath(L"SkyboxVS.cso").c_str(), vsBlob.GetAddressOf()));
+        GetShaderPath(L"VS_Skybox.cso").c_str(), vsBlob.GetAddressOf()));
     DX::ThrowIfFailed(device->CreateVertexShader(
         vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(),
         nullptr, m_vertexShader.ReleaseAndGetAddressOf()));
 
     ComPtr<ID3DBlob> psBlob;
     DX::ThrowIfFailed(D3DReadFileToBlob(
-        GetShaderPath(L"SkyboxPS.cso").c_str(), psBlob.GetAddressOf()));
+        GetShaderPath(L"PS_Skybox.cso").c_str(), psBlob.GetAddressOf()));
     DX::ThrowIfFailed(device->CreatePixelShader(
         psBlob->GetBufferPointer(), psBlob->GetBufferSize(),
         nullptr, m_pixelShader.ReleaseAndGetAddressOf()));

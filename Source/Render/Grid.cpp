@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Grid.h"
 
 using namespace DirectX;
@@ -53,13 +53,13 @@ void Grid::initialize()
 
     // シェーダー読み込み
     Microsoft::WRL::ComPtr<ID3DBlob> vsBlob;
-    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"PristineGridVS.cso").c_str(), vsBlob.GetAddressOf()));
+    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"VS_PristineGrid.cso").c_str(), vsBlob.GetAddressOf()));
     DX::ThrowIfFailed(device->CreateVertexShader(
         vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(),
         nullptr, m_vertexShader.ReleaseAndGetAddressOf()));
 
     Microsoft::WRL::ComPtr<ID3DBlob> psBlob;
-    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"PristineGridPS.cso").c_str(), psBlob.GetAddressOf()));
+    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"PS_PristineGrid.cso").c_str(), psBlob.GetAddressOf()));
     DX::ThrowIfFailed(device->CreatePixelShader(
         psBlob->GetBufferPointer(), psBlob->GetBufferSize(),
         nullptr, m_pixelShader.ReleaseAndGetAddressOf()));
@@ -142,7 +142,7 @@ void Grid::renderPlane(const Matrix& world, const Matrix& view, const Matrix& pr
     // 定数バッファ更新
     ConstantBuffer cb;
     cb.worldViewProjection = (world * view * projection).Transpose();
-    cb.gridParams = Vector4(m_lineWidthX, m_lineWidthY, m_gridScale, 0.0f);
+    cb.gridParams = Vector4(m_lineWidthX, m_lineWidthY, m_gridScale, m_lineEmissiveIntensity);
     cb.lineColor = Vector4(m_finalColor.R(), m_finalColor.G(), m_finalColor.B(), m_finalColor.A());
     cb.baseColor = Vector4(m_baseColor.R(), m_baseColor.G(), m_baseColor.B(), m_baseColor.A());
     context->UpdateSubresource(m_constantBuffer.Get(), 0, nullptr, &cb, 0, 0);

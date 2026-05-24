@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "ColorMaskEffect.h"
 
 using namespace DirectX;
@@ -19,7 +19,7 @@ void ColorMaskEffect::createDeviceDependentResources()
 
     // 頂点シェーダー読み込み
     ComPtr<ID3DBlob> vsBlob;
-    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"FullscreenTriangleVS.cso").c_str(), vsBlob.GetAddressOf()));
+    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"VS_FullscreenTriangle.cso").c_str(), vsBlob.GetAddressOf()));
     DX::ThrowIfFailed(device->CreateVertexShader(
         vsBlob->GetBufferPointer(),
         vsBlob->GetBufferSize(),
@@ -28,7 +28,7 @@ void ColorMaskEffect::createDeviceDependentResources()
 
     // ピクセルシェーダー読み込み
     ComPtr<ID3DBlob> psBlob;
-    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"ColorMaskPS.cso").c_str(), psBlob.GetAddressOf()));
+    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"PS_ColorMask.cso").c_str(), psBlob.GetAddressOf()));
     DX::ThrowIfFailed(device->CreatePixelShader(
         psBlob->GetBufferPointer(),
         psBlob->GetBufferSize(),

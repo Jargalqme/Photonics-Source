@@ -61,9 +61,9 @@ private:
     static constexpr float TORUS_SPAWN_HEIGHT = 0.5f;
 
     // パターン別カラー（Tron パレット — プレイヤーのシアンを避けた暖色寄り）
-    static constexpr Vector4 RAIN_COLOR  = Vector4(1.0f, 0.2f, 1.0f, 1.0f);  // マゼンタ
-    static constexpr Vector4 BURST_COLOR = Vector4(1.0f, 0.5f, 0.1f, 1.0f);  // オレンジ
-    static constexpr Vector4 TORUS_COLOR = Vector4(1.0f, 0.9f, 0.1f, 1.0f);  // イエロー
+    static constexpr Vector4 RAIN_COLOR  = Vector4(4.0f, 0.8f, 4.0f, 1.0f);  // マゼンタ
+    static constexpr Vector4 BURST_COLOR = Vector4(4.0f, 2.0f, 0.4f, 1.0f);  // オレンジ
+    static constexpr Vector4 TORUS_COLOR = Vector4(4.0f, 3.6f, 0.4f, 1.0f);  // イエロー
 
     // バースト連射状態
     bool m_burstActive   = false;

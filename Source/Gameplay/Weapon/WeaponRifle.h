@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Gameplay/Weapon/Weapon.h"
 
 class WeaponRifle : public Weapon

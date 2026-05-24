@@ -144,14 +144,21 @@
     <ClInclude Include="Source\Render\RenderCommandQueue.h" />
     <ClInclude Include="Source\Gameplay\ICombatTarget.h" />
     <ClInclude Include="Source\Render\AssimpModelImporter.h" />
+    <ClInclude Include="Source\Render\Skinning\SkinnedVertex.h" />
+    <ClInclude Include="Source\Render\Skinning\SkinnedModelData.h" />
+    <ClInclude Include="Source\Render\Skinning\SkinnedModelImporter.h" />
+    <ClInclude Include="Source\Render\Skinning\SkinnedModel.h" />
+    <ClInclude Include="Source\Render\Skinning\SkinnedRenderer.h" />
+    <ClInclude Include="Source\Render\Skinning\Skeleton.h" />
+    <ClInclude Include="Source\Render\Skinning\AnimationPlayer.h" />
     <ClInclude Include="Source\Render\ImportedModel.h" />
     <ClInclude Include="Source\Render\ImportedModelCache.h" />
     <ClInclude Include="Source\Render\LayoutLoader.h" />
     <ClInclude Include="Source\Gameplay\CombatSystem.h" />
     <ClInclude Include="Source\Gameplay\EventBus.h" />
     <ClInclude Include="Source\Gameplay\EventTypes.h" />
-    <ClInclude Include="Source\Render\SceneCopyPass.h" />
     <ClInclude Include="Source\Render\SceneRenderer.h" />
+    <ClInclude Include="Source\Render\FinalCompositePass.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Common\Camera.cpp" />
@@ -256,13 +263,18 @@
     <ClCompile Include="Source\Render\Tracers.cpp" />
     <ClCompile Include="Source\Render\RenderCommandQueue.cpp" />
     <ClCompile Include="Source\Render\AssimpModelImporter.cpp" />
+    <ClCompile Include="Source\Render\Skinning\SkinnedModelImporter.cpp" />
+    <ClCompile Include="Source\Render\Skinning\SkinnedModel.cpp" />
+    <ClCompile Include="Source\Render\Skinning\SkinnedRenderer.cpp" />
+    <ClCompile Include="Source\Render\Skinning\Skeleton.cpp" />
+    <ClCompile Include="Source\Render\Skinning\AnimationPlayer.cpp" />
     <ClCompile Include="Source\Render\ImportedModel.cpp" />
     <ClCompile Include="Source\Render\ImportedModelCache.cpp" />
     <ClCompile Include="Source\Render\LayoutLoader.cpp" />
     <ClCompile Include="Source\Gameplay\CombatSystem.cpp" />
     <ClCompile Include="Source\Gameplay\EventBus.cpp" />
-    <ClCompile Include="Source\Render\SceneCopyPass.cpp" />
     <ClCompile Include="Source\Render\SceneRenderer.cpp" />
+    <ClCompile Include="Source\Render\FinalCompositePass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
@@ -273,75 +285,77 @@
     </Manifest>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shaders\ImportedModelPS.hlsl">
+    <FxCompile Include="Shaders\PS_ImportedModel.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\ImportedModelVS.hlsl">
+    <FxCompile Include="Shaders\VS_ImportedModel.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\BeamPS.hlsl">
+    <FxCompile Include="Shaders\PS_Beam.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\BeamVS.hlsl">
+    <FxCompile Include="Shaders\VS_Beam.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\TracerVS.hlsl">
+    <FxCompile Include="Shaders\VS_Tracer.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\TracerPS.hlsl">
+    <FxCompile Include="Shaders\PS_Tracer.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\ColorMaskPS.hlsl">
+    <FxCompile Include="Shaders\PS_ColorMask.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\FractalPS.hlsl">
+    <FxCompile Include="Shaders\PS_Fractal.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\PristineGridPS.hlsl">
+    <FxCompile Include="Shaders\PS_PristineGrid.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\PristineGridVS.hlsl">
+    <FxCompile Include="Shaders\VS_PristineGrid.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\MenuBackgroundVS.hlsl">
+    <FxCompile Include="Shaders\VS_MenuBackground.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\WarpingPS.hlsl">
+    <FxCompile Include="Shaders\PS_Warping.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\WavePS.hlsl">
+    <FxCompile Include="Shaders\PS_Wave.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\BoltVS.hlsl">
+    <FxCompile Include="Shaders\VS_Bolt.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\BeamBoltPS.hlsl">
+    <FxCompile Include="Shaders\PS_BeamBolt.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\OrbVS.hlsl">
+    <FxCompile Include="Shaders\VS_Orb.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\OrbPS.hlsl">
+    <FxCompile Include="Shaders\PS_Orb.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\ParticleVS.hlsl">
+    <FxCompile Include="Shaders\VS_Particle.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\ParticlePS.hlsl">
+    <FxCompile Include="Shaders\PS_Particle.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\SkyboxVS.hlsl" />
-    <FxCompile Include="Shaders\SkyboxPS.hlsl" />
-    <FxCompile Include="Shaders\FullscreenTriangleVS.hlsl" />
-    <FxCompile Include="Shaders\BloomPrefilterPS.hlsl" />
-    <FxCompile Include="Shaders\BloomDownsamplePS.hlsl" />
-    <FxCompile Include="Shaders\BloomUpsamplePS.hlsl" />
-    <FxCompile Include="Shaders\BloomCompositePS.hlsl" />
-    <FxCompile Include="Shaders\BillboardVS.hlsl" />
-    <FxCompile Include="Shaders\BillboardPS.hlsl" />
-    <FxCompile Include="Shaders\WaveWorldVS.hlsl" />
-    <FxCompile Include="Shaders\WaveWorldPS.hlsl" />
-    <FxCompile Include="Shaders\PS_SceneCopy.hlsl" />
+    <FxCompile Include="Shaders\VS_Skybox.hlsl" />
+    <FxCompile Include="Shaders\PS_Skybox.hlsl" />
+    <FxCompile Include="Shaders\VS_FullscreenTriangle.hlsl" />
+    <FxCompile Include="Shaders\PS_BloomPrefilter.hlsl" />
+    <FxCompile Include="Shaders\PS_BloomDownsample.hlsl" />
+    <FxCompile Include="Shaders\PS_BloomUpsample.hlsl" />
+    <FxCompile Include="Shaders\PS_BloomComposite.hlsl" />
+    <FxCompile Include="Shaders\VS_Billboard.hlsl" />
+    <FxCompile Include="Shaders\PS_Billboard.hlsl" />
+    <FxCompile Include="Shaders\VS_WaveWorld.hlsl" />
+    <FxCompile Include="Shaders\PS_WaveWorld.hlsl" />
+    <FxCompile Include="Shaders\VS_SkinnedMenu.hlsl" />
+    <FxCompile Include="Shaders\PS_SkinnedMenu.hlsl" />
+    <FxCompile Include="Shaders\PS_FinalComposite.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Common.hlsli" />

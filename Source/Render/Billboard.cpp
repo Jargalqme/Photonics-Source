@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Billboard.h"
 #include "WICTextureLoader.h"
 #include "DeviceResources.h"
@@ -21,8 +21,8 @@ void Billboard::initialize(const std::wstring& texturePath)
 {
 	auto* device = m_context->device->GetD3DDevice();
 
-	m_vertexShader = m_context->shaders->getVS(L"BillboardVS.cso");
-	m_pixelShader  = m_context->shaders->getPS(L"BillboardPS.cso");
+	m_vertexShader = m_context->shaders->getVS(L"VS_Billboard.cso");
+	m_pixelShader  = m_context->shaders->getPS(L"PS_Billboard.cso");
 
 	m_constantBuffer = RenderUtil::createConstantBuffer<CBData>(device);
 

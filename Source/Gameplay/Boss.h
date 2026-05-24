@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <DirectXCollision.h>
 #include "Gameplay/BossAttackManager.h"
 #include "Gameplay/ICombatTarget.h"

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Core/DeviceResources.h"
 
@@ -24,10 +24,10 @@ public:
     float* getThresholdPtr() { return &m_threshold; }
     float* getKneePtr() { return &m_knee; }
     float* getIntensityPtr() { return &m_intensity; }
-    float* getExposurePtr() { return &m_exposure; }
+    float* getUpsampleScalePtr() { return &m_upsampleScale; }
 
 private:
-    static constexpr int MIP_COUNT = 5;
+    static constexpr int MIP_COUNT = 9;
 
     void renderFullscreenPass(ID3D11PixelShader* ps,
         ID3D11RenderTargetView* outputRTV,
@@ -67,9 +67,9 @@ private:
     // パラメータ
     bool  m_enabled = false;
     float m_threshold = 1.0f;
-    float m_knee = 0.5f;
+    float m_knee = 0.1f;
     float m_intensity = 1.0f;
-    float m_exposure = 1.0f;
+    float m_upsampleScale = 1.0f;
 
     // HLSL 定数バッファと一致
     struct BloomParamsCB
@@ -79,7 +79,6 @@ private:
         float padding1;
         DirectX::XMFLOAT4 threshold;
         float bloomIntensity;
-        float exposure;
-        DirectX::XMFLOAT2 padding2;
+        DirectX::XMFLOAT3 padding2;
     };
 };

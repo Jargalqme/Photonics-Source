@@ -1,36 +1,36 @@
 #include "pch.h"
-#include "Render/SceneCopyPass.h"
+#include "Render/FinalCompositePass.h"
 
 using Microsoft::WRL::ComPtr;
 
-SceneCopyPass::SceneCopyPass(DX::DeviceResources* deviceResources)
+FinalCompositePass::FinalCompositePass(DX::DeviceResources* deviceResources)
     : m_deviceResources(deviceResources)
 {
 }
 
-void SceneCopyPass::createDeviceDependentResources()
+void FinalCompositePass::createDeviceDependentResources()
 {
     auto device = m_deviceResources->GetD3DDevice();
 
     // Shared fullscreen-triangle VS (SV_VertexID-driven, no vertex buffer).
     ComPtr<ID3DBlob> vsBlob;
-    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"FullscreenTriangleVS.cso").c_str(), vsBlob.GetAddressOf()));
+    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"VS_FullscreenTriangle.cso").c_str(), vsBlob.GetAddressOf()));
     DX::ThrowIfFailed(device->CreateVertexShader(
         vsBlob->GetBufferPointer(),
         vsBlob->GetBufferSize(),
         nullptr,
         m_vertexShader.ReleaseAndGetAddressOf()));
 
-    // Pass-through PS: samples input and writes to output.
+    // Final output PS: exposure, tonemap, gamma, then write to backbuffer.
     ComPtr<ID3DBlob> psBlob;
-    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"PS_SceneCopy.cso").c_str(), psBlob.GetAddressOf()));
+    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"PS_FinalComposite.cso").c_str(), psBlob.GetAddressOf()));
     DX::ThrowIfFailed(device->CreatePixelShader(
         psBlob->GetBufferPointer(),
         psBlob->GetBufferSize(),
         nullptr,
         m_pixelShader.ReleaseAndGetAddressOf()));
 
-    // Linear clamp sampler. Backbuffer copy never wraps.
+    // Linear clamp sampler. Backbuffer write never wraps.
     D3D11_SAMPLER_DESC sampDesc = {};
     sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
     sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
@@ -38,22 +38,34 @@ void SceneCopyPass::createDeviceDependentResources()
     sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
     DX::ThrowIfFailed(device->CreateSamplerState(&sampDesc,
         m_sampler.ReleaseAndGetAddressOf()));
+
+    D3D11_BUFFER_DESC cbDesc = {};
+    cbDesc.ByteWidth = sizeof(FinalCompositeCB);
+    cbDesc.Usage = D3D11_USAGE_DEFAULT;
+    cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    DX::ThrowIfFailed(device->CreateBuffer(&cbDesc, nullptr,
+        m_constantBuffer.ReleaseAndGetAddressOf()));
 }
 
-void SceneCopyPass::finalize()
+void FinalCompositePass::finalize()
 {
     m_vertexShader.Reset();
     m_pixelShader.Reset();
     m_sampler.Reset();
+    m_constantBuffer.Reset();
 }
 
-void SceneCopyPass::process(
+void FinalCompositePass::process(
     ID3D11ShaderResourceView* inputSRV,
-    ID3D11RenderTargetView* outputRTV)
+    ID3D11RenderTargetView* outputRTV,
+    float exposure)
 {
     auto context = m_deviceResources->GetD3DDeviceContext();
 
     context->OMSetRenderTargets(1, &outputRTV, nullptr);
+    context->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF);
+    context->OMSetDepthStencilState(nullptr, 0);
+    context->RSSetState(nullptr);
 
     auto viewport = m_deviceResources->GetScreenViewport();
     context->RSSetViewports(1, &viewport);
@@ -61,8 +73,13 @@ void SceneCopyPass::process(
     context->VSSetShader(m_vertexShader.Get(), nullptr, 0);
     context->PSSetShader(m_pixelShader.Get(), nullptr, 0);
 
+    FinalCompositeCB cb = {};
+    cb.exposure = exposure;
+    context->UpdateSubresource(m_constantBuffer.Get(), 0, nullptr, &cb, 0, 0);
+
     context->PSSetShaderResources(0, 1, &inputSRV);
     context->PSSetSamplers(0, 1, m_sampler.GetAddressOf());
+    context->PSSetConstantBuffers(0, 1, m_constantBuffer.GetAddressOf());
 
     // Fullscreen triangle: 3 vertices, SV_VertexID-driven, no IA buffer/layout.
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

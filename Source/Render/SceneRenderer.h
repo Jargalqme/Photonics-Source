@@ -1,6 +1,6 @@
 //=============================================================================
 // @brief    Scene-level rendering orchestration.
-//           Owns post-process effects (Bloom, scene-copy) and exposes a
+//           Owns post-process effects (Bloom, FinalComposite) and exposes a
 //           single render entry point. Sits between the low-level Renderer
 //           (frame orchestration) and the gameplay scenes.
 //           Pattern modeled after Hazel's SceneRenderer at appropriate scale.
@@ -11,7 +11,8 @@
 #include <memory>
 
 class Bloom;
-class SceneCopyPass;
+class Camera;
+class FinalCompositePass;
 
 class SceneRenderer
 {
@@ -37,8 +38,14 @@ public:
     // Expose Bloom for DebugUI sliders. Owned, non-transferring.
     Bloom* getBloom() { return m_bloom.get(); }
 
+    // Borrowed, non-owning. Scenes call this once at enter() so the
+    // composite pass can read exposure (and future imaging properties)
+    // from the active camera each frame.
+    void setActiveCamera(const Camera* camera) { m_activeCamera = camera; }
+
 private:
     DX::DeviceResources* m_deviceResources;
-    std::unique_ptr<Bloom>         m_bloom;
-    std::unique_ptr<SceneCopyPass> m_copyPass;
+    std::unique_ptr<Bloom>              m_bloom;
+    std::unique_ptr<FinalCompositePass> m_finalComposite;
+    const Camera*                       m_activeCamera = nullptr;
 };

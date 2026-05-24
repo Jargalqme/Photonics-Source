@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Scenes/BossScene.h"
 #include "Common/Camera.h"
 #include "DeviceResources.h"
@@ -121,6 +121,8 @@ void BossScene::initialize(SceneContext& context)
     m_debugUI->setBulletPool(&m_bulletPool);
     m_debugUI->setBoss(m_boss.get());
     m_debugUI->setBloom(m_renderer->GetSceneRenderer()->getBloom());
+    m_debugUI->setExposurePtr(m_camera->getExposurePtr());
+    m_renderer->GetSceneRenderer()->setActiveCamera(m_camera.get());
 #endif
 }
 

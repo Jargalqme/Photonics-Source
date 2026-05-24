@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "GeometricPrimitive.h"
 #include <SimpleMath.h>
@@ -19,6 +19,7 @@ struct MeshCommand
 	DirectX::SimpleMath::Matrix  world = DirectX::SimpleMath::Matrix::Identity;
 	DirectX::SimpleMath::Color   color = DirectX::SimpleMath::Color(1.0f, 1.0f, 1.0f, 1.0f);
 	BlendMode                    blendMode = BlendMode::Opaque;
+	float                        emissiveIntensity = 0.0f;
 	bool                         wireframe = false;
 };
 
@@ -35,5 +36,6 @@ struct ImportedModelCommand
 	DirectX::SimpleMath::Matrix world = DirectX::SimpleMath::Matrix::Identity;
 	DirectX::SimpleMath::Color color = DirectX::SimpleMath::Color(1.0f, 1.0f, 1.0f, 1.0f);
 	BlendMode blendMode = BlendMode::Opaque;
+	float emissiveIntensity = 0.0f;
 	bool wireframe = false;
 };

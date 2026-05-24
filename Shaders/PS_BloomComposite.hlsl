@@ -1,10 +1,10 @@
 //---------------------------------------------------------------------------
 //! @file   BloomCompositePS.hlsl
-//! @brief  Final bloom composite — scene + bloom with intensity/exposure
+//! @brief  HDR bloom composite: scene + tent-upsampled bloom.
 //---------------------------------------------------------------------------
 
 #include "Common.hlsli"
-#include "Tonemapping.hlsli"
+#include "Sampling.hlsli"
 
 cbuffer BloomParams : register(b0)
 {
@@ -13,8 +13,7 @@ cbuffer BloomParams : register(b0)
     float  padding1;
     float4 threshold;
     float  bloomIntensity;
-    float  exposure;
-    float2 padding2;
+    float3 padding2;
 };
 
 Texture2D    sceneTexture : register(t0);
@@ -30,11 +29,7 @@ struct PS_INPUT
 float4 main(PS_INPUT input) : SV_TARGET
 {
     float3 scene = sceneTexture.Sample(linearSampler, input.uv).rgb;
-    float3 bloom = bloomTexture.Sample(linearSampler, input.uv).rgb;
+    float3 bloom = UpsampleTent9(bloomTexture, linearSampler, input.uv, texelSize, sampleScale).rgb;
 
-    float3 color = scene + bloom * bloomIntensity;
-    color *= exposure;
-    color = ACESFilm(color);
-
-    return float4(color, 1.0);
+    return float4(scene + bloom * bloomIntensity, 1.0);
 }

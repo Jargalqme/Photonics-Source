@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DeviceResources.h"
 
 class Grid
@@ -25,6 +25,7 @@ public:
     float* getLineWidthXPtr() { return &m_lineWidthX; }
     float* getLineWidthYPtr() { return &m_lineWidthY; }
     float* getGridScalePtr() { return &m_gridScale; }
+    float* getLineEmissiveIntensityPtr() { return &m_lineEmissiveIntensity; }
     float* getLineColorPtr() { return reinterpret_cast<float*>(&m_lineColor); }
     float* getBaseColorPtr() { return reinterpret_cast<float*>(&m_baseColor); }
 
@@ -45,7 +46,7 @@ private:
     DX::DeviceResources* m_deviceResources;
 
     // === グリッドパラメータ ===
-    static constexpr float GRID_SIZE     = 200.0f;
+    static constexpr float GRID_SIZE     = 50.0f;
     static constexpr float FLOOR_Y       = -1.0f;
     static constexpr float WALL_HEIGHT   = 199.5f;
     static constexpr float WALL_DISTANCE = 200.0f;
@@ -55,6 +56,7 @@ private:
     float m_lineWidthY = 0.03f;
     float m_gridScale = 0.15f;
     float m_beatPulse = 0.0f;
+    float m_lineEmissiveIntensity = 2.5f;
 
     // エレクトリックブルー (#0066FF) + オービットネイビー (#0A1024)
     DirectX::SimpleMath::Color m_lineColor{ 0.0f, 0.4f, 1.0f, 1.0f };

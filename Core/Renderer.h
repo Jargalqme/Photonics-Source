@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "DeviceResources.h"
 #include "Source/Render/SceneRenderer.h"

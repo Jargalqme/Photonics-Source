@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Scenes/MenuBackground.h"
 
 using namespace DirectX;
@@ -114,7 +114,7 @@ void MenuBackground::createShaders()
 
     // 頂点シェーダー
     ComPtr<ID3DBlob> vertexShaderBlob;
-    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"MenuBackgroundVS.cso").c_str(), vertexShaderBlob.GetAddressOf()));
+    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"VS_MenuBackground.cso").c_str(), vertexShaderBlob.GetAddressOf()));
 
     DX::ThrowIfFailed(device->CreateVertexShader(
         vertexShaderBlob->GetBufferPointer(),
@@ -125,7 +125,7 @@ void MenuBackground::createShaders()
 
     // ピクセルシェーダー1: ワーピング
     ComPtr<ID3DBlob> ps1Blob;
-    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"WarpingPS.cso").c_str(), ps1Blob.GetAddressOf()));
+    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"PS_Warping.cso").c_str(), ps1Blob.GetAddressOf()));
     DX::ThrowIfFailed(device->CreatePixelShader(
         ps1Blob->GetBufferPointer(),
         ps1Blob->GetBufferSize(),
@@ -135,7 +135,7 @@ void MenuBackground::createShaders()
 
     // ピクセルシェーダー2: フラクタル（Kishimisu風）
     ComPtr<ID3DBlob> ps2Blob;
-    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"FractalPS.cso").c_str(), ps2Blob.GetAddressOf()));
+    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"PS_Fractal.cso").c_str(), ps2Blob.GetAddressOf()));
     DX::ThrowIfFailed(device->CreatePixelShader(
         ps2Blob->GetBufferPointer(),
         ps2Blob->GetBufferSize(),
@@ -145,7 +145,7 @@ void MenuBackground::createShaders()
 
     // ピクセルシェーダー3: 波形
     ComPtr<ID3DBlob> ps3Blob;
-    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"WavePS.cso").c_str(), ps3Blob.GetAddressOf()));
+    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"PS_Wave.cso").c_str(), ps3Blob.GetAddressOf()));
     DX::ThrowIfFailed(device->CreatePixelShader(
         ps3Blob->GetBufferPointer(),
         ps3Blob->GetBufferSize(),

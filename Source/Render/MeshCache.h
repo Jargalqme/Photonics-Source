@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <unordered_map>
 #include <string>
@@ -13,6 +13,7 @@ public:
 	// === 単位形状（呼び出し側が Transform.scale でリサイズ） ===
 	DirectX::GeometricPrimitive* getCube();          // 1 x 1 x 1
 	DirectX::GeometricPrimitive* getCylinder();      // 高さ 1、直径 1
+	DirectX::GeometricPrimitive* getCone();          // 高さ 1、直径 1
 	DirectX::GeometricPrimitive* getOctahedron();    // 半径 1
 	DirectX::GeometricPrimitive* getIcosahedron();   // 半径 1
 	DirectX::GeometricPrimitive* getSphere(int tessellation = 16);  // 半径 1

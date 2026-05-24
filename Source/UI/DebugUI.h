@@ -30,6 +30,7 @@ public:
     void setBulletPool(BulletPool* pool) { m_bulletPool = pool; }
     void setBoss(Boss* boss) { m_boss = boss; }
     void setBloom(Bloom* bloom) { m_bloom = bloom; }
+    void setExposurePtr(float* exposure) { m_exposure = exposure; }
 
     /// @brief デバッグパネルを描画する
     void render();
@@ -47,6 +48,7 @@ private:
     BulletPool* m_bulletPool = nullptr;
     Boss* m_boss = nullptr;
     Bloom* m_bloom = nullptr;
+    float* m_exposure = nullptr;
 
     bool m_showThirds = false;
 };

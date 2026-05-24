@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Gameplay/Boss.h"
 #include "Gameplay/BulletPool.h"
 #include "Gameplay/EventBus.h"
@@ -69,7 +69,7 @@ void Boss::activate()
             if (m_particles)
             {
                 m_particles->emit(m_transform.position,
-                    Vector4(0.6f, 0.0f, 1.0f, 1.0f),
+                    Vector4(2.4f, 0.0f, 4.0f, 1.0f),
                     50, 8.0f, 1.5f, 1.0f);
             }
             if (m_camera)
@@ -87,7 +87,7 @@ void Boss::activate()
             if (m_particles)
             {
                 m_particles->emit(m_transform.position,
-                    Vector4(0.6f, 0.0f, 1.0f, 1.0f),
+                    Vector4(2.4f, 0.0f, 4.0f, 1.0f),
                     80, 10.0f, 2.0f, 1.0f);
             }
             if (m_camera)
@@ -256,7 +256,8 @@ void Boss::submitRender(RenderCommandQueue& queue) const
         const Matrix& world,
         const Color& color,
         bool wireframe = false,
-        BlendMode blendMode = BlendMode::Opaque)
+        BlendMode blendMode = BlendMode::Opaque,
+        float emissiveIntensity = 0.0f)
     {
         if (!mesh)
         {
@@ -269,6 +270,7 @@ void Boss::submitRender(RenderCommandQueue& queue) const
         command.color = color;
         command.wireframe = wireframe;
         command.blendMode = blendMode;
+        command.emissiveIntensity = emissiveIntensity;
         queue.submit(command);
     };
 
@@ -284,12 +286,12 @@ void Boss::submitRender(RenderCommandQueue& queue) const
         ringColor = Color::Lerp(ringColor, flashColor, t);
     }
 
-    submitMesh(m_coreMesh, Matrix::CreateScale(2.0f) * world, coreColor);
+    submitMesh(m_coreMesh, Matrix::CreateScale(2.0f) * world, coreColor, false, BlendMode::Opaque, 0.35f);
 
     Matrix ringWorld = Matrix::CreateRotationX(RING_TILT)
         * Matrix::CreateRotationY(m_ringOrbitAngle)
         * Matrix::CreateTranslation(m_transform.position);
-    submitMesh(m_ringMesh, ringWorld, ringColor);
+    submitMesh(m_ringMesh, ringWorld, ringColor, false, BlendMode::Opaque, 3.0f);
 
 #ifdef _DEBUG
     submitMesh(

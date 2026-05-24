@@ -1,10 +1,14 @@
-#pragma once
+﻿#pragma once
 
 #include "Scenes/Scene.h"
 #include "Services/AudioManager.h"
 #include "Scenes/MenuBackground.h"
 
 class SceneManager;
+class SkinnedModel;
+class SkinnedRenderer;
+class Skeleton;
+class AnimationPlayer;
 
 class MainMenuScene : public Scene
 {
@@ -26,6 +30,10 @@ private:
     SceneManager* m_sceneManager;
     std::unique_ptr<AudioManager> m_audioManager;
     std::unique_ptr<MenuBackground> m_background;
+    std::unique_ptr<SkinnedModel>     m_menuCharacter;
+    std::unique_ptr<SkinnedRenderer>  m_skinnedRenderer;
+    std::unique_ptr<Skeleton>         m_skeleton;
+    std::unique_ptr<AnimationPlayer>  m_animationPlayer;
 
     State m_state = State::Root;
     int m_selectedIndex = 0;

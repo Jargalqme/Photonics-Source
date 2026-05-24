@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Gameplay/Dummy.h"
 #include "Gameplay/EventBus.h"
 #include "Gameplay/EventTypes.h"
@@ -24,13 +24,11 @@ void Dummy::spawn(const Vector3& startPos, DirectX::GeometricPrimitive* mesh)
 {
     m_mesh = mesh ? mesh : m_context->meshes->getCube();
     m_spawnPosition = startPos;
-    m_basePosition = startPos;
     m_transform.position = startPos;
 
     m_health = m_maxHealth;
     m_respawnTimer = 0.0f;
     m_hitFlashTimer = 0.0f;
-    m_moveTime = 0.0f;
     m_color = m_originalColor;
     m_active = true;
 }
@@ -48,13 +46,6 @@ void Dummy::update(float deltaTime)
             }
         }
         return;
-    }
-
-    if (m_moving)
-    {
-        m_moveTime += deltaTime;
-        m_transform.position = m_basePosition;
-        m_transform.position.x += sinf(m_moveTime * m_moveFrequency) * m_moveAmplitude;
     }
 
     if (m_hitFlashTimer > 0.0f)
@@ -90,43 +81,27 @@ void Dummy::submitRender(RenderCommandQueue& queue) const
 
 void Dummy::collectHitColliders(std::vector<CombatHitCollider>& out)
 {
-    if (!m_active || m_invulnerable)
+    if (!m_active)
     {
         return;
     }
 
-    // ボディ — メインの被弾領域
-    {
-        CombatHitCollider c;
-        c.target = this;
-        c.part = HitPart::Body;
-        c.bounds.Center = XMFLOAT3(
-            m_transform.position.x,
-            m_transform.position.y + BODY_OFFSET_Y,
-            m_transform.position.z);
-        c.bounds.Radius = BODY_RADIUS;
-        c.damageMultiplier = 1.0f;
-        out.push_back(c);
-    }
-
-    // 頭部弱点 — 上にある小さなスフィア（2倍ダメージ）
-    {
-        CombatHitCollider c;
-        c.target = this;
-        c.part = HitPart::Head;
-        c.bounds.Center = XMFLOAT3(
-            m_transform.position.x,
-            m_transform.position.y + HEAD_OFFSET_Y,
-            m_transform.position.z);
-        c.bounds.Radius = HEAD_RADIUS;
-        c.damageMultiplier = WEAK_POINT_MULT;
-        out.push_back(c);
-    }
+    // ボディ — 被弾領域
+    CombatHitCollider c;
+    c.target = this;
+    c.part = HitPart::Body;
+    c.bounds.Center = XMFLOAT3(
+        m_transform.position.x,
+        m_transform.position.y + BODY_OFFSET_Y,
+        m_transform.position.z);
+    c.bounds.Radius = BODY_RADIUS;
+    c.damageMultiplier = 1.0f;
+    out.push_back(c);
 }
 
 void Dummy::onHit(const CombatHit& hit)
 {
-    if (!m_active || m_invulnerable)
+    if (!m_active)
     {
         return;
     }
@@ -140,46 +115,17 @@ void Dummy::onHit(const CombatHit& hit)
     {
         m_health = 0.0f;
         m_active = false;
-        m_respawnTimer = m_respawnDelay;
+        m_respawnTimer = DEFAULT_RESPAWN_DELAY;
         EventBus::publish(DummyDiedEvent{ m_transform.position });
     }
-}
-
-void Dummy::setPosition(const Vector3& pos)
-{
-    m_spawnPosition = pos;
-    m_basePosition = pos;
-    m_transform.position = pos;
-    m_moveTime = 0.0f;
-}
-
-void Dummy::setMoving(bool enabled, float amplitude, float frequency)
-{
-    m_moving = enabled;
-    m_moveAmplitude = std::max(0.0f, amplitude);
-    m_moveFrequency = std::max(0.0f, frequency);
-    m_basePosition = m_spawnPosition;
-
-    if (!m_moving)
-    {
-        m_transform.position = m_basePosition;
-    }
-}
-
-void Dummy::deactivate()
-{
-    m_active = false;
-    m_respawnTimer = 0.0f;
 }
 
 void Dummy::respawn()
 {
     m_transform.position = m_spawnPosition;
-    m_basePosition = m_spawnPosition;
     m_health = m_maxHealth;
     m_respawnTimer = 0.0f;
     m_hitFlashTimer = 0.0f;
-    m_moveTime = 0.0f;
     m_color = m_originalColor;
     m_active = true;
 }

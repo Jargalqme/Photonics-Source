@@ -17,7 +17,7 @@ void Bloom::createDeviceDependentResources()
 
     // フルスクリーン三角形 頂点シェーダー
     ComPtr<ID3DBlob> vsBlob;
-    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"FullscreenTriangleVS.cso").c_str(),
+    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"VS_FullscreenTriangle.cso").c_str(),
         vsBlob.GetAddressOf()));
     DX::ThrowIfFailed(device->CreateVertexShader(
         vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(),
@@ -34,10 +34,10 @@ void Bloom::createDeviceDependentResources()
                 nullptr, ps.ReleaseAndGetAddressOf()));
         };
 
-    loadPS(L"BloomPrefilterPS.cso", m_prefilterPS);
-    loadPS(L"BloomDownsamplePS.cso", m_downsamplePS);
-    loadPS(L"BloomUpsamplePS.cso", m_upsamplePS);
-    loadPS(L"BloomCompositePS.cso", m_compositePS);
+    loadPS(L"PS_BloomPrefilter.cso", m_prefilterPS);
+    loadPS(L"PS_BloomDownsample.cso", m_downsamplePS);
+    loadPS(L"PS_BloomUpsample.cso", m_upsamplePS);
+    loadPS(L"PS_BloomComposite.cso", m_compositePS);
 
     // 定数バッファ
     D3D11_BUFFER_DESC cbDesc = {};
@@ -201,6 +201,10 @@ void Bloom::render(ID3D11ShaderResourceView* sceneSRV)
     UINT sceneWidth  = m_targetWidth;
     UINT sceneHeight = m_targetHeight;
 
+    context->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF);
+    context->OMSetDepthStencilState(nullptr, 0);
+    context->RSSetState(nullptr);
+
     // 閾値カーブ事前計算（フレームごとに1回）
     float knee = m_threshold * m_knee;
     float safeKnee = std::max(knee, 0.0001f);
@@ -210,9 +214,8 @@ void Bloom::render(ID3D11ShaderResourceView* sceneSRV)
         m_threshold - knee,
         safeKnee * 2.0f,
         0.25f / safeKnee);
-    cb.sampleScale = 1.0f;
+    cb.sampleScale = m_upsampleScale;
     cb.bloomIntensity = m_intensity;
-    cb.exposure = m_exposure;
 
     // --- パス1: プリフィルタ（シーン → mip[0]） ---
     cb.texelSize = XMFLOAT2(1.0f / sceneWidth, 1.0f / sceneHeight);
@@ -250,7 +253,7 @@ void Bloom::render(ID3D11ShaderResourceView* sceneSRV)
     context->OMSetBlendState(nullptr, nullptr, 0xFFFFFFFF);
 
     // --- パス10: 合成（シーン + ブルーム → 合成RT） ---
-    cb.texelSize = XMFLOAT2(1.0f / sceneWidth, 1.0f / sceneHeight);
+    cb.texelSize = XMFLOAT2(1.0f / m_mipWidths[0], 1.0f / m_mipHeights[0]);
     context->UpdateSubresource(m_constantBuffer.Get(), 0, nullptr, &cb, 0, 0);
 
     renderFullscreenPass(m_compositePS.Get(), m_compositeRTV.Get(),

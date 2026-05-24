@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "DeviceResources.h"
 
@@ -47,8 +47,8 @@ private:
     Microsoft::WRL::ComPtr<ID3D11RasterizerState>    m_rasterizerState;
 
     float m_time = 0.0f;
-    float m_size = 200.0f;
-    float m_speed = 0.5f;
-    float m_brightness = 0.06f;
+    float m_size = 500.0f;
+    float m_speed = 0.8f;
+    float m_brightness = 0.6f;
     float m_alpha = 0.8f;
 };

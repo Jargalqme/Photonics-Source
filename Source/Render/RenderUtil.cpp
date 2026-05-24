@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "RenderUtil.h"
 
 using Microsoft::WRL::ComPtr;

@@ -146,12 +146,23 @@ void DebugUI::render()
         }
 
         DrawSection("Rendering");
+        if (m_exposure)
+        {
+            ImGui::SliderFloat("Exposure", m_exposure, 0.0f, 3.0f);
+        }
+        else
+        {
+            DrawUnavailable("Exposure");
+        }
+
+        ImGui::Spacing();
         if (m_grid)
         {
             ImGui::Text("Grid");
             ImGui::SliderFloat("Line Width X", m_grid->getLineWidthXPtr(), 0.001f, 0.1f);
             ImGui::SliderFloat("Line Width Y", m_grid->getLineWidthYPtr(), 0.001f, 0.1f);
             ImGui::SliderFloat("Grid Scale", m_grid->getGridScalePtr(), 0.1f, 5.0f);
+            ImGui::SliderFloat("Grid Emissive", m_grid->getLineEmissiveIntensityPtr(), 0.0f, 8.0f);
             ImGui::ColorEdit4("Line Color", m_grid->getLineColorPtr());
             ImGui::ColorEdit4("Base Color", m_grid->getBaseColorPtr());
         }
@@ -168,7 +179,7 @@ void DebugUI::render()
             ImGui::SliderFloat("Threshold", m_bloom->getThresholdPtr(), 0.0f, 5.0f);
             ImGui::SliderFloat("Knee", m_bloom->getKneePtr(), 0.0f, 1.0f);
             ImGui::SliderFloat("Intensity", m_bloom->getIntensityPtr(), 0.0f, 5.0f);
-            ImGui::SliderFloat("Exposure", m_bloom->getExposurePtr(), 0.0f, 3.0f);
+            ImGui::SliderFloat("Upsample Scale", m_bloom->getUpsampleScalePtr(), 0.25f, 3.0f);
         }
         else
         {

@@ -1,9 +1,16 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Scenes/MainMenuScene.h"
 #include "Scenes/SceneManager.h"
 #include "Services/InputManager.h"
 #include "Renderer.h"
 #include "Game.h"
+
+#include "Render/Skinning/SkinnedModelImporter.h"
+#include "Render/Skinning/SkinnedModel.h"
+#include "Render/Skinning/SkinnedRenderer.h"
+#include "Render/Skinning/Skeleton.h"
+#include "Render/Skinning/AnimationPlayer.h"
+#include "DeviceResources.h"
 
 #include <cstdio>
 #include <iterator>
@@ -96,6 +103,58 @@ void MainMenuScene::initialize(SceneContext& context)
 {
     Scene::initialize(context);
 
+    {
+        SkinnedModelData data;
+        const auto modelPath = GetAssetPath(L"Characters/MenuGuy/model.fbx");
+        if (SkinnedModelImporter::LoadSkinnedModelData(modelPath, data))
+        {
+            size_t selectedClipIndex = data.clips.empty() ? 0 : data.clips.size() - 1;
+            bool hasSelectedClip = !data.clips.empty();
+            const size_t firstAppendedClipIndex = data.clips.size();
+
+            const auto dancePath = GetAssetPath(L"Characters/MenuGuy/dance.fbx");
+            const int32_t appended =
+                SkinnedModelImporter::AppendClipsFromFile(dancePath, data);
+            if (appended > 0)
+            {
+                selectedClipIndex = firstAppendedClipIndex;
+                hasSelectedClip = true;
+            }
+
+            m_menuCharacter = std::make_unique<SkinnedModel>();
+            if (!m_menuCharacter->initialize(
+                    m_deviceResources->GetD3DDevice(), std::move(data)))
+            {
+                m_menuCharacter.reset();
+            }
+
+            if (m_menuCharacter)
+            {
+                m_skinnedRenderer = std::make_unique<SkinnedRenderer>();
+                if (!m_skinnedRenderer->initialize(m_deviceResources->GetD3DDevice()))
+                {
+                    m_skinnedRenderer.reset();
+                }
+
+                m_skeleton = std::make_unique<Skeleton>();
+                m_skeleton->build(m_menuCharacter->data());
+
+                m_animationPlayer = std::make_unique<AnimationPlayer>();
+                const auto& clips = m_menuCharacter->clips();
+                if (hasSelectedClip && selectedClipIndex < clips.size())
+                {
+                    m_animationPlayer->setClip(&clips[selectedClipIndex]);
+                    m_animationPlayer->setLoop(true);
+                }
+                else if (!clips.empty())
+                {
+                    m_animationPlayer->setClip(&clips.back());
+                    m_animationPlayer->setLoop(true);
+                }
+            }
+        }
+    }
+
     m_background = std::make_unique<MenuBackground>(m_deviceResources);
     m_background->initialize();
     m_background->setShaderType(MenuBackground::ShaderType::Wave);
@@ -150,6 +209,11 @@ void MainMenuScene::update(float deltaTime, InputManager* input)
     if (m_background)
     {
         m_background->update(deltaTime);
+    }
+
+    if (m_animationPlayer)
+    {
+        m_animationPlayer->update(deltaTime);
     }
 
     if (m_state == State::Root)
@@ -276,6 +340,42 @@ void MainMenuScene::render()
     if (m_background)
     {
         m_background->render(m_renderer->GetRenderWidth(), m_renderer->GetRenderHeight());
+    }
+
+    if (m_menuCharacter && m_skinnedRenderer)
+    {
+        const int rw = m_renderer->GetRenderWidth();
+        const int rh = m_renderer->GetRenderHeight();
+        const float aspect = (rh > 0) ? (static_cast<float>(rw) / static_cast<float>(rh)) : 1.0f;
+
+        const Vector3 characterOffset(0.0f, 0.0f, -500.0f);
+
+        const Matrix view = Matrix::CreateLookAt(
+            Vector3(0.0f,  120.0f, 300.0f),
+            Vector3(0.0f,   95.0f,   0.0f) + characterOffset,
+            Vector3::Up);
+        const Matrix proj = Matrix::CreatePerspectiveFieldOfView(
+            XMConvertToRadians(35.0f), aspect, 1.0f, 5000.0f);
+        const Matrix world =
+            Matrix::CreateRotationY(XM_PI) *
+            Matrix::CreateTranslation(characterOffset);
+
+        // Sample the dance clip into the skeleton, build the bone palette,
+        // and hand it to the renderer.
+        const DirectX::SimpleMath::Matrix* palette = nullptr;
+        uint32_t paletteCount = 0;
+        if (m_skeleton && m_animationPlayer)
+        {
+            m_animationPlayer->apply(*m_skeleton);
+            palette      = m_skeleton->palette();
+            paletteCount = m_skeleton->boneCount();
+        }
+
+        m_skinnedRenderer->draw(
+            m_deviceResources->GetD3DDeviceContext(),
+            *m_menuCharacter,
+            palette, paletteCount,
+            world, view, proj);
     }
 
     if (m_state == State::Root)

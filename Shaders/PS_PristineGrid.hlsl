@@ -51,6 +51,8 @@ float4 main(PS_INPUT input) : SV_TARGET
     float2 uv = input.worldPos * gridParams.z;
     float2 lineWidth = float2(gridParams.x, gridParams.y);
     float grid = pristineGrid(uv, lineWidth);
-    float3 color = lerp(baseColor.rgb, lineColor.rgb, grid);
+    float lineEmissiveIntensity = gridParams.w;
+    float3 lineHDR = lineColor.rgb * (1.0 + lineEmissiveIntensity);
+    float3 color = lerp(baseColor.rgb, lineHDR, grid);
     return float4(color, 1.0);
 }

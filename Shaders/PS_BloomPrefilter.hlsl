@@ -26,7 +26,6 @@ struct PS_INPUT
 float4 main(PS_INPUT input) : SV_TARGET
 {
     float4 color = DownsampleBox13Tap(sourceTexture, linearSampler, input.uv, texelSize);
-    color = QuadraticThreshold(color, threshold.x, threshold.yzw);
-    color = max(color, 0.0);
-    return float4(SafeHDR(color.rgb), 1.0);
+    color = Prefilter(color, threshold.x, threshold.yzw);
+    return color;
 }

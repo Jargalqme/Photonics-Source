@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DeviceResources.h"
 #include <SimpleMath.h>
 #include <vector>
@@ -29,7 +29,7 @@ public:
 
     void setBeatTracker(BeatTracker* music) { m_beatTracker = music; }
     void setPlayer(Player* player) { m_player = player; }
-    void setDummies(std::vector<std::unique_ptr<Dummy>>* dummies) { m_dummies = dummies; }
+    void setDummy(Dummy* dummy) { m_dummy = dummy; }
     void setWaveNumber(int wave) { m_currentWave = wave; }
     void setBoss(Boss* boss) { m_boss = boss; }
     void setShowWaveIndicator(bool show) { m_showWaveIndicator = show; }
@@ -42,7 +42,7 @@ private:
     // === ゲーム参照（所有しない） ===
     BeatTracker* m_beatTracker = nullptr;
     Player* m_player = nullptr;
-    std::vector<std::unique_ptr<Dummy>>* m_dummies = nullptr;
+    Dummy* m_dummy = nullptr;
     Boss* m_boss = nullptr;
 
     // === エッジグロー ===

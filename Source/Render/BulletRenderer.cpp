@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "BulletRenderer.h"
 
 #include "Gameplay/BulletPool.h"
@@ -40,7 +40,7 @@ void BulletRenderer::initialize()
     DX::ThrowIfFailed(device->CreateBuffer(&constantDesc, nullptr, m_constantBuffer.ReleaseAndGetAddressOf()));
 
     ComPtr<ID3DBlob> vertexShaderBlob;
-    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"OrbVS.cso").c_str(), vertexShaderBlob.GetAddressOf()));
+    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"VS_Orb.cso").c_str(), vertexShaderBlob.GetAddressOf()));
     DX::ThrowIfFailed(device->CreateVertexShader(
         vertexShaderBlob->GetBufferPointer(),
         vertexShaderBlob->GetBufferSize(),
@@ -48,7 +48,7 @@ void BulletRenderer::initialize()
         m_vertexShader.ReleaseAndGetAddressOf()));
 
     ComPtr<ID3DBlob> pixelShaderBlob;
-    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"OrbPS.cso").c_str(), pixelShaderBlob.GetAddressOf()));
+    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"PS_Orb.cso").c_str(), pixelShaderBlob.GetAddressOf()));
     DX::ThrowIfFailed(device->CreatePixelShader(
         pixelShaderBlob->GetBufferPointer(),
         pixelShaderBlob->GetBufferSize(),

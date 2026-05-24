@@ -1,51 +1,57 @@
 #include "pch.h"
 #include "Render/SceneRenderer.h"
 #include "Render/Bloom.h"
-#include "Render/SceneCopyPass.h"
+#include "Render/FinalCompositePass.h"
+#include "Common/Camera.h"
 
 SceneRenderer::SceneRenderer(DX::DeviceResources* deviceResources)
     : m_deviceResources(deviceResources)
     , m_bloom(std::make_unique<Bloom>(deviceResources))
-    , m_copyPass(std::make_unique<SceneCopyPass>(deviceResources))
+    , m_finalComposite(std::make_unique<FinalCompositePass>(deviceResources))
 {
 }
 
-// Destructor defined here so unique_ptr<Bloom> / unique_ptr<SceneCopyPass>
+// Destructor defined here so unique_ptr<Bloom> / unique_ptr<FinalCompositePass>
 // see the full types. Header forward-declares only.
 SceneRenderer::~SceneRenderer() = default;
 
 void SceneRenderer::createDeviceDependentResources()
 {
     m_bloom->createDeviceDependentResources();
-    m_copyPass->createDeviceDependentResources();
+    m_finalComposite->createDeviceDependentResources();
 }
 
 void SceneRenderer::createWindowSizeDependentResources(int width, int height)
 {
     m_bloom->createWindowSizeDependentResources(width, height);
-    // SceneCopyPass has no window-size-dependent resources.
+    // FinalCompositePass has no window-size-dependent resources.
 }
 
 void SceneRenderer::onDeviceLost()
 {
     m_bloom->finalize();
-    m_copyPass->finalize();
+    m_finalComposite->finalize();
 }
 
 void SceneRenderer::renderPostProcess(
     ID3D11ShaderResourceView* sceneSRV,
     ID3D11RenderTargetView* backbuffer)
 {
-    // Bloom is the only effect that toggles. The copy pass is always the
-    // final step that lands the HDR scene (or post-bloom result) in the
-    // BGRA backbuffer.
+    // Pull exposure from the active camera. Scenes are expected to have
+    // called setActiveCamera() at enter(); fallback to 1.0 (identity) if
+    // no camera was set so the screen never goes black.
+    const float exposure = m_activeCamera ? m_activeCamera->getExposure() : 1.0f;
+
+    // Bloom is the only effect that toggles. The final composite pass is
+    // always the last step that tonemaps the HDR scene (or post-bloom
+    // result) into the BGRA backbuffer.
     if (m_bloom->isEnabled())
     {
         m_bloom->render(sceneSRV);
-        m_copyPass->process(m_bloom->getOutputSRV(), backbuffer);
+        m_finalComposite->process(m_bloom->getOutputSRV(), backbuffer, exposure);
     }
     else
     {
-        m_copyPass->process(sceneSRV, backbuffer);
+        m_finalComposite->process(sceneSRV, backbuffer, exposure);
     }
 }

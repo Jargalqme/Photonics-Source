@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Gameplay/Weapon/WeaponRifle.h"
 #include "Gameplay/Weapon/WeaponShot.h"
 
@@ -24,7 +24,7 @@ bool WeaponRifle::shoot(
         tracerStart,
         m_damage,
         m_maxRange,
-        Vector4(0.4f, 0.85f, 1.0f, 1.0f),
+        Vector4(2.0f, 4.25f, 5.0f, 1.0f),
     });
 
     return true;

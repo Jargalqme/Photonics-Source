@@ -1,6 +1,11 @@
 //---------------------------------------------------------------------------
 //! @file   Sampling.hlsli
-//! @brief  Bloom sampling functions (Jimenez 2014 CoD AW technique)
+//! @brief  Bloom helpers: prefilter, threshold, downsample, upsample.
+//
+//          Kernel reference (DownsampleBox13Tap, UpsampleTent9):
+//          "Next Generation Post Processing in Call of Duty Advanced
+//          Warfare", Jorge Jimenez, SIGGRAPH 2014.
+//          https://advances.realtimerendering.com/s2014/
 //---------------------------------------------------------------------------
 
 #ifndef SAMPLING_HLSLI
@@ -8,74 +13,102 @@
 
 #include "Common.hlsli"
 
-// 13-tap box downsample (Jimenez 2014)
-// Weighted sampling pattern that avoids pulsating artifacts
-// . . . . . . .
-// . A . B . C .
-// . . D . E . .
-// . F . G . H .
-// . . I . J . .
-// . K . L . M .
-// . . . . . . .
+// 13-tap box downsample.
+//     F . G . H
+//     . B . E .
+//     I . A . J
+//     . C . D .
+//     K . L . M
+//
+// Boxes:
+//   inner        (0.5)   : B C D E
+//   top-left     (0.125) : F G I A
+//   top-right    (0.125) : G H A J
+//   bottom-left  (0.125) : I A K L
+//   bottom-right (0.125) : A J L M
 float4 DownsampleBox13Tap(Texture2D tex, SamplerState samp, float2 uv, float2 texelSize)
 {
-    float4 A = tex.Sample(samp, uv + texelSize * float2(-1.0, -1.0));
-    float4 B = tex.Sample(samp, uv + texelSize * float2(0.0, -1.0));
-    float4 C = tex.Sample(samp, uv + texelSize * float2(1.0, -1.0));
-    float4 D = tex.Sample(samp, uv + texelSize * float2(-0.5, -0.5));
-    float4 E = tex.Sample(samp, uv + texelSize * float2(0.5, -0.5));
-    float4 F = tex.Sample(samp, uv + texelSize * float2(-1.0, 0.0));
-    float4 G = tex.Sample(samp, uv);
-    float4 H = tex.Sample(samp, uv + texelSize * float2(1.0, 0.0));
-    float4 I = tex.Sample(samp, uv + texelSize * float2(-0.5, 0.5));
-    float4 J = tex.Sample(samp, uv + texelSize * float2(0.5, 0.5));
-    float4 K = tex.Sample(samp, uv + texelSize * float2(-1.0, 1.0));
-    float4 L = tex.Sample(samp, uv + texelSize * float2(0.0, 1.0));
-    float4 M = tex.Sample(samp, uv + texelSize * float2(1.0, 1.0));
+    // Center
+    float4 A = tex.Sample(samp, uv);
 
-    float2 div = (1.0 / 4.0) * float2(0.5, 0.125);
+    texelSize *= 0.5; // Sample from center of texels
 
-    float4 o = (D + E + I + J) * div.x;
-    o += (A + B + G + F) * div.y;
-    o += (B + C + H + G) * div.y;
-    o += (F + G + L + K) * div.y;
-    o += (G + H + M + L) * div.y;
+    // Inner box (2x2 at half-texel diagonals)
+    float4 B = tex.Sample(samp, uv + texelSize * float2(-1.0, -1.0));
+    float4 C = tex.Sample(samp, uv + texelSize * float2(-1.0,  1.0));
+    float4 D = tex.Sample(samp, uv + texelSize * float2( 1.0,  1.0));
+    float4 E = tex.Sample(samp, uv + texelSize * float2( 1.0, -1.0));
 
-    return o;
+    // Outer 3x3 (full-texel offsets; skip center, which is A)
+    float4 F = tex.Sample(samp, uv + texelSize * float2(-2.0, -2.0));
+    float4 G = tex.Sample(samp, uv + texelSize * float2( 0.0, -2.0));
+    float4 H = tex.Sample(samp, uv + texelSize * float2( 2.0, -2.0));
+    float4 I = tex.Sample(samp, uv + texelSize * float2(-2.0,  0.0));
+    float4 J = tex.Sample(samp, uv + texelSize * float2( 2.0,  0.0));
+    float4 K = tex.Sample(samp, uv + texelSize * float2(-2.0,  2.0));
+    float4 L = tex.Sample(samp, uv + texelSize * float2( 0.0,  2.0));
+    float4 M = tex.Sample(samp, uv + texelSize * float2( 2.0,  2.0));
+
+    float4 result = float4(0, 0, 0, 0);
+
+    // Inner box
+    result += (B + C + D + E) * 0.5;
+
+    // Four outer 2x2 boxes; each shares the center A
+    result += (F + G + I + A) * 0.125;
+    result += (G + H + A + J) * 0.125;
+    result += (I + A + K + L) * 0.125;
+    result += (A + J + L + M) * 0.125;
+
+    // Each box summed 4 samples without division; normalize by 4
+    result *= 0.25;
+
+    return result;
 }
 
-// 9-tap bilinear upsample (tent filter)
-float4 UpsampleTent(Texture2D tex, SamplerState samp, float2 uv, float2 texelSize, float sampleScale)
+// 9-tap tent upsample.
+// Samples a 3x3 grid around uv with the kernel
+//     1 2 1
+//     2 4 2
+//     1 2 1
+// (sum 16)
+float4 UpsampleTent9(Texture2D tex, SamplerState samp, float2 uv, float2 texelSize, float radius)
 {
-    float4 d = texelSize.xyxy * float4(1.0, 1.0, -1.0, 0.0) * sampleScale;
+    float4 offset = texelSize.xyxy * float4(1.0, 1.0, -1.0, 0.0) * radius;
 
-    float4 s;
-    s = tex.Sample(samp, uv - d.xy);
-    s += tex.Sample(samp, uv - d.wy) * 2.0;
-    s += tex.Sample(samp, uv - d.zy);
+    // Center
+    float4 result = tex.Sample(samp, uv) * 4.0;
 
-    s += tex.Sample(samp, uv + d.zw) * 2.0;
-    s += tex.Sample(samp, uv) * 4.0;
-    s += tex.Sample(samp, uv + d.xw) * 2.0;
+    result += tex.Sample(samp, uv - offset.xy);
+    result += tex.Sample(samp, uv - offset.wy) * 2.0;
+    result += tex.Sample(samp, uv - offset.zy);
 
-    s += tex.Sample(samp, uv + d.zy);
-    s += tex.Sample(samp, uv + d.wy) * 2.0;
-    s += tex.Sample(samp, uv + d.xy);
+    result += tex.Sample(samp, uv + offset.zw) * 2.0;
+    result += tex.Sample(samp, uv + offset.xw) * 2.0;
 
-    return s * (1.0 / 16.0);
+    result += tex.Sample(samp, uv + offset.zy);
+    result += tex.Sample(samp, uv + offset.wy) * 2.0;
+    result += tex.Sample(samp, uv + offset.xy);
+
+    return result * (1.0 / 16.0);
 }
 
-// Quadratic color thresholding (soft knee)
-// curve = (threshold - knee, knee * 2, 0.25 / knee)
 float4 QuadraticThreshold(float4 color, float threshold, float3 curve)
 {
-    float br = Max3(color.r, color.g, color.b);
+    // Maximum pixel brightness
+    float brightness = max(max(color.r, color.g), color.b);
+    // Quadratic curve
+    float rq = clamp(brightness - curve.x, 0.0, curve.y);
+    rq = (rq * rq) * curve.z;
+    color *= max(rq, brightness - threshold) / max(brightness, EPSILON);
+    return color;
+}
 
-    float rq = clamp(br - curve.x, 0.0, curve.y);
-    rq = curve.z * rq * rq;
-
-    color *= max(rq, br - threshold) / max(br, EPSILON);
-
+float4 Prefilter(float4 color, float threshold, float3 curve)
+{
+    float clampValue = 20.0;
+    color = clamp(color, 0.0, clampValue);
+    color = QuadraticThreshold(color, threshold, curve);
     return color;
 }
 

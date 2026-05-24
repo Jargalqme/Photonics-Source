@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Gameplay/BulletPool.h"
 
 Bullet* BulletPool::acquire(

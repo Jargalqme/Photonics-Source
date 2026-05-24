@@ -43,11 +43,11 @@ void ParticleSystem::initialize()
 
     // シェーダー読み込み（VS + PS のみ、コンピュートなし）
     ComPtr<ID3DBlob> vsBlob;
-    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"ParticleVS.cso").c_str(), vsBlob.GetAddressOf()));
+    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"VS_Particle.cso").c_str(), vsBlob.GetAddressOf()));
     DX::ThrowIfFailed(device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, m_vertexShader.ReleaseAndGetAddressOf()));
 
     ComPtr<ID3DBlob> psBlob;
-    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"ParticlePS.cso").c_str(), psBlob.GetAddressOf()));
+    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"PS_Particle.cso").c_str(), psBlob.GetAddressOf()));
     DX::ThrowIfFailed(device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, m_pixelShader.ReleaseAndGetAddressOf()));
 
     // ブレンドステート（加算合成）

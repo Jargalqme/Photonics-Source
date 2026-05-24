@@ -1,4 +1,4 @@
-// @Reference: https://github.com/TheAllenChou/numeric-springing
+﻿// @Reference: https://github.com/TheAllenChou/numeric-springing
 #pragma once
 
 

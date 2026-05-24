@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Tracers.h"
 
 #include "DeviceResources.h"
@@ -27,8 +27,8 @@ void Tracers::initialize()
 {
 	auto* device = m_context->device->GetD3DDevice();
 
-	m_vertexShader = m_context->shaders->getVS(L"TracerVS.cso");
-	m_pixelShader = m_context->shaders->getPS(L"TracerPS.cso");
+	m_vertexShader = m_context->shaders->getVS(L"VS_Tracer.cso");
+	m_pixelShader = m_context->shaders->getPS(L"PS_Tracer.cso");
 	m_constantBuffer = RenderUtil::createConstantBuffer<CBData>(device);
 
 	m_tracers.reserve(TRACER_RESERVE);

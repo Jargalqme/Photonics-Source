@@ -1,12 +1,14 @@
 //---------------------------------------------------------------------------
-//! @file   ImportedModelPS.hlsl
-//! @brief  Material-color and base-color texture pass for imported models.
+//! @file   PS_SkinnedMenu.hlsl
+//! @brief  Pixel shader for the menu skinned-character path. Mirrors
+//!         PS_ImportedModel.hlsl — simple Lambert with optional base-color
+//!         texture and tint.
 //---------------------------------------------------------------------------
 
-Texture2D BaseColorTexture : register(t0);
+Texture2D    BaseColorTexture : register(t0);
 SamplerState BaseColorSampler : register(s0);
 
-cbuffer ImportedModelCB : register(b0)
+cbuffer SkinnedTransformCB : register(b0)
 {
     float4x4 WorldViewProjection;
     float4x4 WorldInverseTranspose;
@@ -36,5 +38,6 @@ float4 main(PS_INPUT input) : SV_TARGET
         baseColor *= BaseColorTexture.Sample(BaseColorSampler, input.texCoord);
     }
 
-    return float4(baseColor.rgb, baseColor.a);
+    float emissiveIntensity = MaterialFlags.y;
+    return float4(baseColor.rgb * lighting * (1.0 + emissiveIntensity), baseColor.a);
 }

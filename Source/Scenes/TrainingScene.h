@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Scenes/Scene.h"
 
@@ -9,6 +9,7 @@
 #include "Gameplay/CombatSystem.h"
 #include "Render/Grid.h"
 #include "Render/BulletRenderer.h"
+#include "Render/LayoutLoader.h"
 #include "Render/ParticleSystem.h"
 #include "Render/RenderCommandQueue.h"
 #include "Render/Tracers.h"
@@ -37,12 +38,7 @@ public:
     void render() override;
 
 private:
-    static constexpr int   MAX_DUMMIES         = 30;
-    static constexpr int   DEFAULT_DUMMY_COUNT = 12;
-    static constexpr int   DUMMY_COLUMNS       = 5;
-    static constexpr float DUMMY_SPACING_X     = 4.0f;
-    static constexpr float DUMMY_SPACING_Z     = 3.5f;
-    static constexpr float DUMMY_BASE_Z        = 12.0f;
+    static constexpr float DUMMY_SPAWN_Z = 12.0f;
 
     static constexpr int   IMPACT_PARTICLE_COUNT  = 30;
     static constexpr float IMPACT_PARTICLE_SPEED  = 6.0f;
@@ -62,7 +58,7 @@ private:
     std::unique_ptr<Camera> m_camera;
     std::unique_ptr<Player> m_player;
 
-    std::vector<std::unique_ptr<Dummy>> m_dummies;
+    std::unique_ptr<Dummy> m_dummy;
     std::vector<ICombatTarget*> m_shotTargets;
     std::vector<ICombatTarget*> m_bulletTargets;
     BulletPool m_bulletPool;
@@ -75,22 +71,11 @@ private:
     std::unique_ptr<AudioManager> m_audioManager;
 
     std::unique_ptr<Grid> m_grid;
+    PrimitiveLayout m_environmentLayout;
 
     std::unique_ptr<GameUI> m_gameUI;
     std::unique_ptr<DebugUI> m_debugUI;
     bool m_debugMode = false;
-
-    int   m_dummyCount         = DEFAULT_DUMMY_COUNT;
-    bool  m_dummyMoving        = false;
-    float m_dummyMoveAmplitude = 3.0f;
-    float m_dummyMoveFrequency = 1.0f;
-    bool  m_dummyInvulnerable  = false;
-    float m_dummyRespawnDelay  = 1.0f;
-
-    void allocateDummies();
-    void resetAllDummies();
-    void applyDummyParameters();
-    Vector3 dummyGridPosition(int index) const;
 
     void renderWorld(const Matrix& view, const Matrix& proj, const Vector3& camPos);
     void renderEffects(const Matrix& view, const Matrix& proj, const Vector3& camPos);

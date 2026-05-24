@@ -1,23 +1,52 @@
-//---------------------------------------------------------------------------
-//! @file   Tonemapping.hlsli
-//! @brief  HDR tone mapping operators
-//---------------------------------------------------------------------------
-
 #ifndef TONEMAPPING_HLSLI
 #define TONEMAPPING_HLSLI
 
-// ACES filmic tone mapping (Narkowicz 2015)
-// 5-coefficient fit of the ACES Reference Rendering Transform.
-// Maps HDR values to 0-1 with a cinematic S-curve.
-// Reference: https://knarkowicz.wordpress.com/2016/01/06/aces-filmic-tone-mapping-curve/
-float3 ACESFilm(float3 x)
+//---------------------------------------------------------------------------
+// Tonemap_ACES_Hill
+// Hue-correct ACES fit. Bright saturated colors desaturate toward white
+// instead of locking at maximum chroma.
+//
+// Source:  https://github.com/TheRealMJP/BakingLab/blob/master/BakingLab/ACES.hlsl
+// Author:  Stephen Hill (@self_shadow)
+// License: MIT
+//---------------------------------------------------------------------------
+
+// sRGB => XYZ => D65_2_D60 => AP1 => RRT_SAT
+static const float3x3 ACESInputMat =
 {
-    float a = 2.51;
-    float b = 0.03;
-    float c = 2.43;
-    float d = 0.59;
-    float e = 0.14;
-    return saturate((x * (a * x + b)) / (x * (c * x + d) + e));
+    {0.59719, 0.35458, 0.04823},
+    {0.07600, 0.90834, 0.01566},
+    {0.02840, 0.13383, 0.83777}
+};
+
+// ODT_SAT => XYZ => D60_2_D65 => sRGB
+static const float3x3 ACESOutputMat =
+{
+    { 1.60475, -0.53108, -0.07367},
+    {-0.10208,  1.10813, -0.00605},
+    {-0.00327, -0.07276,  1.07602}
+};
+
+float3 RRTAndODTFit(float3 v)
+{
+    float3 a = v * (v + 0.0245786f) - 0.000090537f;
+    float3 b = v * (0.983729f * v + 0.4329510f) + 0.238081f;
+    return a / b;
+}
+
+float3 Tonemap_ACES_Hill(float3 color)
+{
+    color = mul(ACESInputMat, color);
+
+    // Apply RRT and ODT
+    color = RRTAndODTFit(color);
+
+    color = mul(ACESOutputMat, color);
+
+    // Clamp to [0, 1]
+    color = saturate(color);
+
+    return color;
 }
 
 #endif

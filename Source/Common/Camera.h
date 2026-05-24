@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <memory>
 #include "ThirdParty/FastNoiseLite.h"
@@ -40,6 +40,11 @@ public:
     Vector3 getUp() const { return m_up; }
     float getPitch() const { return m_pitch; }
     float getYaw() const { return m_yaw; }
+
+    // Imaging
+    float  getExposure() const   { return m_exposure; }
+    float* getExposurePtr()      { return &m_exposure; }
+    void   setExposure(float e)  { m_exposure = e; }
 
     void setProjectionParameters(float fov, float aspectRatio, float nearPlane, float farPlane);
 
@@ -86,6 +91,9 @@ private:
     float m_aspectRatio;
     float m_nearZ;
     float m_farZ;
+
+    // Imaging
+    float m_exposure = 0.8f;
 
     FastNoiseLite m_shakeNoise;
     float m_shakeTime = 0.0f;

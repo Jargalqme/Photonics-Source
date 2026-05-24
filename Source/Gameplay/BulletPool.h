@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Gameplay/Bullet.h"
 
 class BulletPool

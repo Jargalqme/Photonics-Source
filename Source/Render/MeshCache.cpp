@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "MeshCache.h"
 
 using namespace DirectX;
@@ -32,6 +32,16 @@ GeometricPrimitive* MeshCache::getCylinder()
 	if (!slot)
 	{
 		slot = GeometricPrimitive::CreateCylinder(m_context, 1.0f, 1.0f, 32, false);
+	}
+	return slot.get();
+}
+
+GeometricPrimitive* MeshCache::getCone()
+{
+	auto& slot = m_meshes["Cone"];
+	if (!slot)
+	{
+		slot = GeometricPrimitive::CreateCone(m_context, 1.0f, 1.0f, 32, false);
 	}
 	return slot.get();
 }

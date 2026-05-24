@@ -24,5 +24,5 @@ struct PS_INPUT
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
-    return UpsampleTent(sourceTexture, linearSampler, input.uv, texelSize, sampleScale);
+    return UpsampleTent9(sourceTexture, linearSampler, input.uv, texelSize, sampleScale);
 }

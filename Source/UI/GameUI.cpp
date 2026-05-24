@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "UI/GameUI.h"
 #include "Services/BeatTracker.h"
 #include "Gameplay/Player.h"
@@ -290,7 +290,7 @@ void GameUI::drawWeaponHUD()
 
 void GameUI::drawDummyHealthBar(const Matrix& view, const Matrix& proj)
 {
-    if (!m_dummies)
+    if (!m_dummy || !m_dummy->isActive())
     {
         return;
     }
@@ -301,63 +301,55 @@ void GameUI::drawDummyHealthBar(const Matrix& view, const Matrix& proj)
 
     auto* drawList = ImGui::GetForegroundDrawList();
 
-    for (auto& dummy : *m_dummies)
+    // 敵の頭上にバーを配置
+    Vector3 worldPos = m_dummy->getPosition() + Vector3(0.0f, 2.5f, 0.0f);
+
+    // ワールド → クリップ空間
+    Vector4 clip = Vector4::Transform(
+        Vector4(worldPos.x, worldPos.y, worldPos.z, 1.0f),
+        view * proj
+    );
+
+    // カメラの後ろならスキップ
+    if (clip.w <= 0.0f)
     {
-        if (!dummy->isActive())
-        {
-            continue;
-        }
-
-        // 敵の頭上にバーを配置
-        Vector3 worldPos = dummy->getPosition() + Vector3(0.0f, 2.5f, 0.0f);
-
-        // ワールド → クリップ空間
-        Vector4 clip = Vector4::Transform(
-            Vector4(worldPos.x, worldPos.y, worldPos.z, 1.0f),
-            view * proj
-        );
-
-        // カメラの後ろならスキップ
-        if (clip.w <= 0.0f)
-        {
-            continue;
-        }
-
-        // 透視除算 → NDC
-        float ndcX = clip.x / clip.w;
-        float ndcY = clip.y / clip.w;
-
-        // NDC → スクリーン座標
-        float screenX = (ndcX * 0.5f + 0.5f) * screenW;
-        float screenY = (1.0f - (ndcY * 0.5f + 0.5f)) * screenH;
-
-        // 距離に応じたスケール
-        float scale = 1.0f / clip.w;
-        scale = std::clamp(scale, 0.05f, 0.5f);
-
-        float barW = 600.0f * scale;
-        float barH = 60.0f * scale;
-        float left = screenX - barW * 0.5f;
-        float top = screenY - barH * 0.5f;
-
-        float ratio = dummy->getHealth() / dummy->getMaxHealth();
-
-        // 背景
-        drawList->AddRectFilled(
-            ImVec2(left, top),
-            ImVec2(left + barW, top + barH),
-            IM_COL32(0, 0, 0, 160)
-        );
-
-        // 体力ゲージ（緑→赤）
-        ImU32 color = (ratio > 0.5f)
-            ? IM_COL32(0, 255, 100, 220)
-            : IM_COL32(255, 60, 30, 220);
-
-        drawList->AddRectFilled(
-            ImVec2(left, top),
-            ImVec2(left + barW * ratio, top + barH),
-            color
-        );
+        return;
     }
+
+    // 透視除算 → NDC
+    float ndcX = clip.x / clip.w;
+    float ndcY = clip.y / clip.w;
+
+    // NDC → スクリーン座標
+    float screenX = (ndcX * 0.5f + 0.5f) * screenW;
+    float screenY = (1.0f - (ndcY * 0.5f + 0.5f)) * screenH;
+
+    // 距離に応じたスケール
+    float scale = 1.0f / clip.w;
+    scale = std::clamp(scale, 0.05f, 0.5f);
+
+    float barW = 600.0f * scale;
+    float barH = 60.0f * scale;
+    float left = screenX - barW * 0.5f;
+    float top = screenY - barH * 0.5f;
+
+    float ratio = m_dummy->getHealth() / m_dummy->getMaxHealth();
+
+    // 背景
+    drawList->AddRectFilled(
+        ImVec2(left, top),
+        ImVec2(left + barW, top + barH),
+        IM_COL32(0, 0, 0, 160)
+    );
+
+    // 体力ゲージ（緑→赤）
+    ImU32 color = (ratio > 0.5f)
+        ? IM_COL32(0, 255, 100, 220)
+        : IM_COL32(255, 60, 30, 220);
+
+    drawList->AddRectFilled(
+        ImVec2(left, top),
+        ImVec2(left + barW * ratio, top + barH),
+        color
+    );
 }
