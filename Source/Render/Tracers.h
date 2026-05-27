@@ -43,6 +43,7 @@ private:
 		DirectX::SimpleMath::Vector3 end;
 		DirectX::SimpleMath::Vector4 color;
 		float                        life;  // [0,1] — 1=新鮮, 0=消滅
+		bool                         fresh;
 	};
 	std::vector<Tracer> m_tracers;
 

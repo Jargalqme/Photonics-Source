@@ -30,9 +30,6 @@ ipch/
 # Compiled shaders (regenerated on build)
 *.cso
 
-# Generated diagnostics
-assimp_model_report.txt
-
 # Windows
 Thumbs.db
 desktop.ini
@@ -50,7 +47,7 @@ DirectXTK/
 Assets/
 
 # Documentation and tools
-Documents/
+Docs/
 Tools/
 
 # Other project files

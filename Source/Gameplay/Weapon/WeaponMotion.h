@@ -27,7 +27,7 @@ struct WeaponMotionTuning
 
 	// Recoil - impulse on fire
 	float recoilKickback{ -8.0f };			// Z pushback velocity
-	float recoilPitchDeg{ -6.0f };			// pitch-up velocity
+	float recoilPitchDeg{ -24.0f };			// pitch-up velocity
 
 	// Bob - sine wave from walking
 	float bobFrequency { 8.0f };			// how fast the cycle runs (rad/s)

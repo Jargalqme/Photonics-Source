@@ -59,8 +59,8 @@ private:
     float m_lineEmissiveIntensity = 2.5f;
 
     // エレクトリックブルー (#0066FF) + オービットネイビー (#0A1024)
-    DirectX::SimpleMath::Color m_lineColor{ 0.0f, 0.4f, 1.0f, 1.0f };
-    DirectX::SimpleMath::Color m_baseColor{ 0.039f, 0.063f, 0.141f, 1.0f };
+    DirectX::SimpleMath::Color m_lineColor{ 1.0f, 0.0f, 0.21f, 1.0f };
+    DirectX::SimpleMath::Color m_baseColor{ 0.0f, 0.0f, 0.0f, 1.0f };
     DirectX::SimpleMath::Color m_finalColor{ 0.0f, 0.0f, 0.0f, 1.0f };
 
     // === グリッド面のワールド行列 ===

@@ -5,8 +5,8 @@
 void WeaponRifle::initialize()
 {
     m_clipSize = 30;
-    m_fireInterval = 0.08f;
-    m_damage = 12.0f;
+    m_fireInterval = 0.15f;
+    m_damage = 2.5f;
     m_maxRange = 150.0f;
     m_reloadDuration = 1.5f;
     Weapon::initialize();

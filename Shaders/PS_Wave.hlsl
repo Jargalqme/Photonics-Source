@@ -34,34 +34,12 @@ float4 main(PS_INPUT input) : SV_TARGET
     }
 
     float val = 0.1 / abs(sin(Time - uv.y - uv.x));
-    //float3 col = float3(val, val, val);
-    //col *= ColorTint;
-    
-    // Hue shift based on wave intensity and time
-  //  float hue = uv.x * 0.3 + uv.y * 0.2 + Time * 0.1;
-  //  float3 col = val * float3(
-  //    sin(hue) * 0.3 + 0.7,
-  //    sin(hue + 2.094) * 0.3 + 0.7, // 2.094 = 2*PI/3
-  //    sin(hue + 4.189) * 0.3 + 0.7 // 4.189 = 4*PI/3
-  //);
-  //  col *= ColorTint;
-    
-    
-    float3 color1 = float3(0.0, 0.4, 1.0); // electric blue
-    float3 color2 = float3(0.6, 0.0, 1.0); // purple
+    float3 color1 = float3(0.7, 0.0, 0.5); // dark magenta
+    float3 color2 = float3(0.0, 0.6, 0.9); // cyan
+    float kick = pow(saturate(sin(Time * 9.4)), 8.0);
     float blend = sin(uv.y * 2.0 + Time * 0.3) * 0.5 + 0.5;
+    blend = lerp(blend, 1.0, kick * 0.6); // each kick pulls blend toward color2
     float3 col = val * lerp(color1, color2, blend);
-    
-    //float pulse = sin(Time * 0.5) * 0.15 + 1.0; // 0.85 to 1.15
-    //float3 col = float3(val * pulse, val * pulse, val * pulse);
-    //col *= ColorTint;
-    
-  //  float hue = uv.x * 0.8 + uv.y * 0.5 + Time * 0.8;
-  //  float3 col = val * float3(
-  //    sin(hue) * 0.3 + 0.7,
-  //    sin(hue + 2.094) * 0.5 + 0.5,
-  //    sin(hue + 4.189) * 0.5 + 0.5
-  //);
     
     return float4(col, 1.0);
 }

@@ -38,8 +38,8 @@ private:
     State m_state = State::Root;
     int m_selectedIndex = 0;
 
-    static constexpr int ROOT_ITEM_COUNT = 4;      // Boss Fight, Training, Settings, Quit
-    static constexpr int SETTINGS_ITEM_COUNT = 3;  // Resolution, Apply, Back
+    static constexpr int ROOT_ITEM_COUNT = 4;
+    static constexpr int SETTINGS_ITEM_COUNT = 3;
 
     int m_pendingResolutionIndex = 0;
 

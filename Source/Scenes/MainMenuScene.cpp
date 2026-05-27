@@ -30,8 +30,43 @@ namespace
     };
 
     constexpr int RESOLUTION_COUNT = static_cast<int>(std::size(RESOLUTIONS));
+    constexpr ImGuiWindowFlags MENU_WINDOW_FLAGS =
+        ImGuiWindowFlags_NoTitleBar |
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoBackground |
+        ImGuiWindowFlags_NoScrollbar |
+        ImGuiWindowFlags_NoScrollWithMouse;
 
-    bool DrawSciFiButton(const char* text, bool isSelected, float width, float centerX, bool* outHovered = nullptr)
+    void DrawCenteredScaledText(const char* text, const ImVec4& color, float desiredFontSize, float maxWidth)
+    {
+        ImFont* font = ImGui::GetFont();
+        float fontSize = desiredFontSize;
+        ImVec2 textSize = font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, text);
+        if (textSize.x > maxWidth && textSize.x > 0.0f)
+        {
+            fontSize *= maxWidth / textSize.x;
+            textSize = font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, text);
+        }
+
+        const ImVec2 cursor = ImGui::GetCursorScreenPos();
+        const float x = cursor.x + (ImGui::GetWindowWidth() - textSize.x) * 0.5f;
+        ImGui::GetWindowDrawList()->AddText(
+            font,
+            fontSize,
+            ImVec2(x, cursor.y),
+            ImGui::ColorConvertFloat4ToU32(color),
+            text);
+        ImGui::Dummy(ImVec2(ImGui::GetWindowWidth(), textSize.y));
+    }
+
+    bool DrawSciFiButton(
+        const char* text,
+        bool isSelected,
+        float width,
+        float centerX,
+        bool* outHovered = nullptr,
+        float desiredTextSize = 32.0f)
     {
         ImDrawList* drawList = ImGui::GetWindowDrawList();
 
@@ -78,12 +113,22 @@ namespace
         drawList->AddLine(ImVec2(x + width - cornerSize, y + height), ImVec2(x + width, y + height), borderColor, 2.0f);
         drawList->AddLine(ImVec2(x + width, y + height - cornerSize), ImVec2(x + width, y + height), borderColor, 2.0f);
 
-        ImVec2 textSize = ImGui::CalcTextSize(text);
+        ImFont* font = ImGui::GetFont();
+        float fontSize = desiredTextSize;
+        ImVec2 textSize = font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, text);
+        const float maxTextWidth = width - 28.0f;
+        if (textSize.x > maxTextWidth && textSize.x > 0.0f)
+        {
+            fontSize *= maxTextWidth / textSize.x;
+            textSize = font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, text);
+        }
+
         const float textX = x + (width - textSize.x) / 2.0f;
         const float textY = y + (height - textSize.y) / 2.0f;
-        drawList->AddText(ImVec2(textX, textY), textColor, text);
+        drawList->AddText(font, fontSize, ImVec2(textX, textY), textColor, text);
 
-        ImGui::SetCursorScreenPos(ImVec2(originalCursor.x, y + height + 12.0f));
+        ImGui::SetCursorScreenPos(ImVec2(originalCursor.x, y + height));
+        ImGui::Dummy(ImVec2(1.0f, 12.0f));
         return isClicked;
     }
 }
@@ -112,7 +157,7 @@ void MainMenuScene::initialize(SceneContext& context)
             bool hasSelectedClip = !data.clips.empty();
             const size_t firstAppendedClipIndex = data.clips.size();
 
-            const auto dancePath = GetAssetPath(L"Characters/MenuGuy/dance.fbx");
+            const auto dancePath = GetAssetPath(L"Characters/MenuGuy/dance1.fbx");
             const int32_t appended =
                 SkinnedModelImporter::AppendClipsFromFile(dancePath, data);
             if (appended > 0)
@@ -348,16 +393,17 @@ void MainMenuScene::render()
         const int rh = m_renderer->GetRenderHeight();
         const float aspect = (rh > 0) ? (static_cast<float>(rw) / static_cast<float>(rh)) : 1.0f;
 
-        const Vector3 characterOffset(0.0f, 0.0f, -500.0f);
+        const Vector3 cameraPos(0.0f, 0.0f, 0.0f);
+        const Vector3 cameraTarget(0.0f, 0.0f, -400.0f);
 
-        const Matrix view = Matrix::CreateLookAt(
-            Vector3(0.0f,  120.0f, 300.0f),
-            Vector3(0.0f,   95.0f,   0.0f) + characterOffset,
-            Vector3::Up);
+        const Vector3 characterOffset(-120.0f, -80.0f, -400.0f);
+        const float characterYaw = XM_PI * 1.1f;
+
+        const Matrix view = Matrix::CreateLookAt(cameraPos, cameraTarget, Vector3::Up);
         const Matrix proj = Matrix::CreatePerspectiveFieldOfView(
             XMConvertToRadians(35.0f), aspect, 1.0f, 5000.0f);
         const Matrix world =
-            Matrix::CreateRotationY(XM_PI) *
+            Matrix::CreateRotationY(characterYaw) *
             Matrix::CreateTranslation(characterOffset);
 
         // Sample the dance clip into the skeleton, build the bone palette,
@@ -371,11 +417,21 @@ void MainMenuScene::render()
             paletteCount = m_skeleton->boneCount();
         }
 
+        //m_skinnedRenderer->draw(
+        //    m_deviceResources->GetD3DDeviceContext(),
+        //    *m_menuCharacter,
+        //    palette, paletteCount,
+        //    world, view, proj);
+
+        const Vector4 menuLight(0.0f, -1.0f, 0.0f, 0.35f);
+
         m_skinnedRenderer->draw(
             m_deviceResources->GetD3DDeviceContext(),
             *m_menuCharacter,
             palette, paletteCount,
-            world, view, proj);
+            world, view, proj,
+            Vector4(0.9f, 0.9f, 0.9f, 1.0f),
+            menuLight);
     }
 
     if (m_state == State::Root)
@@ -400,29 +456,22 @@ void MainMenuScene::renderRoot()
     ImGui::SetNextWindowPos(ImVec2(centerX, centerY), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
     ImGui::SetNextWindowSize(ImVec2(panelWidth, panelHeight));
 
-    ImGui::Begin("##MainMenu", nullptr,
-        ImGuiWindowFlags_NoTitleBar |
-        ImGuiWindowFlags_NoResize |
-        ImGuiWindowFlags_NoMove |
-        ImGuiWindowFlags_NoBackground);
+    ImGui::Begin("##MainMenu", nullptr, MENU_WINDOW_FLAGS);
 
     const float windowWidth = ImGui::GetWindowWidth();
 
-    ImGui::SetWindowFontScale(4.0f);
-    const char* title = "P H O T O N";
-    const float titleWidth = ImGui::CalcTextSize(title).x;
-    ImGui::SetCursorPosX((windowWidth - titleWidth) / 2.0f);
-    ImGui::TextColored(ImVec4(0.0f, 1.0f, 1.0f, 1.0f), title);
-    ImGui::SetWindowFontScale(1.0f);
+    DrawCenteredScaledText(
+        "P H O T O N X",
+        ImVec4(0.0f, 1.0f, 1.0f, 1.0f),
+        80.0f,
+        windowWidth - 24.0f);
 
     ImGui::Spacing();
     ImGui::Spacing();
     ImGui::Spacing();
     ImGui::Spacing();
 
-    ImGui::SetWindowFontScale(1.8f);
-
-    const char* menuItems[ROOT_ITEM_COUNT] = { "BOSS FIGHT", "TRAINING", "SETTINGS", "QUIT" };
+    const char* menuItems[ROOT_ITEM_COUNT] = { "START A GAME", "WORKSHOP", "SETTINGS", "QUIT" };
     for (int i = 0; i < ROOT_ITEM_COUNT; i++)
     {
         bool hovered = false;
@@ -453,18 +502,6 @@ void MainMenuScene::renderRoot()
         }
     }
 
-    ImGui::SetWindowFontScale(1.0f);
-
-    ImGui::Spacing();
-    ImGui::Spacing();
-
-    ImGui::SetWindowFontScale(1.5f);
-    const char* hint = "[W/S] Move  [ENTER] Select";
-    const float hintWidth = ImGui::CalcTextSize(hint).x;
-    ImGui::SetCursorPosX((windowWidth - hintWidth) / 2.0f);
-    ImGui::TextColored(ImVec4(0.4f, 0.4f, 0.4f, 1.0f), hint);
-    ImGui::SetWindowFontScale(1.0f);
-
     ImGui::End();
 }
 
@@ -480,26 +517,19 @@ void MainMenuScene::renderSettings()
     ImGui::SetNextWindowPos(ImVec2(centerX, centerY), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
     ImGui::SetNextWindowSize(ImVec2(panelWidth, panelHeight));
 
-    ImGui::Begin("##MainMenuSettings", nullptr,
-        ImGuiWindowFlags_NoTitleBar |
-        ImGuiWindowFlags_NoResize |
-        ImGuiWindowFlags_NoMove |
-        ImGuiWindowFlags_NoBackground);
+    ImGui::Begin("##MainMenuSettings", nullptr, MENU_WINDOW_FLAGS);
 
     const float windowWidth = ImGui::GetWindowWidth();
 
-    ImGui::SetWindowFontScale(3.0f);
-    const char* title = "SETTINGS";
-    const float titleWidth = ImGui::CalcTextSize(title).x;
-    ImGui::SetCursorPosX((windowWidth - titleWidth) / 2.0f);
-    ImGui::TextColored(ImVec4(0.0f, 1.0f, 1.0f, 1.0f), title);
-    ImGui::SetWindowFontScale(1.0f);
+    DrawCenteredScaledText(
+        "SETTINGS",
+        ImVec4(0.0f, 1.0f, 1.0f, 1.0f),
+        80.0f,
+        windowWidth - 24.0f);
 
     ImGui::Spacing();
     ImGui::Spacing();
     ImGui::Spacing();
-
-    ImGui::SetWindowFontScale(1.6f);
 
     char rowLabel[96];
     if (m_selectedIndex == 0)
@@ -546,17 +576,6 @@ void MainMenuScene::renderSettings()
     {
         m_selectedIndex = 2;
     }
-
-    ImGui::SetWindowFontScale(1.0f);
-
-    ImGui::Spacing();
-
-    ImGui::SetWindowFontScale(1.3f);
-    const char* hint = "[W/S] Row  [A/D] Cycle  [ENTER] Confirm  [ESC] Back";
-    const float hintWidth = ImGui::CalcTextSize(hint).x;
-    ImGui::SetCursorPosX((windowWidth - hintWidth) / 2.0f);
-    ImGui::TextColored(ImVec4(0.4f, 0.4f, 0.4f, 1.0f), hint);
-    ImGui::SetWindowFontScale(1.0f);
 
     ImGui::End();
 }

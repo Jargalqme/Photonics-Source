@@ -183,6 +183,9 @@ void Game::Initialize(HWND window, int width, int height)
 
     ImFontConfig fontConfig;
     fontConfig.SizePixels = 15.0f;
+    fontConfig.OversampleH = 3;
+    fontConfig.OversampleV = 2;
+    fontConfig.PixelSnapH = false;
     io.Fonts->AddFontDefault(&fontConfig);
 
     ImGui::StyleColorsDark();

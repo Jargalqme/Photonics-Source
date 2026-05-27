@@ -61,7 +61,7 @@ public:
 private:
     static constexpr float INVINCIBLE_DURATION = 0.5f;
     static constexpr float MOVE_THRESHOLD      = 0.001f;
-    static constexpr float ARENA_HALF_SIZE     = 195.0f;
+    static constexpr float ARENA_HALF_SIZE     = 50.0f;
     static constexpr float LOOK_PITCH_CLAMP    = 89.0f;
     static constexpr float EYE_HEIGHT          = 2.3f;
 

@@ -105,7 +105,29 @@ void GameUI::drawCrosshair()
     float centerY = static_cast<float>(size.bottom - size.top) / 2.0f;
 
     ImDrawList* drawList = ImGui::GetForegroundDrawList();
-    drawList->AddCircle(ImVec2(centerX, centerY), 20.0f, IM_COL32(255, 0, 255, 255), 0, 2.0f);
+
+    const ImVec2 c(centerX, centerY);
+    const ImU32 cyan = IM_COL32(0, 255, 255, 230);
+    const ImU32 magenta = IM_COL32(255, 0, 255, 180);
+
+    const float gap = 8.0f;
+    const float len = 14.0f;
+    const float r = 18.0f;
+
+    // center dot
+    drawList->AddCircleFilled(c, 2.0f, magenta);
+
+    // four clean aiming ticks
+    drawList->AddLine(ImVec2(centerX - gap - len, centerY), ImVec2(centerX - gap, centerY), cyan, 2.0f);
+    drawList->AddLine(ImVec2(centerX + gap, centerY), ImVec2(centerX + gap + len, centerY), cyan, 2.0f);
+    drawList->AddLine(ImVec2(centerX, centerY - gap - len), ImVec2(centerX, centerY - gap), cyan, 2.0f);
+    drawList->AddLine(ImVec2(centerX, centerY + gap), ImVec2(centerX, centerY + gap + len), cyan, 2.0f);
+
+    // small diagonal sci-fi brackets
+    drawList->AddLine(ImVec2(centerX - r, centerY - r), ImVec2(centerX - r + 7.0f, centerY - r), magenta, 1.5f);
+    drawList->AddLine(ImVec2(centerX - r, centerY - r), ImVec2(centerX - r, centerY - r + 7.0f), magenta, 1.5f);
+    drawList->AddLine(ImVec2(centerX + r, centerY + r), ImVec2(centerX + r - 7.0f, centerY + r), magenta, 1.5f);
+    drawList->AddLine(ImVec2(centerX + r, centerY + r), ImVec2(centerX + r, centerY + r - 7.0f), magenta, 1.5f);
 }
 
 // === ビートフラッシュ ===

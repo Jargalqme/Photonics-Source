@@ -34,8 +34,10 @@ void Boss::buildBoss()
 {
     MeshCache* meshes = m_context->meshes;
 
-    m_coreMesh = meshes->getOctahedron();          // unit；submitRender() で 2.0 倍
-    m_ringMesh = meshes->getTorus(4.0f, 0.4f);     // 寸法そのまま（torus は比率固定でキャッシュ）
+    m_coreMesh = meshes->getSphere(24);
+    m_outerringMesh = meshes->getTorus(4.6f, 0.08f, 64);
+    m_innerRingMesh = meshes->getTorus(3.2f, 0.18f, 64);
+
 #ifdef _DEBUG
     m_debugSphere = meshes->getSphere(16);         // unit (diameter=1)；submitRender() で 2*radius 倍
 #endif
@@ -276,8 +278,9 @@ void Boss::submitRender(RenderCommandQueue& queue) const
 
     Matrix world = Matrix::CreateTranslation(m_transform.position);
 
-    Color coreColor = Color(0.06f, 0.06f, 0.08f);
+    Color coreColor = Color(0.8f, 0.8f, 0.8f);
     Color ringColor = Color(0.4f, 0.0f, 1.0f);
+    const Color energyColor(0.0f, 0.85f, 1.0f);
     if (m_hitFlashTimer > 0.0f)
     {
         float t = m_hitFlashTimer / HIT_FLASH_DURATION;
@@ -286,19 +289,48 @@ void Boss::submitRender(RenderCommandQueue& queue) const
         ringColor = Color::Lerp(ringColor, flashColor, t);
     }
 
-    submitMesh(m_coreMesh, Matrix::CreateScale(2.0f) * world, coreColor, false, BlendMode::Opaque, 0.35f);
+    submitMesh(m_coreMesh,
+        Matrix::CreateScale(1.8f) * world,
+        coreColor,
+        false,
+        BlendMode::Opaque,
+        0.8f);
 
-    Matrix ringWorld = Matrix::CreateRotationX(RING_TILT)
-        * Matrix::CreateRotationY(m_ringOrbitAngle)
-        * Matrix::CreateTranslation(m_transform.position);
-    submitMesh(m_ringMesh, ringWorld, ringColor, false, BlendMode::Opaque, 3.0f);
+    submitMesh(m_outerringMesh,
+        Matrix::CreateRotationX(0.35f) *
+        Matrix::CreateRotationY(m_ringOrbitAngle) *
+        Matrix::CreateTranslation(m_transform.position),
+        energyColor,
+        false,
+        BlendMode::Opaque,
+        4.0f);
+
+    submitMesh(m_innerRingMesh,
+        Matrix::CreateRotationX(-0.55f) *
+        Matrix::CreateRotationZ(XM_PIDIV2 * 0.78f) *
+        Matrix::CreateRotationY(-m_ringOrbitAngle * 1.3f) *
+        Matrix::CreateTranslation(m_transform.position),
+        Color(0.8f, 0.0f, 1.0f),
+        false,
+        BlendMode::Opaque,
+        3.5f);
 
 #ifdef _DEBUG
+    const Vector3 weakPointPosition = m_transform.position + Vector3(0, SKULL_OFFSET_Y, 0);
+
     submitMesh(
         m_debugSphere,
         Matrix::CreateScale(BODY_RADIUS * 2.0f)
         * Matrix::CreateTranslation(m_transform.position),
         Color(0.0f, 1.0f, 0.0f, 0.3f),
+        true,
+        BlendMode::AlphaBlend);
+
+    submitMesh(
+        m_debugSphere,
+        Matrix::CreateScale(SKULL_RADIUS * 2.0f)
+        * Matrix::CreateTranslation(weakPointPosition),
+        Color(1.0f, 0.0f, 1.0f, 0.35f),
         true,
         BlendMode::AlphaBlend);
 #endif
@@ -317,7 +349,8 @@ void Boss::finalize()
     m_skull.finalize();
     // 借用ポインタを nullptr 化（実体は MeshCache が所有）
     m_coreMesh = nullptr;
-    m_ringMesh = nullptr;
+    m_outerringMesh = nullptr;
+    m_innerRingMesh = nullptr;
 #ifdef _DEBUG
     m_debugSphere = nullptr;
 #endif

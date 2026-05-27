@@ -38,4 +38,5 @@ float4 main(PS_INPUT input) : SV_TARGET
 
     float emissiveIntensity = MaterialFlags.y;
     return float4(baseColor.rgb * (lighting + emissiveIntensity), baseColor.a);
+    //return float4(baseColor.rgb, baseColor.a);
 }

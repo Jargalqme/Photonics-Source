@@ -73,7 +73,7 @@ private:
     static constexpr float SKULL_SIZE         = 2.5f;
 
     // 当たり判定コライダ（collectHitColliders で使用）
-    static constexpr float BODY_RADIUS        = 5.0f;
+    static constexpr float BODY_RADIUS        = 2.4f;
     static constexpr float SKULL_RADIUS       = 1.5f;
     static constexpr float WEAK_POINT_MULT    = 2.0f;
 
@@ -103,7 +103,8 @@ private:
     void buildBoss();
     Billboard m_skull;
     DirectX::GeometricPrimitive* m_coreMesh = nullptr;  // MeshCache から借用（非所有）
-    DirectX::GeometricPrimitive* m_ringMesh = nullptr;
+    DirectX::GeometricPrimitive* m_outerringMesh = nullptr;
+    DirectX::GeometricPrimitive* m_innerRingMesh = nullptr;
     float m_ringOrbitAngle = 0.0f;
 
 #ifdef _DEBUG

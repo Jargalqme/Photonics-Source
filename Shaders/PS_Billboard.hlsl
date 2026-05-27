@@ -14,5 +14,6 @@ struct PS_INPUT
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
-    return tex.Sample(sam, input.texCoord);
+    float4 color = tex.Sample(sam, input.texCoord);
+    return float4(color.rgb * 3.0, color.a);
 }

@@ -83,12 +83,12 @@ void BossScene::initialize(SceneContext& context)
     m_audioManager->loadSound("boost", GetAssetPath(L"Audio/boost_sfx.wav").c_str());
     loadRifleFireAudio(*m_audioManager);
     m_audioManager->loadSound("death", GetAssetPath(L"Audio/death_sfx.wav").c_str());
-    m_audioManager->loadMusic("Gameplay", GetAssetPath(L"Audio/gameplay_music.wav").c_str());
+    m_audioManager->loadMusic("Gameplay", GetAssetPath(L"Audio/sample.wav").c_str());
 
     m_beatTracker = std::make_unique<BeatTracker>();
-    m_beatTracker->setBPM(120.0f);
+    m_beatTracker->setBPM(109.0f);
     m_beatTracker->setStartDelay(15.931f);
-    m_beatTracker->setSongDuration(150.0f);
+    m_beatTracker->setSongDuration(115.0f);
     m_beatTracker->setBeatCallback([this](int beat) {
         onBeat(beat);
     });

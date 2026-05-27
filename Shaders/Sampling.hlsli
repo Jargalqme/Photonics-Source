@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
 //! @file   Sampling.hlsli
-//! @brief  Bloom helpers: prefilter, threshold, downsample, upsample.
+//! @brief  Bloom helpers: downsample, upsample, threshold, prefilter.
 //
 //          Kernel reference (DownsampleBox13Tap, UpsampleTent9):
 //          "Next Generation Post Processing in Call of Duty Advanced

@@ -49,4 +49,27 @@ float3 Tonemap_ACES_Hill(float3 color)
     return color;
 }
 
+
+
+//---------------------------------------------------------------------------
+// Tonemap_ACES_Narkowicz
+// Cheap one-rational ACES curve fit. No hue correction — bright saturated
+// colors clip to their primary instead of desaturating toward white.
+//
+// Source:  https://knarkowicz.wordpress.com/2016/01/06/aces-filmic-tone-mapping-curve/
+// Author:  Krzysztof Narkowicz
+// License: MIT
+//---------------------------------------------------------------------------
+
+float3 Tonemap_ACES_Narkowicz(float3 color)
+{
+    float a = 2.51f;
+    float b = 0.03f;
+    float c = 2.43f;
+    float d = 0.59f;
+    float e = 0.14f;
+    
+    return saturate((color * (a * color + b)) / (color * (c * color + d) + e));
+}
+
 #endif
