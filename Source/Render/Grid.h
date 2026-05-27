@@ -67,13 +67,13 @@ private:
     DirectX::SimpleMath::Matrix m_worldFloor = Matrix::Identity * Matrix::CreateTranslation(0, FLOOR_Y, 0);
 
     // === GPUリソース ===
-    Microsoft::WRL::ComPtr<ID3D11Buffer> m_vertexBuffer;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> m_indexBuffer;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> m_constantBuffer;
-    Microsoft::WRL::ComPtr<ID3D11VertexShader> m_vertexShader;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pixelShader;
-    Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
-    Microsoft::WRL::ComPtr<ID3D11BlendState> m_blendState;
-    Microsoft::WRL::ComPtr<ID3D11DepthStencilState> m_depthStencilState;
-    Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_rasterizerState;
+    com_ptr<ID3D11Buffer>            m_vertexBuffer;
+    com_ptr<ID3D11Buffer>            m_indexBuffer;
+    com_ptr<ID3D11Buffer>            m_constantBuffer;
+    com_ptr<ID3D11VertexShader>      m_vertexShader;
+    com_ptr<ID3D11PixelShader>       m_pixelShader;
+    com_ptr<ID3D11InputLayout>       m_inputLayout;
+    com_ptr<ID3D11BlendState>        m_blendState;
+    com_ptr<ID3D11DepthStencilState> m_depthStencilState;
+    com_ptr<ID3D11RasterizerState>   m_rasterizerState;
 };

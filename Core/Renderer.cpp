@@ -101,31 +101,6 @@ Renderer::Renderer(DX::DeviceResources* deviceResources)
 {
 }
 
-void Renderer::Clear()
-{
-    // NOTE: This method is currently unused because BeginScene handles clearing.
-    // It's kept for potential future use (debugging, alternate render paths, etc.)
-
-	// Clear the views
-	m_deviceResources->PIXBeginEvent(L"Clear");
-
-	auto context = m_deviceResources->GetD3DDeviceContext();
-	auto renderTarget = m_deviceResources->GetRenderTargetView();
-	auto depthStencil = m_deviceResources->GetDepthStencilView();
-
-	// Dark blue Tron-style background
-    static const float darkTronBlue[4] = { 0.12f, 0.05f, 0.2f, 1.0f };
-
-	context->ClearRenderTargetView(renderTarget, darkTronBlue);
-	context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-	context->OMSetRenderTargets(1, &renderTarget, depthStencil);
-
-	const auto viewport = m_deviceResources->GetScreenViewport();
-	context->RSSetViewports(1, &viewport);
-
-	m_deviceResources->PIXEndEvent();
-}
-
 void Renderer::CreateDeviceDependentResources()
 {
     m_sceneRenderer->createDeviceDependentResources();

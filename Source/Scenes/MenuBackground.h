@@ -93,7 +93,7 @@ private:
     ShaderType m_shaderType = ShaderType::Fractal;
 
     // ピクセルシェーダー（3種類）
-    Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pixelShaderWarping;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pixelShaderFractal;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pixelShaderWave;
+    com_ptr<ID3D11PixelShader> m_pixelShaderWarping;
+    com_ptr<ID3D11PixelShader> m_pixelShaderFractal;
+    com_ptr<ID3D11PixelShader> m_pixelShaderWave;
 };

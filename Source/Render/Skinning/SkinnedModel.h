@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "SkinnedModelData.h"
 
@@ -32,7 +32,7 @@ public:
 
 private:
     SkinnedModelData m_data;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> m_vertexBuffer;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> m_indexBuffer;
+    com_ptr<ID3D11Buffer> m_vertexBuffer;
+    com_ptr<ID3D11Buffer> m_indexBuffer;
     std::vector<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> m_textureSRVs;
 };

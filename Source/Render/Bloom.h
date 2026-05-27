@@ -41,28 +41,28 @@ private:
     UINT m_targetHeight = 0;
 
     // ブルームミップチェーン（5レベル）
-    Microsoft::WRL::ComPtr<ID3D11Texture2D>          m_mipTextures[MIP_COUNT];
-    Microsoft::WRL::ComPtr<ID3D11RenderTargetView>   m_mipRTVs[MIP_COUNT];
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_mipSRVs[MIP_COUNT];
+    com_ptr<ID3D11Texture2D>          m_mipTextures[MIP_COUNT];
+    com_ptr<ID3D11RenderTargetView>   m_mipRTVs[MIP_COUNT];
+    com_ptr<ID3D11ShaderResourceView> m_mipSRVs[MIP_COUNT];
     UINT m_mipWidths[MIP_COUNT] = {};
     UINT m_mipHeights[MIP_COUNT] = {};
 
     // 合成出力（フル解像度、HDR）
-    Microsoft::WRL::ComPtr<ID3D11Texture2D>          m_compositeTexture;
-    Microsoft::WRL::ComPtr<ID3D11RenderTargetView>   m_compositeRTV;
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_compositeSRV;
+    com_ptr<ID3D11Texture2D>          m_compositeTexture;
+    com_ptr<ID3D11RenderTargetView>   m_compositeRTV;
+    com_ptr<ID3D11ShaderResourceView> m_compositeSRV;
 
     // シェーダー
-    Microsoft::WRL::ComPtr<ID3D11VertexShader> m_fullscreenVS;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader>  m_prefilterPS;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader>  m_downsamplePS;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader>  m_upsamplePS;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader>  m_compositePS;
+    com_ptr<ID3D11VertexShader> m_fullscreenVS;
+    com_ptr<ID3D11PixelShader>  m_prefilterPS;
+    com_ptr<ID3D11PixelShader>  m_downsamplePS;
+    com_ptr<ID3D11PixelShader>  m_upsamplePS;
+    com_ptr<ID3D11PixelShader>  m_compositePS;
 
     // 共有リソース
-    Microsoft::WRL::ComPtr<ID3D11Buffer>       m_constantBuffer;
-    Microsoft::WRL::ComPtr<ID3D11SamplerState> m_sampler;
-    Microsoft::WRL::ComPtr<ID3D11BlendState>   m_additiveBlend;
+    com_ptr<ID3D11Buffer>       m_constantBuffer;
+    com_ptr<ID3D11SamplerState> m_sampler;
+    com_ptr<ID3D11BlendState>   m_additiveBlend;
 
     // パラメータ
     bool  m_enabled = false;

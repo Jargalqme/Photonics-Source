@@ -37,8 +37,8 @@ private:
     };
 
     // GPUリソース
-    Microsoft::WRL::ComPtr<ID3D11VertexShader> m_vertexShader;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pixelShader;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> m_constantBuffer;
-    Microsoft::WRL::ComPtr<ID3D11SamplerState> m_sampler;
+    com_ptr<ID3D11VertexShader> m_vertexShader;
+    com_ptr<ID3D11PixelShader> m_pixelShader;
+    com_ptr<ID3D11Buffer> m_constantBuffer;
+    com_ptr<ID3D11SamplerState> m_sampler;
 };

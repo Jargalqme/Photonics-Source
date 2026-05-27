@@ -88,7 +88,7 @@ public:
 
 private:
     ImportedModelData m_data;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> m_vertexBuffer;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> m_indexBuffer;
-    std::vector<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> m_textureSRVs;
+    com_ptr<ID3D11Buffer> m_vertexBuffer;
+    com_ptr<ID3D11Buffer> m_indexBuffer;
+    std::vector<com_ptr<ID3D11ShaderResourceView>> m_textureSRVs;
 };

@@ -19,11 +19,11 @@ public:
 private:
 	struct VSEntry
 	{
-		Microsoft::WRL::ComPtr<ID3D11VertexShader> shader;
-		Microsoft::WRL::ComPtr<ID3DBlob>           blob;
+		com_ptr<ID3D11VertexShader> shader;
+		com_ptr<ID3DBlob>           blob;
 	};
 
 	ID3D11Device* m_device = nullptr;
-	std::unordered_map<std::wstring, VSEntry>                                   m_vs;
-	std::unordered_map<std::wstring, Microsoft::WRL::ComPtr<ID3D11PixelShader>> m_ps;
+	std::unordered_map<std::wstring, VSEntry>                    m_vs;
+	std::unordered_map<std::wstring, com_ptr<ID3D11PixelShader>> m_ps;
 };

@@ -21,11 +21,11 @@ private:
 
     DX::DeviceResources* m_deviceResources;
 
-    Microsoft::WRL::ComPtr<ID3D11VertexShader>       m_vertexShader;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader>        m_pixelShader;
-    Microsoft::WRL::ComPtr<ID3D11Buffer>             m_constantBuffer;
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_cubeSRV;
-    Microsoft::WRL::ComPtr<ID3D11SamplerState>       m_sampler;
-    Microsoft::WRL::ComPtr<ID3D11DepthStencilState>  m_depthStencilState;
-    Microsoft::WRL::ComPtr<ID3D11RasterizerState>    m_rasterizerState;
+    com_ptr<ID3D11VertexShader>       m_vertexShader;
+    com_ptr<ID3D11PixelShader>        m_pixelShader;
+    com_ptr<ID3D11Buffer>             m_constantBuffer;
+    com_ptr<ID3D11ShaderResourceView> m_cubeSRV;
+    com_ptr<ID3D11SamplerState>       m_sampler;
+    com_ptr<ID3D11DepthStencilState>  m_depthStencilState;
+    com_ptr<ID3D11RasterizerState>    m_rasterizerState;
 };

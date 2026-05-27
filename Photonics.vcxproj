@@ -204,10 +204,13 @@ xcopy /Y /D "$(ProjectDir)ThirdParty\Assimp\bin\x64\Release\*.dll" "$(TargetDir)
     <ClInclude Include="ImGui\imstb_rectpack.h" />
     <ClInclude Include="ImGui\imstb_textedit.h" />
     <ClInclude Include="ImGui\imstb_truetype.h" />
+    <ClInclude Include="Source\Common\camera.h" />
+    <ClInclude Include="Source\Common\typedef.h" />
     <ClInclude Include="Source\Gameplay\CombatSystem.h" />
     <ClInclude Include="Source\Gameplay\ICombatTarget.h" />
     <ClInclude Include="Source\Gameplay\EventBus.h" />
     <ClInclude Include="Source\Gameplay\EventTypes.h" />
+    <ClInclude Include="Source\Gameplay\PlayerCamera.h" />
     <ClInclude Include="Source\Render\ArenaFloor.h" />
     <ClInclude Include="Source\Render\AssimpModelImporter.h" />
     <ClInclude Include="Source\Render\FinalCompositePass.h" />
@@ -227,7 +230,6 @@ xcopy /Y /D "$(ProjectDir)ThirdParty\Assimp\bin\x64\Release\*.dll" "$(TargetDir)
     <ClInclude Include="Source\Services\BeatTracker.h" />
     <ClInclude Include="Source\Gameplay\Bullet.h" />
     <ClInclude Include="Source\Gameplay\BulletPool.h" />
-    <ClInclude Include="Source\Common\Camera.h" />
     <ClInclude Include="Source\Gameplay\CollisionSystem.h" />
     <ClInclude Include="Source\Render\ColorMaskEffect.h" />
     <ClInclude Include="Source\UI\DebugUI.h" />
@@ -307,8 +309,10 @@ xcopy /Y /D "$(ProjectDir)ThirdParty\Assimp\bin\x64\Release\*.dll" "$(TargetDir)
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Source\Common\camera.cpp" />
     <ClCompile Include="Source\Gameplay\CombatSystem.cpp" />
     <ClCompile Include="Source\Gameplay\EventBus.cpp" />
+    <ClCompile Include="Source\Gameplay\PlayerCamera.cpp" />
     <ClCompile Include="Source\Render\ArenaFloor.cpp" />
     <ClCompile Include="Source\Render\AssimpModelImporter.cpp" />
     <ClCompile Include="Source\Render\FinalCompositePass.cpp" />
@@ -326,7 +330,6 @@ xcopy /Y /D "$(ProjectDir)ThirdParty\Assimp\bin\x64\Release\*.dll" "$(TargetDir)
     <ClCompile Include="Source\Services\BeatTracker.cpp" />
     <ClCompile Include="Source\Gameplay\Bullet.cpp" />
     <ClCompile Include="Source\Gameplay\BulletPool.cpp" />
-    <ClCompile Include="Source\Common\Camera.cpp" />
     <ClCompile Include="Source\Gameplay\CollisionSystem.cpp" />
     <ClCompile Include="Source\Render\ColorMaskEffect.cpp" />
     <ClCompile Include="Source\UI\DebugUI.cpp">

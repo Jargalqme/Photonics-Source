@@ -66,16 +66,16 @@ private:
     std::vector<EmitRequest> m_emitRequests;
 
     // GPU リソース
-    Microsoft::WRL::ComPtr<ID3D11Buffer> m_particleBuffer;
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_particleSRV;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> m_constantBuffer;
+    com_ptr<ID3D11Buffer> m_particleBuffer;
+    com_ptr<ID3D11ShaderResourceView> m_particleSRV;
+    com_ptr<ID3D11Buffer> m_constantBuffer;
 
     // シェーダー
-    Microsoft::WRL::ComPtr<ID3D11VertexShader> m_vertexShader;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pixelShader;
+    com_ptr<ID3D11VertexShader> m_vertexShader;
+    com_ptr<ID3D11PixelShader> m_pixelShader;
 
     // レンダーステート
-    Microsoft::WRL::ComPtr<ID3D11BlendState> m_blendState;
-    Microsoft::WRL::ComPtr<ID3D11DepthStencilState> m_depthStencilState;
-    Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_rasterizerState;
+    com_ptr<ID3D11BlendState> m_blendState;
+    com_ptr<ID3D11DepthStencilState> m_depthStencilState;
+    com_ptr<ID3D11RasterizerState> m_rasterizerState;
 };

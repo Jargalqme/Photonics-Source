@@ -28,8 +28,8 @@ private:
 	ID3D11PixelShader*  m_pixelShader  = nullptr;
 
 	// 自前所有
-	Microsoft::WRL::ComPtr<ID3D11Buffer>             m_constantBuffer;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_textureSRV;
+	com_ptr<ID3D11Buffer>             m_constantBuffer;
+	com_ptr<ID3D11ShaderResourceView> m_textureSRV;
 
 	struct alignas(16) CBData
 	{

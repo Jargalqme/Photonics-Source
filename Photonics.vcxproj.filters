@@ -25,7 +25,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\Common\Camera.h" />
     <ClInclude Include="Source\Services\InputManager.h" />
     <ClInclude Include="Source\Render\ColorMaskEffect.h" />
     <ClInclude Include="Source\UI\GameUI.h" />
@@ -159,9 +158,11 @@
     <ClInclude Include="Source\Gameplay\EventTypes.h" />
     <ClInclude Include="Source\Render\SceneRenderer.h" />
     <ClInclude Include="Source\Render\FinalCompositePass.h" />
+    <ClInclude Include="Source\Common\typedef.h" />
+    <ClInclude Include="Source\Common\camera.h" />
+    <ClInclude Include="Source\Gameplay\PlayerCamera.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\Common\Camera.cpp" />
     <ClCompile Include="Source\Services\InputManager.cpp" />
     <ClCompile Include="Source\Render\ColorMaskEffect.cpp" />
     <ClCompile Include="Source\UI\GameUI.cpp" />
@@ -275,6 +276,8 @@
     <ClCompile Include="Source\Gameplay\EventBus.cpp" />
     <ClCompile Include="Source\Render\SceneRenderer.cpp" />
     <ClCompile Include="Source\Render\FinalCompositePass.cpp" />
+    <ClCompile Include="Source\Common\camera.cpp" />
+    <ClCompile Include="Source\Gameplay\PlayerCamera.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

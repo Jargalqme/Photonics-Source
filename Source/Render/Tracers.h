@@ -34,7 +34,7 @@ private:
 	ID3D11PixelShader*  m_pixelShader  = nullptr;
 
 	// 自前所有
-	Microsoft::WRL::ComPtr<ID3D11Buffer> m_constantBuffer;
+	com_ptr<ID3D11Buffer> m_constantBuffer;
 
 	// アクティブなトレーサー1本分のデータ
 	struct Tracer

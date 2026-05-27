@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "SkinnedModelData.h"
 
@@ -38,12 +38,12 @@ public:
             DirectX::SimpleMath::Vector4(-0.35f, -0.85f, 0.35f, 0.28f));
 
 private:
-    Microsoft::WRL::ComPtr<ID3D11VertexShader>      m_vs;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader>       m_ps;
-    Microsoft::WRL::ComPtr<ID3D11InputLayout>       m_inputLayout;
-    Microsoft::WRL::ComPtr<ID3D11Buffer>            m_transformCB;
-    Microsoft::WRL::ComPtr<ID3D11Buffer>            m_paletteCB;
-    Microsoft::WRL::ComPtr<ID3D11SamplerState>      m_sampler;
-    Microsoft::WRL::ComPtr<ID3D11RasterizerState>   m_rasterizer;
-    Microsoft::WRL::ComPtr<ID3D11DepthStencilState> m_depthState;
+    com_ptr<ID3D11VertexShader>      m_vs;
+    com_ptr<ID3D11PixelShader>       m_ps;
+    com_ptr<ID3D11InputLayout>       m_inputLayout;
+    com_ptr<ID3D11Buffer>            m_transformCB;
+    com_ptr<ID3D11Buffer>            m_paletteCB;
+    com_ptr<ID3D11SamplerState>      m_sampler;
+    com_ptr<ID3D11RasterizerState>   m_rasterizer;
+    com_ptr<ID3D11DepthStencilState> m_depthState;
 };

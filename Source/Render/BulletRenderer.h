@@ -49,15 +49,15 @@ private:
     DX::DeviceResources* m_deviceResources = nullptr;
     float m_time = 0.0f;
 
-    Microsoft::WRL::ComPtr<ID3D11Buffer> m_bulletBuffer;
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_bulletSRV;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> m_constantBuffer;
+    com_ptr<ID3D11Buffer> m_bulletBuffer;
+    com_ptr<ID3D11ShaderResourceView> m_bulletSRV;
+    com_ptr<ID3D11Buffer> m_constantBuffer;
     BulletRenderData m_bulletData[MAX_BULLETS_TO_RENDER] = {};
 
-    Microsoft::WRL::ComPtr<ID3D11VertexShader> m_vertexShader;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pixelShader;
+    com_ptr<ID3D11VertexShader> m_vertexShader;
+    com_ptr<ID3D11PixelShader> m_pixelShader;
 
-    Microsoft::WRL::ComPtr<ID3D11BlendState> m_blendState;
-    Microsoft::WRL::ComPtr<ID3D11DepthStencilState> m_depthStencilState;
-    Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_rasterizerState;
+    com_ptr<ID3D11BlendState> m_blendState;
+    com_ptr<ID3D11DepthStencilState> m_depthStencilState;
+    com_ptr<ID3D11RasterizerState> m_rasterizerState;
 };

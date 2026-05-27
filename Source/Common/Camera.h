@@ -1,117 +1,106 @@
-﻿#pragma once
+//---------------------------------------------------------------------------
+//! @file   Camera.h
+//! @brief  カメラ (ビュー行列・投影行列のみ)
+//---------------------------------------------------------------------------
+#pragma once
 
-#include <memory>
-#include "ThirdParty/FastNoiseLite.h"
-
-class Player;
-
-using DirectX::SimpleMath::Vector2;
-using DirectX::SimpleMath::Vector3;
-using DirectX::SimpleMath::Matrix;
-
-struct CameraState
-{
-    float height = 1.5f;
-    float fov = 45.0f;
-
-    static CameraState Lerp(const CameraState& a, const CameraState& b, float t);
-};
-
+//===========================================================================
+//! カメラ
+//===========================================================================
 class Camera
 {
 public:
-    Camera();
-    ~Camera() = default;
+	//----------------------------------------------------------
+	//! @name   初期化
+	//----------------------------------------------------------
+	//!@{
 
-    void update(const Player& player, float deltaTime);
+	//! コンストラクタ
+	Camera();
 
-    void setPosition(const Vector3& pos) { m_position = pos; }
-    void setRotation(float pitch, float yaw, float roll = 0.0f);
+	//! デストラクタ
+	virtual ~Camera() = default;
 
-    void updateViewMatrix();
-    void updateProjectionMatrix();
-    Matrix getViewMatrix() const { return m_viewMatrix; }
-    Matrix getProjectionMatrix() const { return m_projectionMatrix; }
-    Matrix getViewModelProjection() const { return m_viewModelProjection; }
+	//! 更新 (現在の状態からビュー行列・投影行列を再構築)
+	void update();
 
-    Vector3 getPosition() const { return m_position; }
-    Vector3 getForward() const { return m_forward; }
-    Vector3 getRight() const { return m_right; }
-    Vector3 getUp() const { return m_up; }
-    float getPitch() const { return m_pitch; }
-    float getYaw() const { return m_yaw; }
+	//!@}
+	//----------------------------------------------------------
+	//! @name   設定
+	//----------------------------------------------------------
+	//!@{
 
-    // Imaging
-    float  getExposure() const   { return m_exposure; }
-    float* getExposurePtr()      { return &m_exposure; }
-    void   setExposure(float e)  { m_exposure = e; }
+	//! 座標を設定
+	void setPosition(const Vector3& position) noexcept { m_position = position; }
 
-    void setProjectionParameters(float fov, float aspectRatio, float nearPlane, float farPlane);
+	//! 回転を設定 (単位:度)
+	void setRotation(float pitch, float yaw, float roll = 0.0f) noexcept;
 
-    void triggerShake(float intensity, float duration);
-    bool isShaking() const { return m_currentShakeIntensity > SHAKE_THRESHOLD; }
+	//! 投影パラメータを設定 (FOV単位:度)
+	void setProjection(float fovDegrees, float aspectRatio, float nearZ, float farZ) noexcept;
 
-    CameraState* getFollowStatePtr() { return &m_followState; }
-    CameraState* getAimStatePtr() { return &m_aimState; }
+	//!@}
+	//----------------------------------------------------------
+	//! @name   取得・参照
+	//----------------------------------------------------------
+	//!@{
 
-private:
-    static constexpr float MIN_CAMERA_HEIGHT = 1.0f;
-    static constexpr float SHAKE_THRESHOLD = 0.01f;
-    static constexpr float SHAKE_TIME_SCALE = 60.0f;
-    static constexpr float MAX_COMBINED_SHAKE = 30.0f;
-    static constexpr float SHAKE_NOISE_FREQ = 5.0f;
-    static constexpr float SHAKE_Z_ATTENUATION = 0.5f;
-    static constexpr float VIEWMODEL_FOV = 70.0f;
-    static constexpr float VIEWMODEL_NEAR = 0.01f;
-    static constexpr float VIEWMODEL_FAR = 10.0f;
+	//! 座標を取得します
+	[[nodiscard]] Vector3 position() const noexcept { return m_position; }
 
-    void updateViewModelProjection();
-    void updateDirectionVectors();
-    void updateShake(float deltaTime);
+	//! 前方ベクトルを取得します
+	[[nodiscard]] Vector3 forward()  const noexcept { return m_forward; }
 
-    CameraState m_followState;
-    CameraState m_aimState;
-    CameraState m_current;
-    float m_blendSpeed = 8.0f;
+	//! 右方向ベクトルを取得します
+	[[nodiscard]] Vector3 right()    const noexcept { return m_right; }
 
-    Vector3 m_position;
-    Vector3 m_right;
-    Vector3 m_up;
-    Vector3 m_forward;
+	//! 上方向ベクトルを取得します
+	[[nodiscard]] Vector3 up()       const noexcept { return m_up; }
 
-    float m_pitch;
-    float m_yaw;
-    float m_roll;
+	//! ピッチ角を取得します (単位:度)
+	[[nodiscard]] float   pitch()    const noexcept { return m_pitch; }
 
-    Matrix m_viewMatrix;
-    Matrix m_projectionMatrix;
-    Matrix m_viewModelProjection;
+	//! ヨー角を取得します (単位:度)
+	[[nodiscard]] float   yaw()      const noexcept { return m_yaw; }
 
-    float m_fov;
-    float m_aspectRatio;
-    float m_nearZ;
-    float m_farZ;
+	//! ロール角を取得します (単位:度)
+	[[nodiscard]] float   roll()     const noexcept { return m_roll; }
 
-    // Imaging
-    float m_exposure = 0.8f;
+	//! ビュー行列を取得します
+	[[nodiscard]] Matrix  matView()  const noexcept { return m_matView; }
 
-    FastNoiseLite m_shakeNoise;
-    float m_shakeTime = 0.0f;
+	//! 投影行列を取得します
+	[[nodiscard]] Matrix  matProj()  const noexcept { return m_matProj; }
 
-    float m_shakeIntensity = 0.0f;
-    float m_shakeDuration = 0.0f;
-    float m_shakeTimer = 0.0f;
-    float m_currentShakeIntensity = 0.0f;
+	//!@}
 
-    float m_shakeMaxYaw = 0.5f;
-    float m_shakeMaxPitch = 0.3f;
-    float m_shakeMaxRoll = 1.0f;
-    float m_shakeMaxOffset = 0.03f;
+protected:
+	//! 方向ベクトル(forward/right/up)をピッチ・ヨー・ロールから再計算
+	void updateDirectionVectors() noexcept;
 
-    float m_shakeYaw = 0.0f;
-    float m_shakePitch = 0.0f;
-    float m_shakeRoll = 0.0f;
-    float m_shakeOffsetX = 0.0f;
-    float m_shakeOffsetY = 0.0f;
-    float m_shakeOffsetZ = 0.0f;
+	//! ビュー行列を再構築 (継承先で上書き可能 ─ カメラシェイクなど)
+	virtual void updateViewMatrix() noexcept;
+
+	//! 投影行列を再構築
+	void updateProjectionMatrix() noexcept;
+
+	// カメラ姿勢
+	Vector3 m_position{ 0.0f, 0.0f, 5.0f };    //!< 座標
+	Vector3 m_forward { 0.0f, 0.0f,-1.0f };    //!< 前方ベクトル
+	Vector3 m_right   { 1.0f, 0.0f, 0.0f };    //!< 右方向ベクトル
+	Vector3 m_up      { 0.0f, 1.0f, 0.0f };    //!< 上方向ベクトル
+
+	float m_pitch{ 0.0f };                     //!< ピッチ角 (度)
+	float m_yaw  { 0.0f };                     //!< ヨー角   (度)
+	float m_roll { 0.0f };                     //!< ロール角 (度)
+
+	// レンズパラメータ
+	float m_fovy       { DirectX::XMConvertToRadians(45.0f) };    //!< 画角        (radian)
+	float m_aspectRatio{ 16.0f / 9.0f };                          //!< アスペクト比
+	float m_nearZ      { 0.1f };                                  //!< ニアクリップ距離
+	float m_farZ       { 1000.0f };                               //!< ファークリップ距離
+
+	// 行列
+	Matrix m_matView{ Matrix::Identity };    //!< ビュー行列
+	Matrix m_matProj{ Matrix::Identity };    //!< 投影行列
 };

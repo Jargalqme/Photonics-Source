@@ -88,37 +88,37 @@ namespace DX
         void GetHardwareAdapter(IDXGIAdapter1** ppAdapter);
 
         // Direct3D objects.
-        Microsoft::WRL::ComPtr<IDXGIFactory2>               m_dxgiFactory;
-        Microsoft::WRL::ComPtr<ID3D11Device1>               m_d3dDevice;
-        Microsoft::WRL::ComPtr<ID3D11DeviceContext1>        m_d3dContext;
-        Microsoft::WRL::ComPtr<IDXGISwapChain1>             m_swapChain;
-        Microsoft::WRL::ComPtr<ID3DUserDefinedAnnotation>   m_d3dAnnotation;
+        com_ptr<IDXGIFactory2>               m_dxgiFactory;
+        com_ptr<ID3D11Device1>               m_d3dDevice;
+        com_ptr<ID3D11DeviceContext1>        m_d3dContext;
+        com_ptr<IDXGISwapChain1>             m_swapChain;
+        com_ptr<ID3DUserDefinedAnnotation>   m_d3dAnnotation;
 
         // Direct3D rendering objects. Required for 3D.
-        Microsoft::WRL::ComPtr<ID3D11Texture2D>         m_renderTarget;
-        Microsoft::WRL::ComPtr<ID3D11Texture2D>         m_depthStencil;
-        Microsoft::WRL::ComPtr<ID3D11RenderTargetView>  m_d3dRenderTargetView;
-        Microsoft::WRL::ComPtr<ID3D11DepthStencilView>  m_d3dDepthStencilView;
-        D3D11_VIEWPORT                                  m_screenViewport;
+        com_ptr<ID3D11Texture2D>             m_renderTarget;
+        com_ptr<ID3D11Texture2D>             m_depthStencil;
+        com_ptr<ID3D11RenderTargetView>      m_d3dRenderTargetView;
+        com_ptr<ID3D11DepthStencilView>      m_d3dDepthStencilView;
+        D3D11_VIEWPORT                       m_screenViewport;
 
         // Direct3D properties.
-        DXGI_FORMAT                                     m_backBufferFormat;
-        DXGI_FORMAT                                     m_depthBufferFormat;
-        UINT                                            m_backBufferCount;
-        D3D_FEATURE_LEVEL                               m_d3dMinFeatureLevel;
+        DXGI_FORMAT                          m_backBufferFormat;
+        DXGI_FORMAT                          m_depthBufferFormat;
+        UINT                                 m_backBufferCount;
+        D3D_FEATURE_LEVEL                    m_d3dMinFeatureLevel;
 
         // Cached device properties.
-        HWND                                            m_window;
-        D3D_FEATURE_LEVEL                               m_d3dFeatureLevel;
-        RECT                                            m_outputSize;
+        HWND                                 m_window;
+        D3D_FEATURE_LEVEL                    m_d3dFeatureLevel;
+        RECT                                 m_outputSize;
 
         // HDR Support
-        DXGI_COLOR_SPACE_TYPE                           m_colorSpace;
+        DXGI_COLOR_SPACE_TYPE                m_colorSpace;
 
         // DeviceResources options (see flags above)
-        unsigned int                                    m_options;
+        unsigned int                         m_options;
 
         // The IDeviceNotify can be held directly as it owns the DeviceResources.
-        IDeviceNotify*                                  m_deviceNotify;
+        IDeviceNotify*                       m_deviceNotify;
     };
 }
