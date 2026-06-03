@@ -214,6 +214,7 @@ xcopy /Y /D "$(ProjectDir)ThirdParty\Assimp\bin\x64\Release\*.dll" "$(TargetDir)
     <ClInclude Include="Source\Render\ArenaFloor.h" />
     <ClInclude Include="Source\Render\AssimpModelImporter.h" />
     <ClInclude Include="Source\Render\FinalCompositePass.h" />
+    <ClInclude Include="Source\Render\IndirectLight.h" />
     <ClInclude Include="Source\Render\Skinning\SkinnedVertex.h" />
     <ClInclude Include="Source\Render\Skinning\SkinnedModelData.h" />
     <ClInclude Include="Source\Render\Skinning\SkinnedModelImporter.h" />
@@ -231,7 +232,6 @@ xcopy /Y /D "$(ProjectDir)ThirdParty\Assimp\bin\x64\Release\*.dll" "$(TargetDir)
     <ClInclude Include="Source\Gameplay\Bullet.h" />
     <ClInclude Include="Source\Gameplay\BulletPool.h" />
     <ClInclude Include="Source\Gameplay\CollisionSystem.h" />
-    <ClInclude Include="Source\Render\ColorMaskEffect.h" />
     <ClInclude Include="Source\UI\DebugUI.h" />
     <ClInclude Include="Source\Common\Easing.h" />
     <ClInclude Include="Source\Gameplay\Dummy.h" />
@@ -316,6 +316,7 @@ xcopy /Y /D "$(ProjectDir)ThirdParty\Assimp\bin\x64\Release\*.dll" "$(TargetDir)
     <ClCompile Include="Source\Render\ArenaFloor.cpp" />
     <ClCompile Include="Source\Render\AssimpModelImporter.cpp" />
     <ClCompile Include="Source\Render\FinalCompositePass.cpp" />
+    <ClCompile Include="Source\Render\IndirectLight.cpp" />
     <ClCompile Include="Source\Render\Skinning\SkinnedModelImporter.cpp" />
     <ClCompile Include="Source\Render\Skinning\SkinnedModel.cpp" />
     <ClCompile Include="Source\Render\Skinning\SkinnedRenderer.cpp" />
@@ -331,7 +332,6 @@ xcopy /Y /D "$(ProjectDir)ThirdParty\Assimp\bin\x64\Release\*.dll" "$(TargetDir)
     <ClCompile Include="Source\Gameplay\Bullet.cpp" />
     <ClCompile Include="Source\Gameplay\BulletPool.cpp" />
     <ClCompile Include="Source\Gameplay\CollisionSystem.cpp" />
-    <ClCompile Include="Source\Render\ColorMaskEffect.cpp" />
     <ClCompile Include="Source\UI\DebugUI.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)'=='Release'">true</ExcludedFromBuild>
     </ClCompile>
@@ -372,6 +372,18 @@ xcopy /Y /D "$(ProjectDir)ThirdParty\Assimp\bin\x64\Release\*.dll" "$(TargetDir)
     <Manifest Include="settings.manifest" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="Shaders\CS_IrradianceConvolution.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)%(RelativeDir)%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)%(RelativeDir)%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
     <FxCompile Include="Shaders\PS_FinalComposite.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
@@ -703,7 +715,19 @@ xcopy /Y /D "$(ProjectDir)ThirdParty\Assimp\bin\x64\Release\*.dll" "$(TargetDir)
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shaders\BRDF.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="Shaders\Camera.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
     <None Include="Shaders\Common.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="Shaders\Includes\IBLCommon.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>

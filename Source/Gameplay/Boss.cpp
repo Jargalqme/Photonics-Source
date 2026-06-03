@@ -3,7 +3,7 @@
 #include "Gameplay/BulletPool.h"
 #include "Gameplay/EventBus.h"
 #include "Gameplay/EventTypes.h"
-#include "Common/Camera.h"
+#include "Gameplay/PlayerCamera.h"
 #include "Render/ParticleSystem.h"
 #include "Services/SceneContext.h"
 #include "Render/MeshCache.h"

@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
 #include "Scenes/BossScene.h"
-#include "Common/Camera.h"
+#include "Gameplay/PlayerCamera.h"
 #include "DeviceResources.h"
 #include "Gameplay/EventBus.h"
 #include "Services/InputManager.h"
@@ -53,9 +53,10 @@ void BossScene::initialize(SceneContext& context)
 
     // カメラ — アスペクト比はバックバッファではなくレンダー解像度から取る
     // （レンダーが 16:9、ウィンドウが 21:9 のとき投影は 16:9 のまま、合成側でレターボックス）
-    m_camera = std::make_unique<Camera>();
+    m_camera = std::make_unique<PlayerCamera>(m_deviceResources);
     float aspectRatio = float(m_renderer->GetRenderWidth()) / float(m_renderer->GetRenderHeight());
-    m_camera->setProjectionParameters(45.0f, aspectRatio, 0.1f, 1000.0f);
+    m_camera->setProjection(45.0f, aspectRatio, 0.1f, 1000.0f);
+    m_camera->createDeviceDependentResources();
 
     // プレイヤー
     m_player = std::make_unique<Player>(*m_context);
@@ -94,14 +95,17 @@ void BossScene::initialize(SceneContext& context)
     });
 
     // ワールド
-    m_grid = std::make_unique<Grid>(m_deviceResources);
+    m_grid = std::make_unique<Grid>(*m_context);
     m_grid->initialize();
 
-    m_arenaFloor = std::make_unique<ArenaFloor>(m_deviceResources);
+    m_arenaFloor = std::make_unique<ArenaFloor>(*m_context);
     m_arenaFloor->initialize();
 
     m_skybox = std::make_unique<Skybox>(m_deviceResources);
     m_skybox->initialize();
+
+    m_indirectLight = std::make_unique<IndirectLight>(m_deviceResources);
+    m_indirectLight->initialize(m_skybox->cubeSRV(), m_context->commonStates->LinearClamp());
 
     // UI
     m_gameUI = std::make_unique<GameUI>();
@@ -121,8 +125,7 @@ void BossScene::initialize(SceneContext& context)
     m_debugUI->setBulletPool(&m_bulletPool);
     m_debugUI->setBoss(m_boss.get());
     m_debugUI->setBloom(m_renderer->GetSceneRenderer()->getBloom());
-    m_debugUI->setExposurePtr(m_camera->getExposurePtr());
-    m_renderer->GetSceneRenderer()->setActiveCamera(m_camera.get());
+    m_debugUI->setExposurePtr(m_camera->exposurePtr());
 #endif
 }
 
@@ -195,7 +198,7 @@ void BossScene::enter()
     }
 
     // Boss starts directly; Stage 4 replaces this with the intro FSM.
-    m_boss->setPlayerTarget(m_player->getPositionPtr());
+    m_boss->setPlayerTarget(m_player->rootPositionPtr());
     m_boss->setBulletPool(&m_bulletPool);
     m_boss->activate();
     EventBus::publish(WaveChangedEvent{ 3 });
@@ -213,6 +216,8 @@ void BossScene::enter()
 
     // ブルーム有効化（exit() で disable されるため毎エントリで再有効化）
     m_renderer->GetSceneRenderer()->getBloom()->setEnabled(true);
+
+    m_renderer->GetSceneRenderer()->setActiveCamera(m_camera.get());
 }
 
 void BossScene::exit()
@@ -224,20 +229,23 @@ void BossScene::exit()
     if (m_renderer)
     {
         m_renderer->GetSceneRenderer()->getBloom()->setEnabled(false);
+        m_renderer->GetSceneRenderer()->setActiveCamera(nullptr);
     }
 }
 
 void BossScene::finalize()
 {
     // GPU リソース解放
-    if (m_grid) { m_grid->finalize(); }
-    if (m_arenaFloor) { m_arenaFloor->finalize(); }
-    if (m_skybox) { m_skybox->finalize(); }
-    if (m_player) { m_player->finalize(); }
-    if (m_boss) { m_boss->finalize(); }
+    if (m_grid)           { m_grid->finalize(); }
+    if (m_arenaFloor)     { m_arenaFloor->finalize(); }
+    if (m_skybox)         { m_skybox->finalize(); }
+    if (m_indirectLight)  { m_indirectLight->finalize(); }
+    if (m_player)         { m_player->finalize(); }
+    if (m_boss)           { m_boss->finalize(); }
     if (m_particleSystem) { m_particleSystem->finalize(); }
     if (m_bulletRenderer) { m_bulletRenderer->finalize(); }
-    if (m_tracers) { m_tracers->finalize(); }
+    if (m_tracers)        { m_tracers->finalize(); }
+    m_camera->finalize();
 
     // オブジェクト破棄
     m_particleSystem.reset();
@@ -249,6 +257,7 @@ void BossScene::finalize()
     m_grid.reset();
     m_arenaFloor.reset();
     m_skybox.reset();
+    m_indirectLight.reset();
     m_beatTracker.reset();
     m_audioManager.reset();
     m_debugUI.reset();
@@ -320,6 +329,7 @@ void BossScene::update(float deltaTime, InputManager* input)
     }
 
     m_camera->update(*m_player, deltaTime);
+    m_camera->updateConstants();
 
     // === サブシステム（UI / オーディオ / VFX / ワールド）===
     m_gameUI->update(deltaTime);
@@ -344,9 +354,11 @@ void BossScene::onBeat(int beat)
 
 void BossScene::render()
 {
-    const auto view   = m_camera->getViewMatrix();
-    const auto proj   = m_camera->getProjectionMatrix();
-    const auto camPos = m_camera->getPosition();
+    const auto view   = m_camera->matView();
+    const auto proj   = m_camera->matProj();
+    const auto camPos = m_camera->position();
+
+    m_renderer->SetIrradianceSRV(m_indirectLight->irradianceSRV());
 
     renderWorld(view, proj, camPos);      // グリッド + ボスメッシュ
     renderEffects(view, proj, camPos);    // 弾・パーティクル・トレーサー
@@ -359,7 +371,7 @@ void BossScene::render()
 void BossScene::renderWorld(const Matrix& view, const Matrix& proj, const Vector3& camPos)
 {
     // ArenaFloor は将来用に保持（現状未使用）
-    m_skybox->render(view, proj);
+    m_skybox->render();
     //m_arenaFloor->render(view, proj);
     m_grid->render(view, proj);
 
@@ -380,8 +392,8 @@ void BossScene::renderViewmodel(const Matrix& view, const Vector3& camPos)
     m_renderer->BeginViewmodelPass();   // 深度クリアして常に最前面に描画
 
     m_renderQueue.clear();
-    m_player->getWeapon().render(m_renderQueue, view);
-    m_renderer->ExecuteRenderCommands(m_renderQueue, view, m_camera->getViewModelProjection(), camPos);
+    m_player->weapon().render(m_renderQueue, view);
+    m_renderer->ExecuteRenderCommands(m_renderQueue, view, m_camera->matViewmodelProj(), camPos);
 }
 
 void BossScene::renderUI(const Matrix& view, const Matrix& proj)

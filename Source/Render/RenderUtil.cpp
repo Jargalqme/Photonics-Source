@@ -49,4 +49,18 @@ namespace RenderUtil
 
 		return shader;
 	}
+
+	ComPtr<ID3D11ComputeShader> loadCS(
+		ID3D11Device* device,
+		const std::wstring& filename)
+	{
+		ComPtr<ID3DBlob> blob = loadShaderBlob(filename);
+
+		ComPtr<ID3D11ComputeShader> shader;
+		DX::ThrowIfFailed(device->CreateComputeShader(
+			blob->GetBufferPointer(), blob->GetBufferSize(), nullptr,
+			shader.ReleaseAndGetAddressOf()));
+
+		return shader;
+	}
 }

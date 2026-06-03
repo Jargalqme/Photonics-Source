@@ -1,4 +1,4 @@
-//=============================================================================
+﻿//=============================================================================
 // @brief    Scene-level rendering orchestration.
 //           Owns post-process effects (Bloom, FinalComposite) and exposes a
 //           single render entry point. Sits between the low-level Renderer
@@ -11,7 +11,7 @@
 #include <memory>
 
 class Bloom;
-class Camera;
+class PlayerCamera;
 class FinalCompositePass;
 
 class SceneRenderer
@@ -41,11 +41,11 @@ public:
     // Borrowed, non-owning. Scenes call this once at enter() so the
     // composite pass can read exposure (and future imaging properties)
     // from the active camera each frame.
-    void setActiveCamera(const Camera* camera) { m_activeCamera = camera; }
+    void setActiveCamera(const PlayerCamera* camera) { m_activeCamera = camera; }
 
 private:
     DX::DeviceResources* m_deviceResources;
     std::unique_ptr<Bloom>              m_bloom;
     std::unique_ptr<FinalCompositePass> m_finalComposite;
-    const Camera*                       m_activeCamera = nullptr;
+    const PlayerCamera*                 m_activeCamera = nullptr;
 };

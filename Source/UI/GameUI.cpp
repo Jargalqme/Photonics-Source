@@ -167,7 +167,7 @@ void GameUI::drawPlayerHealth()
     float x = 30.0f;
     float y = screenHeight - barHeight - 30.0f;
 
-    float healthPercent = m_player->getHealth() / m_player->getMaxHealth();
+    float healthPercent = m_player->health() / m_player->maxHealth();
 
     // 体力に応じた色
     ImU32 fillColor;
@@ -298,10 +298,10 @@ void GameUI::drawWeaponHUD()
     }
     else
     {
-        sprintf_s(ammoText, "%d / %d", m_player->getAmmo(), m_player->getMaxAmmo());
+        sprintf_s(ammoText, "%d / %d", m_player->ammo(), m_player->maxAmmo());
     }
 
-    ImU32 ammoColor = (m_player->getAmmo() <= 5)
+    ImU32 ammoColor = (m_player->ammo() <= 5)
         ? IM_COL32(255, 50, 50, 255)
         : IM_COL32(255, 255, 255, 255);
 

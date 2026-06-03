@@ -27,7 +27,7 @@ public:
     float* getUpsampleScalePtr() { return &m_upsampleScale; }
 
 private:
-    static constexpr int MIP_COUNT = 9;
+    static constexpr int MIP_COUNT = 7;
 
     void renderFullscreenPass(ID3D11PixelShader* ps,
         ID3D11RenderTargetView* outputRTV,

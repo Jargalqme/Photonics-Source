@@ -7,7 +7,7 @@ class Grid;
 class Skybox;
 class AudioManager;
 class BeatTracker;
-class Camera;
+class PlayerCamera;
 class InputManager;
 class BulletPool;
 class Boss;
@@ -19,7 +19,7 @@ public:
     DebugUI() = default;
 
     // ゲームオブジェクトのポインタ設定（オブジェクト生成後に1回呼ぶ）
-    void setCamera(Camera* camera) { m_camera = camera; }
+    void setCamera(PlayerCamera* camera) { m_camera = camera; }
     void setLightCycle(Player* player) { m_player = player; }
     void setGrid(Grid* grid) { m_grid = grid; }
     void setSkybox(Skybox* skybox) { m_skybox = skybox; }
@@ -37,7 +37,7 @@ public:
 
 private:
     // ゲームオブジェクトへのポインタ（所有しない）
-    Camera* m_camera = nullptr;
+    PlayerCamera* m_camera = nullptr;
     Player* m_player = nullptr;
     Grid* m_grid = nullptr;
     Skybox* m_skybox = nullptr;

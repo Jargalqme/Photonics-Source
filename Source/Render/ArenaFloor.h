@@ -2,10 +2,12 @@
 
 #include "DeviceResources.h"
 
+struct SceneContext;
+
 class ArenaFloor
 {
 public:
-    ArenaFloor(DX::DeviceResources* deviceResources);
+    ArenaFloor(SceneContext& context);
     ~ArenaFloor() = default;
 
     void initialize();
@@ -34,7 +36,7 @@ private:
         float alpha;
     };
 
-    DX::DeviceResources* m_deviceResources;
+    SceneContext* m_context;
 
     com_ptr<ID3D11Buffer>             m_vertexBuffer;
     com_ptr<ID3D11Buffer>             m_indexBuffer;
@@ -42,9 +44,6 @@ private:
     com_ptr<ID3D11VertexShader>       m_vertexShader;
     com_ptr<ID3D11PixelShader>        m_pixelShader;
     com_ptr<ID3D11InputLayout>        m_inputLayout;
-    com_ptr<ID3D11BlendState>         m_blendState;
-    com_ptr<ID3D11DepthStencilState>  m_depthStencilState;
-    com_ptr<ID3D11RasterizerState>    m_rasterizerState;
 
     float m_time = 0.0f;
     float m_size = 500.0f;

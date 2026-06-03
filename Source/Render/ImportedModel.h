@@ -33,6 +33,10 @@ struct ImportedMaterial
     std::string baseColorTexture;
     std::string diffuseTexture;
     int32_t baseColorTextureIndex = IMPORTED_TEXTURE_NONE;
+    float metallicFactor  = 0.0f;
+    float roughnessFactor = 1.0f;
+    int32_t normalTextureIndex            = IMPORTED_TEXTURE_NONE;
+    int32_t metallicRoughnessTextureIndex = IMPORTED_TEXTURE_NONE;
 };
 
 struct ImportedTextureData

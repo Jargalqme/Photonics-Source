@@ -2,11 +2,7 @@
 //! @file   SkyboxVS.hlsl
 //! @brief  Fullscreen triangle at depth=1 with world direction from inverse VP
 //---------------------------------------------------------------------------
-
-cbuffer SkyboxConstants : register(b0)
-{
-    matrix inverseViewProjection;
-};
+#include "Camera.hlsli"
 
 struct VS_OUTPUT
 {
@@ -21,8 +17,15 @@ VS_OUTPUT main(uint vertexID : SV_VertexID)
     float2 uv = float2((vertexID << 1) & 2, vertexID & 2);
     output.position = float4(uv.x * 2.0 - 1.0, 1.0 - uv.y * 2.0, 1.0, 1.0);
 
-    float4 world = mul(output.position, inverseViewProjection);
-    output.direction = world.xyz / world.w;
+    float4 view = mul(output.position, cameraInvProj);
+    
+    float4x4 invViewNoTranslation = cameraInvView;
+    invViewNoTranslation._41 = 0.0f;
+    invViewNoTranslation._42 = 0.0f;
+    invViewNoTranslation._43 = 0.0f;
+    
+    float4 world = mul(view, invViewNoTranslation);
+    output.direction = world.xyz;
 
     return output;
 }

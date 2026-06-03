@@ -66,6 +66,48 @@ float4 DownsampleBox13Tap(Texture2D tex, SamplerState samp, float2 uv, float2 te
     return result;
 }
 
+float karisWeight(float3 c)
+{
+    float luma = dot(c, float3(0.2126, 0.7152, 0.0722)); // Rec.709
+    return 1.0 / (1.0 + luma);
+}
+
+float4 DownsampleBox13TapKaris(Texture2D tex, SamplerState samp, float2 uv, float2 texelSize)
+{
+    float3 A = tex.Sample(samp, uv).rgb;
+    texelSize *= 0.5;
+
+    float3 B = tex.Sample(samp, uv + texelSize * float2(-1.0, -1.0)).rgb;
+    float3 C = tex.Sample(samp, uv + texelSize * float2(-1.0, 1.0)).rgb;
+    float3 D = tex.Sample(samp, uv + texelSize * float2(1.0, 1.0)).rgb;
+    float3 E = tex.Sample(samp, uv + texelSize * float2(1.0, -1.0)).rgb;
+    float3 F = tex.Sample(samp, uv + texelSize * float2(-2.0, -2.0)).rgb;
+    float3 G = tex.Sample(samp, uv + texelSize * float2(0.0, -2.0)).rgb;
+    float3 H = tex.Sample(samp, uv + texelSize * float2(2.0, -2.0)).rgb;
+    float3 I = tex.Sample(samp, uv + texelSize * float2(-2.0, 0.0)).rgb;
+    float3 J = tex.Sample(samp, uv + texelSize * float2(2.0, 0.0)).rgb;
+    float3 K = tex.Sample(samp, uv + texelSize * float2(-2.0, 2.0)).rgb;
+    float3 L = tex.Sample(samp, uv + texelSize * float2(0.0, 2.0)).rgb;
+    float3 M = tex.Sample(samp, uv + texelSize * float2(2.0, 2.0)).rgb;
+
+      // Same 5 boxes as DownsampleBox13Tap, but Karis-weighted.
+    float3 box0 = (B + C + D + E) * 0.25; // inner  (spatial weight 0.5)
+    float3 box1 = (F + G + I + A) * 0.25; // TL     (0.125)
+    float3 box2 = (G + H + A + J) * 0.25; // TR
+    float3 box3 = (I + A + K + L) * 0.25; // BL
+    float3 box4 = (A + J + L + M) * 0.25; // BR
+
+    float w0 = karisWeight(box0) * 0.5;
+    float w1 = karisWeight(box1) * 0.125;
+    float w2 = karisWeight(box2) * 0.125;
+    float w3 = karisWeight(box3) * 0.125;
+    float w4 = karisWeight(box4) * 0.125;
+
+    float3 result = (box0 * w0 + box1 * w1 + box2 * w2 + box3 * w3 + box4 * w4)
+                    / (w0 + w1 + w2 + w3 + w4);
+    return float4(result, 1.0);
+}
+
 // 9-tap tent upsample.
 // Samples a 3x3 grid around uv with the kernel
 //     1 2 1

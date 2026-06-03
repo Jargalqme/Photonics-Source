@@ -1,19 +1,19 @@
 ﻿#include "pch.h"
 #include "Grid.h"
+#include "RenderUtil.h"
+#include "DeviceResources.h"
+#include "Services/SceneContext.h"
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
 
-Grid::Grid(DX::DeviceResources* deviceResources)
-    : m_deviceResources(deviceResources)
-{
-}
+Grid::Grid(SceneContext& context) : m_context(&context) {}
 
 // === 初期化・終了 ===
 
 void Grid::initialize()
 {
-    auto device = m_deviceResources->GetD3DDevice();
+    auto device = m_context->device->GetD3DDevice();
 
     // ジオメトリ作成（頂点・インデックスバッファ）
     float half = m_gridSize;
@@ -28,41 +28,14 @@ void Grid::initialize()
         2, 1, 3
     };
 
-    // 頂点バッファ
-    D3D11_BUFFER_DESC vbDesc = {};
-    vbDesc.ByteWidth = sizeof(vertices);
-    vbDesc.Usage = D3D11_USAGE_DEFAULT;
-    vbDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    D3D11_SUBRESOURCE_DATA vbData = { vertices };
-    DX::ThrowIfFailed(device->CreateBuffer(&vbDesc, &vbData, m_vertexBuffer.ReleaseAndGetAddressOf()));
-
-    // インデックスバッファ
-    D3D11_BUFFER_DESC ibDesc = {};
-    ibDesc.ByteWidth = sizeof(indices);
-    ibDesc.Usage = D3D11_USAGE_DEFAULT;
-    ibDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    D3D11_SUBRESOURCE_DATA ibData = { indices };
-    DX::ThrowIfFailed(device->CreateBuffer(&ibDesc, &ibData, m_indexBuffer.ReleaseAndGetAddressOf()));
-
-    // 定数バッファ
-    D3D11_BUFFER_DESC cbDesc = {};
-    cbDesc.ByteWidth = sizeof(ConstantBuffer);
-    cbDesc.Usage = D3D11_USAGE_DEFAULT;
-    cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    DX::ThrowIfFailed(device->CreateBuffer(&cbDesc, nullptr, m_constantBuffer.ReleaseAndGetAddressOf()));
+    m_vertexBuffer   = RenderUtil::createStaticVertexBuffer(device, vertices, static_cast<UINT>(std::size(vertices)));
+    m_indexBuffer    = RenderUtil::createStaticIndexBuffer (device, indices,  static_cast<UINT>(std::size(indices)));
+    m_constantBuffer = RenderUtil::createDynamicConstantBuffer<ConstantBuffer>(device);
 
     // シェーダー読み込み
     Microsoft::WRL::ComPtr<ID3DBlob> vsBlob;
-    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"VS_PristineGrid.cso").c_str(), vsBlob.GetAddressOf()));
-    DX::ThrowIfFailed(device->CreateVertexShader(
-        vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(),
-        nullptr, m_vertexShader.ReleaseAndGetAddressOf()));
-
-    Microsoft::WRL::ComPtr<ID3DBlob> psBlob;
-    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"PS_PristineGrid.cso").c_str(), psBlob.GetAddressOf()));
-    DX::ThrowIfFailed(device->CreatePixelShader(
-        psBlob->GetBufferPointer(), psBlob->GetBufferSize(),
-        nullptr, m_pixelShader.ReleaseAndGetAddressOf()));
+    m_vertexShader = RenderUtil::loadVS(device, L"VS_PristineGrid.cso", &vsBlob);
+    m_pixelShader  = RenderUtil::loadPS(device, L"PS_PristineGrid.cso");
 
     // 入力レイアウト
     D3D11_INPUT_ELEMENT_DESC layout[] = {
@@ -72,34 +45,6 @@ void Grid::initialize()
         layout, 1,
         vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(),
         m_inputLayout.ReleaseAndGetAddressOf()));
-
-    // ブレンドステート（アルファブレンド）
-    D3D11_BLEND_DESC blendDesc = {};
-    blendDesc.RenderTarget[0].BlendEnable = TRUE;
-    blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-    blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-    blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-    blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-    blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
-    blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-    blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-    DX::ThrowIfFailed(device->CreateBlendState(&blendDesc, m_blendState.ReleaseAndGetAddressOf()));
-
-    // 深度ステンシル（読み取り専用）
-    D3D11_DEPTH_STENCIL_DESC dsDesc = {};
-    dsDesc.DepthEnable = TRUE;
-    dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
-    dsDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
-    DX::ThrowIfFailed(device->CreateDepthStencilState(&dsDesc, m_depthStencilState.ReleaseAndGetAddressOf()));
-
-    // ラスタライザー（カリングなし）
-    D3D11_RASTERIZER_DESC rsDesc = {};
-    rsDesc.FillMode = D3D11_FILL_SOLID;
-    rsDesc.CullMode = D3D11_CULL_NONE;
-    rsDesc.DepthBias = 0;
-    rsDesc.SlopeScaledDepthBias = 0.0f;
-    rsDesc.DepthClipEnable = TRUE;
-    DX::ThrowIfFailed(device->CreateRasterizerState(&rsDesc, m_rasterizerState.ReleaseAndGetAddressOf()));
 }
 
 void Grid::finalize()
@@ -110,9 +55,6 @@ void Grid::finalize()
     m_vertexShader.Reset();
     m_pixelShader.Reset();
     m_inputLayout.Reset();
-    m_blendState.Reset();
-    m_depthStencilState.Reset();
-    m_rasterizerState.Reset();
 }
 
 // === 更新 ===
@@ -137,7 +79,7 @@ void Grid::render(const Matrix& view, const Matrix& projection)
 
 void Grid::renderPlane(const Matrix& world, const Matrix& view, const Matrix& projection)
 {
-    auto context = m_deviceResources->GetD3DDeviceContext();
+    auto context = m_context->device->GetD3DDeviceContext();
 
     // 定数バッファ更新
     ConstantBuffer cb;
@@ -145,7 +87,7 @@ void Grid::renderPlane(const Matrix& world, const Matrix& view, const Matrix& pr
     cb.gridParams = Vector4(m_lineWidthX, m_lineWidthY, m_gridScale, m_lineEmissiveIntensity);
     cb.lineColor = Vector4(m_finalColor.R(), m_finalColor.G(), m_finalColor.B(), m_finalColor.A());
     cb.baseColor = Vector4(m_baseColor.R(), m_baseColor.G(), m_baseColor.B(), m_baseColor.A());
-    context->UpdateSubresource(m_constantBuffer.Get(), 0, nullptr, &cb, 0, 0);
+    RenderUtil::updateDynamicConstantBuffer(context, m_constantBuffer, cb);
 
     // パイプライン設定
     context->IASetInputLayout(m_inputLayout.Get());
@@ -161,10 +103,11 @@ void Grid::renderPlane(const Matrix& world, const Matrix& view, const Matrix& pr
     context->VSSetConstantBuffers(0, 1, m_constantBuffer.GetAddressOf());
     context->PSSetConstantBuffers(0, 1, m_constantBuffer.GetAddressOf());
 
+    auto* states = m_context->commonStates;
     float blendFactor[4] = { 0, 0, 0, 0 };
-    context->OMSetBlendState(m_blendState.Get(), blendFactor, 0xffffffff);
-    context->OMSetDepthStencilState(m_depthStencilState.Get(), 0);
-    context->RSSetState(m_rasterizerState.Get());
+    context->OMSetBlendState(states->NonPremultiplied(), blendFactor, 0xffffffff);
+    context->OMSetDepthStencilState(states->DepthRead(), 0);
+    context->RSSetState(states->CullNone());
 
     context->DrawIndexed(6, 0, 0);
 

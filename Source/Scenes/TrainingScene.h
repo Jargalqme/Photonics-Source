@@ -21,7 +21,7 @@
 #include <memory>
 #include <vector>
 
-class Camera;
+class PlayerCamera;
 
 class TrainingScene : public Scene
 {
@@ -55,7 +55,7 @@ private:
 
     SceneManager* m_sceneManager = nullptr;
 
-    std::unique_ptr<Camera> m_camera;
+    std::unique_ptr<PlayerCamera> m_camera;
     std::unique_ptr<Player> m_player;
 
     std::unique_ptr<Dummy> m_dummy;

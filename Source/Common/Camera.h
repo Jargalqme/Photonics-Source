@@ -1,8 +1,10 @@
-//---------------------------------------------------------------------------
+﻿//---------------------------------------------------------------------------
 //! @file   Camera.h
-//! @brief  カメラ (ビュー行列・投影行列のみ)
+//! @brief  カメラ (ビュー行列・投影行列　+　ビュー定数バッファ)
 //---------------------------------------------------------------------------
 #pragma once
+
+#include "Core/DeviceResources.h"
 
 //===========================================================================
 //! カメラ
@@ -16,13 +18,22 @@ public:
 	//!@{
 
 	//! コンストラクタ
-	Camera();
+	explicit Camera(DX::DeviceResources* deviceResources);
 
 	//! デストラクタ
 	virtual ~Camera() = default;
 
+	//! デバイス依存リソースを生成 (定数バッファ)
+	void createDeviceDependentResources();
+
+	//! デバイス依存リソースを解放
+	void finalize();
+
 	//! 更新 (現在の状態からビュー行列・投影行列を再構築)
 	void update();
+
+	//! カメラ定数を更新し b10 にバインド (VS/PS)
+	void updateConstants();
 
 	//!@}
 	//----------------------------------------------------------
@@ -86,7 +97,7 @@ protected:
 
 	// カメラ姿勢
 	Vector3 m_position{ 0.0f, 0.0f, 5.0f };    //!< 座標
-	Vector3 m_forward { 0.0f, 0.0f,-1.0f };    //!< 前方ベクトル
+	Vector3 m_forward { 0.0f, 0.0f, 1.0f };    //!< 前方ベクトル (+Z, yaw=0 の計算値に一致)
 	Vector3 m_right   { 1.0f, 0.0f, 0.0f };    //!< 右方向ベクトル
 	Vector3 m_up      { 0.0f, 1.0f, 0.0f };    //!< 上方向ベクトル
 
@@ -103,4 +114,21 @@ protected:
 	// 行列
 	Matrix m_matView{ Matrix::Identity };    //!< ビュー行列
 	Matrix m_matProj{ Matrix::Identity };    //!< 投影行列
+
+private:
+	//----------------------------------------------------------
+	//! 定数バッファ構造体 (b10 / HLSL側と同一レイアウト)
+	//----------------------------------------------------------
+	struct CameraInfo
+	{
+		Matrix  view;             // ビュー行列
+		Matrix  proj;             // 投影行列
+		Matrix  invView;          // ビュー逆行列 (深度→ワールド復元用)
+		Matrix  invProj;          // 投影逆行列   (深度→ビュー復元用)
+		Vector3 cameraPosition;   // カメラのワールド座標
+		float   _pad;             // 16B境界: 256 + 12 + 4 = 272
+	};
+
+	com_ptr<ID3D11Buffer> m_constantBuffer;    //!< CameraInfo定数バッファ
+	DX::DeviceResources*  m_deviceResources;   //!< デバイスリソース (注入)
 };

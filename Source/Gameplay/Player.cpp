@@ -37,15 +37,15 @@ namespace
 
     Vector3 playerMovementDirection(Player& player, const Vector2& move)
     {
-        Vector3 lookForward = player.getLookForward();
-        lookForward.y = 0.0f;
-        lookForward.Normalize();
+        Vector3 moveForward = player.lookForward();
+        moveForward.y = 0.0f;
+        moveForward.Normalize();
 
-        Vector3 lookRight = player.getLookRight();
-        lookRight.y = 0.0f;
-        lookRight.Normalize();
+        Vector3 moveRight = player.lookRight();
+        moveRight.y = 0.0f;
+        moveRight.Normalize();
 
-        return lookForward * move.y + lookRight * move.x;
+        return moveForward * move.y + moveRight * move.x;
     }
 }
 
@@ -83,11 +83,11 @@ void Player::updateMovement(const Vector3& direction, float deltaTime)
     if (moveDir.LengthSquared() > MOVE_THRESHOLD)
     {
         moveDir.Normalize();
-        m_transform.position += moveDir * m_speed * deltaTime;
+        m_rootPosition += moveDir * m_speed * deltaTime;
     }
 
-    m_transform.position.x = std::clamp(m_transform.position.x, -ARENA_HALF_SIZE, ARENA_HALF_SIZE);
-    m_transform.position.z = std::clamp(m_transform.position.z, -ARENA_HALF_SIZE, ARENA_HALF_SIZE);
+    m_rootPosition.x = std::clamp(m_rootPosition.x, -ARENA_HALF_SIZE, ARENA_HALF_SIZE);
+    m_rootPosition.z = std::clamp(m_rootPosition.z, -ARENA_HALF_SIZE, ARENA_HALF_SIZE);
 }
 
 void Player::update(InputManager& input, float deltaTime, std::vector<WeaponShot>& outShots)
@@ -115,8 +115,8 @@ void Player::update(InputManager& input, float deltaTime, std::vector<WeaponShot
 
     PlayerWeaponFrame weaponFrame;
     weaponFrame.deltaTime = deltaTime;
-    weaponFrame.hitScanOrigin = getEyePosition();
-    weaponFrame.hitScanDirection = getLookForward();
+    weaponFrame.hitScanOrigin = eyePosition();
+    weaponFrame.hitScanDirection = lookForward();
     weaponFrame.viewDeltaDegrees = viewDeltaDegrees;
     weaponFrame.moveSpeed = movementSpeed(deltaTime);
     weaponFrame.fireHeld = fireHeld;
@@ -133,12 +133,12 @@ void Player::clearInputState()
     setAiming(false);
 }
 
-PlayerWeapon& Player::getWeapon()
+PlayerWeapon& Player::weapon()
 {
     return *m_weapon;
 }
 
-const PlayerWeapon& Player::getWeapon() const
+const PlayerWeapon& Player::weapon() const
 {
     return *m_weapon;
 }
@@ -147,14 +147,14 @@ float Player::movementSpeed(float deltaTime)
 {
     if (deltaTime <= 0.0f || m_speed <= 0.0f)
     {
-        m_lastPosition = m_transform.position;
+        m_lastPosition = m_rootPosition;
         return 0.0f;
     }
 
-    Vector3 delta = m_transform.position - m_lastPosition;
+    Vector3 delta = m_rootPosition - m_lastPosition;
     delta.y = 0.0f;
 
-    m_lastPosition = m_transform.position;
+    m_lastPosition = m_rootPosition;
 
     return delta.Length() / deltaTime;
 }
@@ -185,11 +185,11 @@ void Player::updateVerticalMovement(float deltaTime)
     if (!m_isGrounded)
     {
         m_verticalVelocity -= m_gravity * deltaTime;
-        m_transform.position.y += m_verticalVelocity * deltaTime;
+        m_rootPosition.y += m_verticalVelocity * deltaTime;
 
-        if (m_transform.position.y <= m_groundLevel)
+        if (m_rootPosition.y <= m_groundLevel)
         {
-            m_transform.position.y = m_groundLevel;
+            m_rootPosition.y = m_groundLevel;
             m_verticalVelocity = 0.0f;
             m_isGrounded = true;
         }
@@ -207,9 +207,9 @@ void Player::collectHitColliders(std::vector<CombatHitCollider>& out)
     c.target = this;
     c.part = HitPart::Body;
     c.bounds.Center = XMFLOAT3(
-        m_transform.position.x,
-        m_transform.position.y + 1.2f,
-        m_transform.position.z);
+        m_rootPosition.x,
+        m_rootPosition.y + 1.2f,
+        m_rootPosition.z);
     c.bounds.Radius = 1.2f;
     c.damageMultiplier = 1.0f;
     out.push_back(c);
@@ -224,7 +224,7 @@ void Player::onHit(const CombatHit& hit)
 
     takeDamage(hit.finalDamage);
     EventBus::publish(PlayerDamagedEvent{
-        m_transform.position,
+        m_rootPosition,
         hit.finalDamage,
         m_health,
         m_maxHealth });
@@ -253,17 +253,17 @@ void Player::finalize()
 
 Matrix Player::createGameplayCameraWorldMatrix() const
 {
-    const Vector3 eyePosition = getEyePosition();
-    const Vector3 forward = getLookForward();
-    const Vector3 right = getLookRight();
+    const Vector3 eyePos = eyePosition();
+    const Vector3 forward = lookForward();
+    const Vector3 right = lookRight();
     Vector3 up = forward.Cross(right);
     up.Normalize();
 
-    const Matrix view = XMMatrixLookAtLH(eyePosition, eyePosition + forward, up);
+    const Matrix view = XMMatrixLookAtLH(eyePos, eyePos + forward, up);
     return view.Invert();
 }
 
-Vector3 Player::getLookForward() const
+Vector3 Player::lookForward() const
 {
     const float yawRad = XMConvertToRadians(m_lookYaw);
     const float pitchRad = XMConvertToRadians(m_lookPitch);
@@ -275,10 +275,10 @@ Vector3 Player::getLookForward() const
     return forward;
 }
 
-Vector3 Player::getLookRight() const
+Vector3 Player::lookRight() const
 {
     const Vector3 worldUp(0.0f, 1.0f, 0.0f);
-    Vector3 right = worldUp.Cross(getLookForward());
+    Vector3 right = worldUp.Cross(lookForward());
     right.Normalize();
     return right;
 }
@@ -288,20 +288,19 @@ bool Player::isReloading() const
     return m_weapon->isReloading();
 }
 
-int Player::getAmmo() const
+int Player::ammo() const
 {
     return m_weapon->getAmmo();
 }
 
-int Player::getMaxAmmo() const
+int Player::maxAmmo() const
 {
     return m_weapon->getMaxAmmo();
 }
 
 void Player::reset()
 {
-    m_transform.position = Vector3(0.0f, 0.0f, -20.0f);
-    m_transform.rotation = Vector3::Zero;
+    m_rootPosition = Vector3(0.0f, 0.0f, -20.0f);
     m_health = m_maxHealth;
     m_invincibleTimer = 0.0f;
     m_isAiming = false;
@@ -309,6 +308,6 @@ void Player::reset()
     m_verticalVelocity = 0.0f;
     m_lookYaw = 0.0f;
     m_lookPitch = 0.0f;
-    m_lastPosition = m_transform.position;
+    m_lastPosition = m_rootPosition;
     m_weapon->reset();
 }

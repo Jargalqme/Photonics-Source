@@ -9,6 +9,7 @@
 #include "Gameplay/CombatSystem.h"
 #include "Render/Grid.h"
 #include "Render/Skybox.h"
+#include "Render/IndirectLight.h"
 #include "Render/ArenaFloor.h"
 #include "Render/BulletRenderer.h"
 #include "Render/ParticleSystem.h"
@@ -24,7 +25,7 @@
 #include <memory>
 #include <vector>
 
-class Camera;
+class PlayerCamera;
 
 class BossScene : public Scene
 {
@@ -70,7 +71,7 @@ private:
 
     SceneManager* m_sceneManager = nullptr;
 
-    std::unique_ptr<Camera> m_camera;
+    std::unique_ptr<PlayerCamera> m_camera;
     std::unique_ptr<Player> m_player;
     std::unique_ptr<Boss>   m_boss;
 
@@ -90,6 +91,7 @@ private:
     std::unique_ptr<Grid> m_grid;
     std::unique_ptr<ArenaFloor> m_arenaFloor;
     std::unique_ptr<Skybox> m_skybox;
+    std::unique_ptr<IndirectLight> m_indirectLight;
 
     std::unique_ptr<GameUI> m_gameUI;
     std::unique_ptr<DebugUI> m_debugUI;

@@ -1,8 +1,8 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Render/SceneRenderer.h"
 #include "Render/Bloom.h"
 #include "Render/FinalCompositePass.h"
-#include "Common/Camera.h"
+#include "Gameplay/PlayerCamera.h"
 
 SceneRenderer::SceneRenderer(DX::DeviceResources* deviceResources)
     : m_deviceResources(deviceResources)
@@ -40,7 +40,7 @@ void SceneRenderer::renderPostProcess(
     // Pull exposure from the active camera. Scenes are expected to have
     // called setActiveCamera() at enter(); fallback to 1.0 (identity) if
     // no camera was set so the screen never goes black.
-    const float exposure = m_activeCamera ? m_activeCamera->getExposure() : 1.0f;
+    const float exposure = m_activeCamera ? m_activeCamera->exposure() : 1.0f;
 
     // Bloom is the only effect that toggles. The final composite pass is
     // always the last step that tonemaps the HDR scene (or post-bloom

@@ -8,7 +8,7 @@
 
 class BulletPool;
 class ParticleSystem;
-class Camera;
+class PlayerCamera;
 class RenderCommandQueue;
 struct SceneContext;
 
@@ -47,7 +47,7 @@ public:
     void setPlayerTarget(const Vector3* target) { m_playerTarget = target; }
     void setBulletPool(BulletPool* pool) { m_bulletPool = pool; }
     void setParticles(ParticleSystem* particles) { m_particles = particles; }
-    void setCamera(Camera* camera) { m_camera = camera; }
+    void setCamera(PlayerCamera* camera) { m_camera = camera; }
 
     // --- ゲッター / セッター ---
     Vector3 getPosition() const { return m_transform.position; }
@@ -137,7 +137,7 @@ private:
 
     // 外部システム（非所有）
     ParticleSystem* m_particles = nullptr;
-    Camera* m_camera = nullptr;
+    PlayerCamera* m_camera = nullptr;
     const Vector3* m_playerTarget = nullptr;
     BulletPool* m_bulletPool = nullptr;
 

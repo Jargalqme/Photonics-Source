@@ -23,7 +23,7 @@ void Skybox::initialize()
     const wchar_t* faceFiles[6] = {
         L"Assets/Textures/skybox_right.png",
         L"Assets/Textures/skybox_left.png",
-        L"Assets/Textures/skybox_top.png",
+        L"Assets/Textures/skybox_top.jpg",
         L"Assets/Textures/skybox_bottom.png",
         L"Assets/Textures/skybox_front.png",
         L"Assets/Textures/skybox_back.png",
@@ -99,14 +99,6 @@ void Skybox::initialize()
         psBlob->GetBufferPointer(), psBlob->GetBufferSize(),
         nullptr, m_pixelShader.ReleaseAndGetAddressOf()));
 
-    // 定数バッファ
-    D3D11_BUFFER_DESC cbDesc = {};
-    cbDesc.ByteWidth = sizeof(ConstantBuffer);
-    cbDesc.Usage = D3D11_USAGE_DEFAULT;
-    cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    DX::ThrowIfFailed(device->CreateBuffer(
-        &cbDesc, nullptr, m_constantBuffer.ReleaseAndGetAddressOf()));
-
     // 深度ステンシル：テストなし、書き込みなし
     D3D11_DEPTH_STENCIL_DESC dsDesc = {};
     dsDesc.DepthEnable = FALSE;
@@ -127,7 +119,6 @@ void Skybox::finalize()
 {
     m_vertexShader.Reset();
     m_pixelShader.Reset();
-    m_constantBuffer.Reset();
     m_cubeSRV.Reset();
     m_sampler.Reset();
     m_depthStencilState.Reset();
@@ -136,21 +127,9 @@ void Skybox::finalize()
 
 // === 描画 ===
 
-void Skybox::render(const Matrix& view, const Matrix& proj)
+void Skybox::render()
 {
     auto context = m_deviceResources->GetD3DDeviceContext();
-
-    // 平行移動を除去 — スカイボックスはカメラに追従
-    Matrix viewRotOnly = view;
-    viewRotOnly._41 = 0.0f;
-    viewRotOnly._42 = 0.0f;
-    viewRotOnly._43 = 0.0f;
-
-    Matrix invVP = (viewRotOnly * proj).Invert();
-
-    ConstantBuffer cb;
-    cb.inverseViewProjection = invVP.Transpose();
-    context->UpdateSubresource(m_constantBuffer.Get(), 0, nullptr, &cb, 0, 0);
 
     // パイプライン設定
     context->IASetInputLayout(nullptr);
@@ -158,7 +137,6 @@ void Skybox::render(const Matrix& view, const Matrix& proj)
 
     context->VSSetShader(m_vertexShader.Get(), nullptr, 0);
     context->PSSetShader(m_pixelShader.Get(), nullptr, 0);
-    context->VSSetConstantBuffers(0, 1, m_constantBuffer.GetAddressOf());
 
     // キューブマップテクスチャとサンプラーをバインド
     context->PSSetShaderResources(0, 1, m_cubeSRV.GetAddressOf());

@@ -1,6 +1,6 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "UI/DebugUI.h"
-#include "Common/Camera.h"
+#include "Gameplay/PlayerCamera.h"
 #include "Gameplay/Player.h"
 #include "Gameplay/Weapon/PlayerWeapon.h"
 #include "Render/Grid.h"
@@ -68,21 +68,15 @@ void DebugUI::render()
         DrawSection("Camera");
         if (m_camera)
         {
-            CameraState* follow = m_camera->getFollowStatePtr();
-            ImGui::Text("Follow");
-            ImGui::SliderFloat("Follow Height", &follow->height, 0.5f, 10.0f);
-            ImGui::SliderFloat("Follow FOV", &follow->fov, 30.0f, 90.0f);
-
-            ImGui::Spacing();
-            CameraState* aim = m_camera->getAimStatePtr();
-            ImGui::Text("Aim");
-            ImGui::SliderFloat("Aim Height", &aim->height, 0.5f, 8.0f);
-            ImGui::SliderFloat("Aim FOV", &aim->fov, 20.0f, 70.0f);
+            ImGui::Text("Camera FOV");
+            ImGui::SliderFloat("HIP FOV", m_camera->hipFovDegreesPtr(), 30.0f, 90.0f);
+            ImGui::SliderFloat("ADS FOV", m_camera->adsFovDegreesPtr(), 20.0f, 70.0f);
+            ImGui::SliderFloat("FOV Blend Speed", m_camera->fovBlendSpeedPtr(), 0.0f, 30.0f);
 
             ImGui::Spacing();
             if (m_player)
             {
-                ImGui::SliderFloat("Mouse Sens", m_player->getMouseSensitivityPtr(), 0.005f, 0.200f, "%.3f");
+                ImGui::SliderFloat("Mouse Sens", m_player->mouseSensitivityPtr(), 0.005f, 0.200f, "%.3f");
             }
             else
             {
@@ -95,26 +89,10 @@ void DebugUI::render()
             DrawUnavailable("Camera");
         }
 
-        DrawSection("Player");
-        if (m_player)
-        {
-            Vector3 pos = m_player->getPosition();
-            ImGui::Text("World Position: %.1f, %.1f, %.1f", pos.x, pos.y, pos.z);
-            Transform* t = m_player->getTransformPtr();
-
-            ImGui::SliderFloat3("Scale", &t->scale.x, 0.1f, 3.0f);
-            ImGui::SliderFloat3("Rotation", &t->rotation.x, -3.14f, 3.14f);
-            ImGui::SliderFloat3("Position", &t->position.x, -100.0f, 100.0f);
-        }
-        else
-        {
-            DrawUnavailable("Player");
-        }
-
         DrawSection("Weapon");
         if (m_player)
         {
-            WeaponMotionTuning* t = m_player->getWeapon().getMotionTuning();
+            WeaponMotionTuning* t = m_player->weapon().getMotionTuning();
 
             ImGui::Text("Pose");
             ImGui::SliderFloat3("Hip Position", &t->hipPosition.x, -1.0f, 1.0f);

@@ -1,5 +1,6 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Render/FinalCompositePass.h"
+#include "Render/RenderUtil.h"
 
 using Microsoft::WRL::ComPtr;
 
@@ -39,12 +40,7 @@ void FinalCompositePass::createDeviceDependentResources()
     DX::ThrowIfFailed(device->CreateSamplerState(&sampDesc,
         m_sampler.ReleaseAndGetAddressOf()));
 
-    D3D11_BUFFER_DESC cbDesc = {};
-    cbDesc.ByteWidth = sizeof(FinalCompositeCB);
-    cbDesc.Usage = D3D11_USAGE_DEFAULT;
-    cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    DX::ThrowIfFailed(device->CreateBuffer(&cbDesc, nullptr,
-        m_constantBuffer.ReleaseAndGetAddressOf()));
+    m_constantBuffer = RenderUtil::createDynamicConstantBuffer<FinalCompositeCB>(device);
 }
 
 void FinalCompositePass::finalize()
@@ -75,7 +71,7 @@ void FinalCompositePass::process(
 
     FinalCompositeCB cb = {};
     cb.exposure = exposure;
-    context->UpdateSubresource(m_constantBuffer.Get(), 0, nullptr, &cb, 0, 0);
+    RenderUtil::updateDynamicConstantBuffer(context, m_constantBuffer, cb);
 
     context->PSSetShaderResources(0, 1, &inputSRV);
     context->PSSetSamplers(0, 1, m_sampler.GetAddressOf());

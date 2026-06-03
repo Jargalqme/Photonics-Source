@@ -16,5 +16,5 @@ float4 main(PS_INPUT input) : SV_TARGET
 {
     float3 dir = normalize(input.direction);
     float4 color = skyboxTexture.Sample(skyboxSampler, dir);
-    return float4(color.rgb * 1.5, color.a);
+    return float4(color.rgb * 1.0, color.a);
 }

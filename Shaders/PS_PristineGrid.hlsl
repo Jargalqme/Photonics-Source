@@ -3,6 +3,8 @@
 //! @brief  Anti-aliased procedural grid lines (Ben Golus pristine grid)
 //---------------------------------------------------------------------------
 
+#include "Camera.hlsli"
+
 cbuffer GridConstants : register(b0)
 {
     matrix worldViewProjection;
@@ -46,13 +48,41 @@ float pristineGrid(float2 uv, float2 lineWidth)
     return lerp(grid2.x, 1.0, grid2.y);
 }
 
+//float4 main(PS_INPUT input) : SV_TARGET
+//{
+//    float2 uv = input.worldPos * gridParams.z;
+//    float2 lineWidth = float2(gridParams.x, gridParams.y);
+//    float grid = pristineGrid(uv, lineWidth);
+//    float lineEmissiveIntensity = gridParams.w;
+//    float3 lineHDR = lineColor.rgb * (1.0 + lineEmissiveIntensity);
+//    //return float4(lineHDR, grid);
+    
+//    float3 color = lerp(baseColor.rgb, lineHDR, grid);
+//    return float4(color, 1.0);
+//}
+
 float4 main(PS_INPUT input) : SV_TARGET
 {
     float2 uv = input.worldPos * gridParams.z;
     float2 lineWidth = float2(gridParams.x, gridParams.y);
+
     float grid = pristineGrid(uv, lineWidth);
-    float lineEmissiveIntensity = gridParams.w;
+
+    float cellsPerPixel = max(fwidth(uv).x, fwidth(uv).y);
+    float fade = 1.0 - smoothstep(0.35, 1.0, cellsPerPixel);
+    grid *= fade;
+
+    float lineEmissiveIntensity = gridParams.w * fade;
     float3 lineHDR = lineColor.rgb * (1.0 + lineEmissiveIntensity);
     float3 color = lerp(baseColor.rgb, lineHDR, grid);
+
+    // --- Distance fog into a horizon color --------------------------------
+    const float3 fogColor = float3(0.0, 0.0, 0.0); // linear synthwave horizon (tune)
+    const float fogDensity = 0.01; // larger = fog closer (tune)
+    float dist = length(input.worldPos - cameraPosition.xz); // worldPos is world XZ
+    float fog = 1.0 - exp(-dist * fogDensity); // 0 near Å® 1 far
+    color = lerp(color, fogColor, fog);
+    // ---------------------------------------------------------------------
+
     return float4(color, 1.0);
 }

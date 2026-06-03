@@ -24,7 +24,7 @@ void Billboard::initialize(const std::wstring& texturePath)
 	m_vertexShader = m_context->shaders->getVS(L"VS_Billboard.cso");
 	m_pixelShader  = m_context->shaders->getPS(L"PS_Billboard.cso");
 
-	m_constantBuffer = RenderUtil::createConstantBuffer<CBData>(device);
+	m_constantBuffer = RenderUtil::createDynamicConstantBuffer<CBData>(device);
 
 	DX::ThrowIfFailed(CreateWICTextureFromFile(
 		device, texturePath.c_str(),

@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "SkinnedRenderer.h"
 
 #include "SkinnedModel.h"
@@ -53,8 +53,8 @@ bool SkinnedRenderer::initialize(ID3D11Device* device)
         vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(),
         m_inputLayout.ReleaseAndGetAddressOf()));
 
-    m_transformCB = RenderUtil::createConstantBuffer<SkinnedTransformCB>(device);
-    m_paletteCB   = RenderUtil::createConstantBuffer<SkinnedPaletteCB>(device);
+    m_transformCB = RenderUtil::createDynamicConstantBuffer<SkinnedTransformCB>(device);
+    m_paletteCB   = RenderUtil::createDynamicConstantBuffer<SkinnedPaletteCB>(device);
 
     D3D11_SAMPLER_DESC sampDesc = {};
     sampDesc.Filter         = D3D11_FILTER_MIN_MAG_MIP_LINEAR;

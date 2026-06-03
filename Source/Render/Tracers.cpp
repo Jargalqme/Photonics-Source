@@ -31,7 +31,7 @@ void Tracers::initialize()
 
 	m_vertexShader = m_context->shaders->getVS(L"VS_Tracer.cso");
 	m_pixelShader = m_context->shaders->getPS(L"PS_Tracer.cso");
-	m_constantBuffer = RenderUtil::createConstantBuffer<CBData>(device);
+	m_constantBuffer = RenderUtil::createDynamicConstantBuffer<CBData>(device);
 
 	m_tracers.reserve(TRACER_RESERVE);
 }

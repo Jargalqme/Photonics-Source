@@ -1,0 +1,488 @@
+[AssimpModelImporter] Inspecting model
+  requested: Assets/Weapons/Rifle/rifle.glb
+  resolved:  Assets/Weapons/Rifle/rifle.glb
+  loaded: yes
+  nodes: 53
+  meshes: 42
+  materials: 43
+  textures: 14
+  VM nodes: 11
+  VM node[0] VM_Part_Bolt_01
+    position: (0, 0.0462115, 0.00298411)
+    meshes: 1
+  VM node[1] VM_Part_Bolt_02
+    position: (0, 0.0462115, 0.00298411)
+    meshes: 1
+  VM node[2] VM_Part_Bolt_03
+    position: (0, 0.0462115, 0.00298411)
+    meshes: 1
+  VM node[3] VM_Part_Bolt_04
+    position: (0, 0.0462115, 0.00298411)
+    meshes: 1
+  VM node[4] VM_Part_Trigger
+    position: (0, 0.0462115, 0.00298411)
+    meshes: 1
+  VM node[5] VM_Part_Magazine
+    position: (0, 0.0462115, 0.00298411)
+    meshes: 1
+  VM node[6] VM_Muzzle
+    position: (0, 0.149257, -0.382648)
+    meshes: 0
+  VM node[7] VM_RecoilPivot
+    position: (0, 0.1603, 0.322371)
+    meshes: 0
+  VM node[8] VM_GripPivot
+    position: (0, 0.102928, 0.0514641)
+    meshes: 0
+  VM node[9] VM_SightFront
+    position: (0, 0.208962, -0.330485)
+    meshes: 0
+  VM node[10] VM_SightRear
+    position: (0, 0.208962, 0.0553239)
+    meshes: 0
+  mesh[0] Mesh_0.004
+    vertices: 54
+    faces: 50
+    material: 0
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[1] Mesh_1.003
+    vertices: 1170
+    faces: 2202
+    material: 1
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[2] Mesh_2.002
+    vertices: 539
+    faces: 872
+    material: 2
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[3] Mesh_7.002
+    vertices: 700
+    faces: 1112
+    material: 3
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[4] Mesh_8.002
+    vertices: 386
+    faces: 672
+    material: 4
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[5] Mesh_9.002
+    vertices: 48
+    faces: 62
+    material: 5
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[6] Mesh_10.002
+    vertices: 2187
+    faces: 3492
+    material: 6
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[7] Mesh_11.002
+    vertices: 256
+    faces: 460
+    material: 7
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[8] Mesh_12.001
+    vertices: 226
+    faces: 328
+    material: 8
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[9] Mesh_13.001
+    vertices: 1250
+    faces: 2031
+    material: 9
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[10] Mesh_14.001
+    vertices: 2506
+    faces: 4586
+    material: 10
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[11] Mesh_15.001
+    vertices: 64
+    faces: 60
+    material: 11
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[12] Mesh_16
+    vertices: 1782
+    faces: 2840
+    material: 12
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[13] Mesh_17
+    vertices: 948
+    faces: 1430
+    material: 13
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[14] Mesh_18
+    vertices: 3322
+    faces: 5190
+    material: 14
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[15] Mesh_19
+    vertices: 1974
+    faces: 2866
+    material: 15
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[16] Mesh_20
+    vertices: 60
+    faces: 56
+    material: 16
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[17] Mesh_21
+    vertices: 413
+    faces: 588
+    material: 17
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[18] Mesh_22
+    vertices: 2132
+    faces: 2992
+    material: 18
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[19] Mesh_23
+    vertices: 272
+    faces: 318
+    material: 19
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[20] Mesh_3.002
+    vertices: 1190
+    faces: 1906
+    material: 20
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[21] Mesh_4.002
+    vertices: 2027
+    faces: 3342
+    material: 21
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[22] Mesh_5.002
+    vertices: 818
+    faces: 1400
+    material: 22
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[23] Mesh_6.002
+    vertices: 124
+    faces: 166
+    material: 23
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[24] Mesh_24
+    vertices: 1392
+    faces: 2182
+    material: 24
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[25] Mesh_6.006
+    vertices: 12
+    faces: 6
+    material: 25
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[26] Mesh_3.006
+    vertices: 20
+    faces: 8
+    material: 26
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[27] Mesh_4.006
+    vertices: 20
+    faces: 8
+    material: 27
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[28] Mesh_1.008
+    vertices: 33
+    faces: 28
+    material: 28
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[29] Mesh_12.003
+    vertices: 2260
+    faces: 3390
+    material: 29
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[30] Mesh_9.006
+    vertices: 2760
+    faces: 4340
+    material: 30
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[31] Mesh_7.006
+    vertices: 1012
+    faces: 398
+    material: 31
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[32] Mesh_2.006
+    vertices: 224
+    faces: 276
+    material: 32
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[33] Mesh_13.003
+    vertices: 498
+    faces: 646
+    material: 33
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[34] Mesh_14.003
+    vertices: 120
+    faces: 154
+    material: 34
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[35] Mesh_0.010
+    vertices: 161
+    faces: 58
+    material: 35
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[36] Mesh_5.006
+    vertices: 16
+    faces: 6
+    material: 36
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[37] Mesh_11.006
+    vertices: 1912
+    faces: 2536
+    material: 37
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[38] Mesh_10.006
+    vertices: 1840
+    faces: 2788
+    material: 38
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[39] Mesh_8.006
+    vertices: 161
+    faces: 58
+    material: 39
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[40] Mesh_0.013
+    vertices: 3120
+    faces: 5448
+    material: 40
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  mesh[41] Mesh_0.012
+    vertices: 1348
+    faces: 2089
+    material: 41
+    normals: yes
+    texcoords: yes
+    tangents: yes
+  material[0] autor_default_frame.001
+    base color: (1, 1, 1, 1)
+    base color texture: *0
+    diffuse texture: *0
+  material[1] autor_default_variant
+    base color: (1, 1, 1, 1)
+    base color texture: *3
+    diffuse texture: *3
+  material[2] autor_default_variant.001
+    base color: (1, 1, 1, 1)
+    base color texture: *3
+    diffuse texture: *3
+  material[3] autor_default_frame.005
+    base color: (1, 1, 1, 1)
+    base color texture: *0
+    diffuse texture: *0
+  material[4] autor_default_frame.006
+    base color: (1, 1, 1, 1)
+    base color texture: *0
+    diffuse texture: *0
+  material[5] autor_default_frame.007
+    base color: (1, 1, 1, 1)
+    base color texture: *0
+    diffuse texture: *0
+  material[6] autor_default_frame.008
+    base color: (1, 1, 1, 1)
+    base color texture: *0
+    diffuse texture: *0
+  material[7] autor_default_frame.009
+    base color: (1, 1, 1, 1)
+    base color texture: *0
+    diffuse texture: *0
+  material[8] autor_default_variant.003
+    base color: (1, 1, 1, 1)
+    base color texture: *3
+    diffuse texture: *3
+  material[9] autor_default_frame.010
+    base color: (1, 1, 1, 1)
+    base color texture: *0
+    diffuse texture: *0
+  material[10] autor_default_variant.004
+    base color: (1, 1, 1, 1)
+    base color texture: *3
+    diffuse texture: *3
+  material[11] autor_default_variant.005
+    base color: (1, 1, 1, 1)
+    base color texture: *3
+    diffuse texture: *3
+  material[12] autor_default_variant.006
+    base color: (1, 1, 1, 1)
+    base color texture: *3
+    diffuse texture: *3
+  material[13] autor_default_variant.007
+    base color: (1, 1, 1, 1)
+    base color texture: *3
+    diffuse texture: *3
+  material[14] autor_default_frame.011
+    base color: (1, 1, 1, 1)
+    base color texture: *0
+    diffuse texture: *0
+  material[15] autor_default_variant.008
+    base color: (1, 1, 1, 1)
+    base color texture: *3
+    diffuse texture: *3
+  material[16] autor_default_frame.012
+    base color: (1, 1, 1, 1)
+    base color texture: *0
+    diffuse texture: *0
+  material[17] autor_default_variant.009
+    base color: (1, 1, 1, 1)
+    base color texture: *3
+    diffuse texture: *3
+  material[18] autor_default_variant.010
+    base color: (1, 1, 1, 1)
+    base color texture: *3
+    diffuse texture: *3
+  material[19] autor_default_variant.011
+    base color: (1, 1, 1, 1)
+    base color texture: *3
+    diffuse texture: *3
+  material[20] autor_default_frame.002
+    base color: (1, 1, 1, 1)
+    base color texture: *0
+    diffuse texture: *0
+  material[21] autor_default_variant.002
+    base color: (1, 1, 1, 1)
+    base color texture: *3
+    diffuse texture: *3
+  material[22] autor_default_frame.003
+    base color: (1, 1, 1, 1)
+    base color texture: *0
+    diffuse texture: *0
+  material[23] autor_default_frame.004
+    base color: (1, 1, 1, 1)
+    base color texture: *0
+    diffuse texture: *0
+  material[24] autor_default_frame.013
+    base color: (1, 1, 1, 1)
+    base color texture: *0
+    diffuse texture: *0
+  material[25] sight_auto_light_01_holo_uiMaterial.002
+    base color: (1, 1, 1, 1)
+  material[26] sight_auto_light_01_holo_uiMaterial
+    base color: (1, 1, 1, 1)
+  material[27] sight_auto_light_01_holo_uiMaterial.001
+    base color: (1, 1, 1, 1)
+  material[28] sight_einkMaterial
+    base color: (1, 1, 1, 1)
+  material[29] sight_auto_light_01_defaultMaterial.004
+    base color: (1, 1, 1, 1)
+    base color texture: *6
+    diffuse texture: *6
+  material[30] sight_auto_light_01_defaultMaterial.001
+    base color: (1, 1, 1, 1)
+    base color texture: *6
+    diffuse texture: *6
+  material[31] hs_decal_shaderMaterial
+    base color: (0.286231, 0.286231, 0.286231, 1)
+  material[32] sight_auto_light_01_defaultMaterial
+    base color: (1, 1, 1, 1)
+    base color texture: *6
+    diffuse texture: *6
+  material[33] sight_auto_light_01_defaultMaterial.005
+    base color: (1, 1, 1, 1)
+    base color texture: *6
+    diffuse texture: *6
+  material[34] sight_auto_light_01_emissiveMaterial
+    base color: (1, 0, 0, 1)
+  material[35] hs_transparent_shaderMaterial.002
+    base color: (1, 1, 1, 1)
+  material[36] postprocess_maskMaterial.002
+    base color: (0.5, 0.5, 0.5, 1)
+  material[37] sight_auto_light_01_defaultMaterial.003
+    base color: (1, 1, 1, 1)
+    base color texture: *6
+    diffuse texture: *6
+  material[38] sight_auto_light_01_defaultMaterial.002
+    base color: (1, 1, 1, 1)
+    base color texture: *6
+    diffuse texture: *6
+  material[39] scope_transparentvignetteMaterial
+    base color: (0.00150821, 0.00150821, 0.00150821, 1)
+  material[40] autor_default
+    base color: (1, 1, 1, 1)
+    base color texture: *8
+    diffuse texture: *8
+  material[41] autor_default.001
+    base color: (1, 1, 1, 1)
+    base color texture: *11
+    diffuse texture: *11
+  material[42] 
+    base color: (1, 1, 1, 1)

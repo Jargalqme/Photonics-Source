@@ -1,6 +1,6 @@
-//---------------------------------------------------------------------------
+﻿//---------------------------------------------------------------------------
 //! @file   Camera.cpp
-//! @brief  カメラ (ビュー行列・投影行列のみ)
+//! @brief  カメラ (ビュー行列・投影行列　+　ビュー定数バッファ)
 //---------------------------------------------------------------------------
 #include "pch.h"
 #include "Camera.h"
@@ -8,10 +8,54 @@
 //---------------------------------------------------------------------------
 //! コンストラクタ
 //---------------------------------------------------------------------------
-Camera::Camera()
+Camera::Camera(DX::DeviceResources* deviceResources)
+	: m_deviceResources(deviceResources)
 {
 	// メンバ初期値から行列を構築しておく
 	update();
+}
+
+//---------------------------------------------------------------------------
+//! デバイス依存リソースを生成 (定数バッファ)
+//---------------------------------------------------------------------------
+void Camera::createDeviceDependentResources()
+{
+	auto device = m_deviceResources->GetD3DDevice();
+
+	D3D11_BUFFER_DESC cbDesc = {};
+	cbDesc.ByteWidth = sizeof(CameraInfo);
+	cbDesc.Usage     = D3D11_USAGE_DEFAULT;
+	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	DX::ThrowIfFailed(device->CreateBuffer(&cbDesc, nullptr,
+		m_constantBuffer.ReleaseAndGetAddressOf()));
+}
+
+//---------------------------------------------------------------------------
+//! デバイス依存リソースを解放
+//---------------------------------------------------------------------------
+void Camera::finalize()
+{
+	m_constantBuffer.Reset();
+}
+
+//---------------------------------------------------------------------------
+//! カメラ定数を更新し b10 にバインド (VS/PS)
+//---------------------------------------------------------------------------
+void Camera::updateConstants()
+{
+	auto context = m_deviceResources->GetD3DDeviceContext();
+	CameraInfo cb{};
+	cb.view    = m_matView.Transpose();
+	cb.proj    = m_matProj.Transpose();
+	cb.invView = m_matView.Invert().Transpose();
+	cb.invProj = m_matProj.Invert().Transpose();
+	cb.cameraPosition = m_position;
+
+	context->UpdateSubresource(m_constantBuffer.Get(), 0, nullptr, &cb, 0, 0);
+
+	ID3D11Buffer* cbs[] = { m_constantBuffer.Get() };
+	context->VSSetConstantBuffers(10, 1, cbs);
+	context->PSSetConstantBuffers(10, 1, cbs);
 }
 
 //---------------------------------------------------------------------------

@@ -1,6 +1,6 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Scenes/TrainingScene.h"
-#include "Common/Camera.h"
+#include "Gameplay/PlayerCamera.h"
 #include "DeviceResources.h"
 #include "Gameplay/Weapon/WeaponShot.h"
 #include "Gameplay/EventBus.h"
@@ -103,9 +103,10 @@ void TrainingScene::initialize(SceneContext& context)
 
     // カメラ — アスペクト比はバックバッファではなくレンダー解像度から取る
     // （レンダーが 16:9、ウィンドウが 21:9 のとき投影は 16:9 のまま、合成側でレターボックス）
-    m_camera = std::make_unique<Camera>();
+    m_camera = std::make_unique<PlayerCamera>(m_deviceResources);
     float aspectRatio = float(m_renderer->GetRenderWidth()) / float(m_renderer->GetRenderHeight());
-    m_camera->setProjectionParameters(45.0f, aspectRatio, 0.1f, 1000.0f);
+    m_camera->setProjection(45.0f, aspectRatio, 0.1f, 1000.0f);
+    m_camera->createDeviceDependentResources();
 
     // プレイヤー
     m_player = std::make_unique<Player>(*m_context);
@@ -126,7 +127,7 @@ void TrainingScene::initialize(SceneContext& context)
     m_tracers->initialize();
 
     // ワールド
-    m_grid = std::make_unique<Grid>(m_deviceResources);
+    m_grid = std::make_unique<Grid>(*m_context);
     m_grid->initialize();
     LayoutLoader::loadLayout(
         *m_context,
@@ -151,8 +152,7 @@ void TrainingScene::initialize(SceneContext& context)
     m_debugUI->setGrid(m_grid.get());
     m_debugUI->setBulletPool(&m_bulletPool);
     m_debugUI->setBloom(m_renderer->GetSceneRenderer()->getBloom());
-    m_debugUI->setExposurePtr(m_camera->getExposurePtr());
-    m_renderer->GetSceneRenderer()->setActiveCamera(m_camera.get());
+    m_debugUI->setExposurePtr(m_camera->exposurePtr());
     m_debugUI->setAudioManager(m_audioManager.get());
 #endif
 }
@@ -215,6 +215,8 @@ void TrainingScene::enter()
 
     // ブルーム有効化（exit() で disable されるため毎エントリで再有効化）
     m_renderer->GetSceneRenderer()->getBloom()->setEnabled(true);
+
+    m_renderer->GetSceneRenderer()->setActiveCamera(m_camera.get());
 }
 
 void TrainingScene::exit()
@@ -225,6 +227,7 @@ void TrainingScene::exit()
     if (m_renderer)
     {
         m_renderer->GetSceneRenderer()->getBloom()->setEnabled(false);
+        m_renderer->GetSceneRenderer()->setActiveCamera(nullptr);
     }
 }
 
@@ -236,6 +239,7 @@ void TrainingScene::finalize()
     if (m_bulletRenderer) { m_bulletRenderer->finalize(); }
     if (m_tracers) { m_tracers->finalize(); }
     if (m_dummy) { m_dummy->finalize(); }
+    m_camera->finalize();
 
     m_dummy.reset();
     m_particleSystem.reset();
@@ -295,6 +299,7 @@ void TrainingScene::update(float deltaTime, InputManager* input)
     EventBus::dispatchQueued();
 
     m_camera->update(*m_player, deltaTime);
+    m_camera->updateConstants();
 
     // === サブシステム ===
     m_gameUI->update(deltaTime);
@@ -309,9 +314,9 @@ void TrainingScene::update(float deltaTime, InputManager* input)
 
 void TrainingScene::render()
 {
-    const auto view   = m_camera->getViewMatrix();
-    const auto proj   = m_camera->getProjectionMatrix();
-    const auto camPos = m_camera->getPosition();
+    const auto view   = m_camera->matView();
+    const auto proj   = m_camera->matProj();
+    const auto camPos = m_camera->position();
 
     renderWorld(view, proj, camPos);      // グリッド + ダミーメッシュ
     renderEffects(view, proj, camPos);    // 弾・パーティクル・トレーサー
@@ -369,8 +374,8 @@ void TrainingScene::renderViewmodel(const Matrix& view, const Vector3& camPos)
     m_renderer->BeginViewmodelPass();   // 深度クリアして常に最前面に描画
 
     m_renderQueue.clear();
-    m_player->getWeapon().render(m_renderQueue, view);
-    m_renderer->ExecuteRenderCommands(m_renderQueue, view, m_camera->getViewModelProjection(), camPos);
+    m_player->weapon().render(m_renderQueue, view);
+    m_renderer->ExecuteRenderCommands(m_renderQueue, view, m_camera->matViewmodelProj(), camPos);
 }
 
 void TrainingScene::renderUI(const Matrix& view, const Matrix& proj)

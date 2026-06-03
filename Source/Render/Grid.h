@@ -1,10 +1,11 @@
 ﻿#pragma once
-#include "DeviceResources.h"
+
+struct SceneContext;
 
 class Grid
 {
 public:
-    Grid(DX::DeviceResources* deviceResources);
+    Grid(SceneContext& context);
     ~Grid() = default;
 
     void initialize();
@@ -43,10 +44,10 @@ private:
         DirectX::SimpleMath::Vector4 baseColor;
     };
 
-    DX::DeviceResources* m_deviceResources;
+    SceneContext* m_context;
 
     // === グリッドパラメータ ===
-    static constexpr float GRID_SIZE     = 50.0f;
+    static constexpr float GRID_SIZE     = 500.0f;
     static constexpr float FLOOR_Y       = -1.0f;
     static constexpr float WALL_HEIGHT   = 199.5f;
     static constexpr float WALL_DISTANCE = 200.0f;
@@ -73,7 +74,4 @@ private:
     com_ptr<ID3D11VertexShader>      m_vertexShader;
     com_ptr<ID3D11PixelShader>       m_pixelShader;
     com_ptr<ID3D11InputLayout>       m_inputLayout;
-    com_ptr<ID3D11BlendState>        m_blendState;
-    com_ptr<ID3D11DepthStencilState> m_depthStencilState;
-    com_ptr<ID3D11RasterizerState>   m_rasterizerState;
 };

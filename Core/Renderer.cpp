@@ -15,10 +15,14 @@ namespace
 {
     struct ImportedModelCBData
     {
+        Matrix world;
         Matrix worldViewProjection;
         Matrix worldInverseTranspose;
         Vector4 color;
         Vector4 lightDirectionAndAmbient;
+        Vector4 lightColor;
+        Vector4 cameraPosition;
+        Vector4 materialParams;
         Vector4 materialFlags;
     };
 
@@ -289,7 +293,7 @@ void Renderer::CreateImportedModelResources()
         vsBlob->GetBufferSize(),
         m_importedModelInputLayout.ReleaseAndGetAddressOf()));
 
-    m_importedModelConstantBuffer = RenderUtil::createConstantBuffer<ImportedModelCBData>(device);
+    m_importedModelConstantBuffer = RenderUtil::createDynamicConstantBuffer<ImportedModelCBData>(device);
 
     D3D11_RASTERIZER_DESC rasterizerDesc = {};
     rasterizerDesc.FillMode = D3D11_FILL_SOLID;
@@ -342,7 +346,8 @@ void Renderer::CreateImportedModelResources()
 void Renderer::DrawImportedModelCommand(
     const ImportedModelCommand& command,
     const Matrix& view,
-    const Matrix& projection)
+    const Matrix& projection,
+    const Vector3& cameraPosition)
 {
     if (!command.model ||
         !command.model->vertexBuffer() ||
@@ -376,6 +381,9 @@ void Renderer::DrawImportedModelCommand(
     ID3D11SamplerState* sampler = m_importedModelSampler.Get();
     context->PSSetSamplers(0, 1, &sampler);
 
+    ID3D11ShaderResourceView* irradianceSRV = m_irradianceSRV;
+    context->PSSetShaderResources(3, 1, &irradianceSRV);
+
     ID3D11RasterizerState* rasterizer =
         command.wireframe ? m_importedModelWireframeRasterizer.Get() : m_importedModelSolidRasterizer.Get();
     context->RSSetState(rasterizer);
@@ -388,18 +396,22 @@ void Renderer::DrawImportedModelCommand(
     const Matrix normalMatrix = normalWorld.Invert().Transpose();
 
     ImportedModelCBData cb = {};
+    cb.world = command.world.Transpose();
     cb.worldViewProjection = (command.world * view * projection).Transpose();
     cb.worldInverseTranspose = normalMatrix.Transpose();
     cb.lightDirectionAndAmbient = Vector4(-0.35f, -0.85f, 0.35f, 0.28f);
+    cb.lightColor = Vector4(5.0f, 5.0f, 5.0f, 1.0f);
+    cb.cameraPosition = Vector4(cameraPosition.x, cameraPosition.y, cameraPosition.z, 1.0f);
 
     const auto& submeshes = model.submeshes();
     if (submeshes.empty())
     {
         cb.color = Vector4(command.color.x, command.color.y, command.color.z, command.color.w);
         cb.materialFlags = Vector4(0.0f, command.emissiveIntensity, 0.0f, 0.0f);
+        cb.materialParams = Vector4(0.0f, 1.0f, 0.0f, 0.0f);   // metallic 0, rough 1, no maps
 
-        ID3D11ShaderResourceView* nullTexture = nullptr;
-        context->PSSetShaderResources(0, 1, &nullTexture);
+        ID3D11ShaderResourceView* nullSRVs[3] = { nullptr, nullptr, nullptr };
+        context->PSSetShaderResources(0, 3, nullSRVs);
 
         D3D11_MAPPED_SUBRESOURCE mapped = {};
         DX::ThrowIfFailed(context->Map(m_importedModelConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped));
@@ -419,10 +431,31 @@ void Renderer::DrawImportedModelCommand(
         }
 
         cb.color = CombineImportedModelColor(command, model, submesh);
-        const int32_t textureIndex = GetImportedModelBaseColorTextureIndex(model, submesh);
-        ID3D11ShaderResourceView* textureSRV = model.textureSRV(textureIndex);
-        cb.materialFlags = Vector4(textureSRV ? 1.0f : 0.0f, command.emissiveIntensity, 0.0f, 0.0f);
-        context->PSSetShaderResources(0, 1, &textureSRV);
+
+        const int32_t baseColorIndex = GetImportedModelBaseColorTextureIndex(model, submesh);
+        ID3D11ShaderResourceView* baseColorSRV = model.textureSRV(baseColorIndex);
+
+        float metallic = 1.0f, roughness = 1.0f;
+        int32_t normalIndex = IMPORTED_TEXTURE_NONE, metalRoughIndex = IMPORTED_TEXTURE_NONE;
+        const auto& materials = model.materials();
+        if (submesh.materialIndex < materials.size())
+        {
+            const ImportedMaterial& mat = materials[submesh.materialIndex];
+            metallic = mat.metallicFactor;
+            roughness = mat.roughnessFactor;
+            normalIndex = mat.normalTextureIndex;
+            metalRoughIndex = mat.metallicRoughnessTextureIndex;
+        }
+        ID3D11ShaderResourceView* normalSRV = model.textureSRV(normalIndex);
+        ID3D11ShaderResourceView* metalRoughSRV = model.textureSRV(metalRoughIndex);
+
+        cb.materialFlags = Vector4(baseColorSRV ? 1.0f : 0.0f, command.emissiveIntensity, 0.0f, 0.0f);
+        cb.materialParams = Vector4(metallic, roughness,
+            normalSRV ? 1.0f : 0.0f,
+            metalRoughSRV ? 1.0f : 0.0f);
+
+        ID3D11ShaderResourceView* srvs[3] = { baseColorSRV, normalSRV, metalRoughSRV };
+        context->PSSetShaderResources(0, 3, srvs);
 
         D3D11_MAPPED_SUBRESOURCE mapped = {};
         DX::ThrowIfFailed(context->Map(m_importedModelConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped));
@@ -432,8 +465,8 @@ void Renderer::DrawImportedModelCommand(
         context->DrawIndexed(submesh.indexCount, submesh.startIndex, 0);
     }
 
-    ID3D11ShaderResourceView* nullTexture = nullptr;
-    context->PSSetShaderResources(0, 1, &nullTexture);
+    ID3D11ShaderResourceView* nullSRVs[4] = {};
+    context->PSSetShaderResources(0, 4, nullSRVs);
     context->RSSetState(nullptr);
 }
 
@@ -443,8 +476,6 @@ void Renderer::ExecuteRenderCommands(
     const Matrix& projection,
     const Vector3& cameraPosition)
 {
-    (void)cameraPosition;
-
     auto drawMesh = [&](const MeshCommand& command)
     {
         if (!command.mesh)
@@ -472,7 +503,7 @@ void Renderer::ExecuteRenderCommands(
     for (const auto& command : queue.opaqueImportedModels())
     {
         context->OMSetBlendState(nullptr, blendFactor, 0xFFFFFFFF);
-        DrawImportedModelCommand(command, view, projection);
+        DrawImportedModelCommand(command, view, projection, cameraPosition);
     }
 
     for (const auto& command : queue.transparentMeshes())
@@ -487,7 +518,7 @@ void Renderer::ExecuteRenderCommands(
             command,
             m_importedModelAlphaBlendState.Get(),
             m_importedModelAdditiveBlendState.Get());
-        DrawImportedModelCommand(command, view, projection);
+        DrawImportedModelCommand(command, view, projection, cameraPosition);
     }
 
     context->OMSetBlendState(nullptr, blendFactor, 0xFFFFFFFF);

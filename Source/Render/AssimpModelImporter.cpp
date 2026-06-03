@@ -394,6 +394,54 @@ namespace
                             textureIndexByPath);
                     }
                 }
+
+                ai_real metallic = importedMaterial.metallicFactor;
+                if (aiGetMaterialFloat(material, AI_MATKEY_METALLIC_FACTOR, &metallic) == AI_SUCCESS)
+                {
+                    importedMaterial.metallicFactor =
+                        std::clamp(static_cast<float>(metallic), 0.0f, 1.0f);
+                }
+
+                ai_real roughness = importedMaterial.roughnessFactor;
+                if (aiGetMaterialFloat(material, AI_MATKEY_ROUGHNESS_FACTOR, &roughness) == AI_SUCCESS)
+                {
+                    importedMaterial.roughnessFactor =
+                        std::clamp(static_cast<float>(roughness), 0.0f, 1.0f);
+                }
+
+
+                aiString normalPath;
+                if (material->GetTexture(aiTextureType_NORMALS, 0, &normalPath) == AI_SUCCESS)
+                {
+                    importedMaterial.normalTextureIndex = ResolveTextureIndex(
+                        ToString(normalPath), modelDirectory, outData,
+                        /*srgb*/ false, textureIndexByPath);
+                }
+
+                aiString metalRoughPath;
+                if (material->GetTexture(aiTextureType_METALNESS, 0, &metalRoughPath) == AI_SUCCESS)
+                {
+                    importedMaterial.metallicRoughnessTextureIndex = ResolveTextureIndex(
+                        ToString(metalRoughPath), modelDirectory, outData,
+                        /*srgb*/ false, textureIndexByPath);
+                }
+
+                aiString roughnessPath;
+                if (material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &roughnessPath) == AI_SUCCESS)
+                {
+                    const int32_t roughnessTextureIndex = ResolveTextureIndex(
+                        ToString(roughnessPath),
+                        modelDirectory,
+                        outData,
+                        false,
+                        textureIndexByPath);
+
+                    if (importedMaterial.metallicRoughnessTextureIndex == IMPORTED_TEXTURE_NONE)
+                    {
+                        importedMaterial.metallicRoughnessTextureIndex = roughnessTextureIndex;
+                    }
+                }
+
             }
 
             outData.materials.push_back(std::move(importedMaterial));

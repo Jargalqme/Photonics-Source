@@ -78,6 +78,7 @@ public:
     static constexpr float REF_WIDTH = 1920.0f;
     static constexpr float REF_HEIGHT = 1080.0f;
 
+    void SetIrradianceSRV(ID3D11ShaderResourceView* srv) { m_irradianceSRV = srv; }
 
 private:
     DirectX::SpriteFont* GetFont(FontType type);
@@ -85,7 +86,8 @@ private:
     void DrawImportedModelCommand(
         const ImportedModelCommand& command,
         const DirectX::SimpleMath::Matrix& view,
-        const DirectX::SimpleMath::Matrix& projection);
+        const DirectX::SimpleMath::Matrix& projection,
+        const DirectX::SimpleMath::Vector3& cameraPosition);
 
     // Device resources (not owned by this class)
     DX::DeviceResources* m_deviceResources;
@@ -101,6 +103,8 @@ private:
     com_ptr<ID3D11SamplerState>    m_importedModelSampler;
     com_ptr<ID3D11BlendState>      m_importedModelAlphaBlendState;
     com_ptr<ID3D11BlendState>      m_importedModelAdditiveBlendState;
+
+    ID3D11ShaderResourceView* m_irradianceSRV = nullptr;
 
     com_ptr<ID3D11Texture2D>          m_sceneTexture;
     com_ptr<ID3D11RenderTargetView>   m_sceneRTV;

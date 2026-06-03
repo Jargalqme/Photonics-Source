@@ -27,6 +27,6 @@ VS_OUTPUT main(VS_INPUT input)
 {
     VS_OUTPUT output;
     output.position = mul(float4(input.position, 1.0), WorldViewProjection);
-    output.uv = input.position.xz;
+    output.uv = input.position.xy;
     return output;
 }

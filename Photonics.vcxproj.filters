@@ -26,7 +26,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Services\InputManager.h" />
-    <ClInclude Include="Source\Render\ColorMaskEffect.h" />
     <ClInclude Include="Source\UI\GameUI.h" />
     <ClInclude Include="Source\Scenes\MenuBackground.h" />
     <ClInclude Include="Source\Scenes\BossScene.h">
@@ -161,10 +160,10 @@
     <ClInclude Include="Source\Common\typedef.h" />
     <ClInclude Include="Source\Common\camera.h" />
     <ClInclude Include="Source\Gameplay\PlayerCamera.h" />
+    <ClInclude Include="Source\Render\IndirectLight.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Services\InputManager.cpp" />
-    <ClCompile Include="Source\Render\ColorMaskEffect.cpp" />
     <ClCompile Include="Source\UI\GameUI.cpp" />
     <ClCompile Include="Source\Scenes\MenuBackground.cpp" />
     <ClCompile Include="Source\Scenes\BossScene.cpp">
@@ -278,6 +277,7 @@
     <ClCompile Include="Source\Render\FinalCompositePass.cpp" />
     <ClCompile Include="Source\Common\camera.cpp" />
     <ClCompile Include="Source\Gameplay\PlayerCamera.cpp" />
+    <ClCompile Include="Source\Render\IndirectLight.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
@@ -359,9 +359,13 @@
     <FxCompile Include="Shaders\VS_SkinnedMenu.hlsl" />
     <FxCompile Include="Shaders\PS_SkinnedMenu.hlsl" />
     <FxCompile Include="Shaders\PS_FinalComposite.hlsl" />
+    <FxCompile Include="Shaders\CS_IrradianceConvolution.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Common.hlsli" />
     <None Include="Shaders\Sampling.hlsli" />
+    <None Include="Shaders\Camera.hlsli" />
+    <None Include="Shaders\BRDF.hlsli" />
+    <None Include="Shaders\Includes\IBLCommon.hlsli" />
   </ItemGroup>
 </Project>
