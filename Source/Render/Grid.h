@@ -36,7 +36,7 @@ private:
         DirectX::XMFLOAT3 position;
     };
 
-    struct ConstantBuffer
+    struct GridCB
     {
         DirectX::SimpleMath::Matrix  worldViewProjection;
         DirectX::SimpleMath::Vector4 gridParams;   // x=lineWidthX, y=lineWidthY, z=scale

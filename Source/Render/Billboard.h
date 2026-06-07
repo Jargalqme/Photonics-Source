@@ -31,7 +31,7 @@ private:
 	com_ptr<ID3D11Buffer>             m_constantBuffer;
 	com_ptr<ID3D11ShaderResourceView> m_textureSRV;
 
-	struct alignas(16) CBData
+	struct alignas(16) BillboardCB
 	{
 		DirectX::SimpleMath::Matrix  viewProjection;  // 64 bytes
 		DirectX::SimpleMath::Vector3 worldPosition;   // 12 bytes

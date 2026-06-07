@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "Scenes/MenuBackground.h"
+#include "Render/RenderUtil.h"
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
@@ -55,22 +56,13 @@ void MenuBackground::createDeviceDependentResources()
     auto device = m_deviceResources->GetD3DDevice();
 
     // 頂点バッファ
-    D3D11_BUFFER_DESC bufferDesc = {};
-    bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-    bufferDesc.ByteWidth = static_cast<UINT>(sizeof(MenuVertex) * m_vertices.size());
-    bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-
-    D3D11_SUBRESOURCE_DATA initData = {};
-    initData.pSysMem = m_vertices.data();
-
-    DX::ThrowIfFailed(device->CreateBuffer(&bufferDesc, &initData, m_vertexBuffer.ReleaseAndGetAddressOf()));
+    m_vertexBuffer = RenderUtil::createStaticVertexBuffer(
+        device,
+        m_vertices.data(),
+        static_cast<UINT>(m_vertices.size()));
 
     // 定数バッファ
-    bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-    bufferDesc.ByteWidth = sizeof(MenuConstantBuffer);
-    bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-
-    DX::ThrowIfFailed(device->CreateBuffer(&bufferDesc, nullptr, m_constantBuffer.ReleaseAndGetAddressOf()));
+    m_constantBuffer = RenderUtil::createDynamicConstantBuffer<MenuBackgroundCB>(device);
 
     // シェーダー
     createShaders();
@@ -114,44 +106,16 @@ void MenuBackground::createShaders()
 
     // 頂点シェーダー
     ComPtr<ID3DBlob> vertexShaderBlob;
-    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"VS_MenuBackground.cso").c_str(), vertexShaderBlob.GetAddressOf()));
-
-    DX::ThrowIfFailed(device->CreateVertexShader(
-        vertexShaderBlob->GetBufferPointer(),
-        vertexShaderBlob->GetBufferSize(),
-        nullptr,
-        m_vertexShader.ReleaseAndGetAddressOf()
-    ));
+    m_vertexShader = RenderUtil::loadVS(device, L"VS_MenuBackground.cso", &vertexShaderBlob);
 
     // ピクセルシェーダー1: ワーピング
-    ComPtr<ID3DBlob> ps1Blob;
-    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"PS_Warping.cso").c_str(), ps1Blob.GetAddressOf()));
-    DX::ThrowIfFailed(device->CreatePixelShader(
-        ps1Blob->GetBufferPointer(),
-        ps1Blob->GetBufferSize(),
-        nullptr,
-        m_pixelShaderWarping.ReleaseAndGetAddressOf()
-    ));
+    m_pixelShaderWarping = RenderUtil::loadPS(device, L"PS_Warping.cso");
 
     // ピクセルシェーダー2: フラクタル（Kishimisu風）
-    ComPtr<ID3DBlob> ps2Blob;
-    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"PS_Fractal.cso").c_str(), ps2Blob.GetAddressOf()));
-    DX::ThrowIfFailed(device->CreatePixelShader(
-        ps2Blob->GetBufferPointer(),
-        ps2Blob->GetBufferSize(),
-        nullptr,
-        m_pixelShaderFractal.ReleaseAndGetAddressOf()
-    ));
+    m_pixelShaderFractal = RenderUtil::loadPS(device, L"PS_Fractal.cso");
 
     // ピクセルシェーダー3: 波形
-    ComPtr<ID3DBlob> ps3Blob;
-    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"PS_Wave.cso").c_str(), ps3Blob.GetAddressOf()));
-    DX::ThrowIfFailed(device->CreatePixelShader(
-        ps3Blob->GetBufferPointer(),
-        ps3Blob->GetBufferSize(),
-        nullptr,
-        m_pixelShaderWave.ReleaseAndGetAddressOf()
-    ));
+    m_pixelShaderWave = RenderUtil::loadPS(device, L"PS_Wave.cso");
 
     // 入力レイアウト
     static const D3D11_INPUT_ELEMENT_DESC inputElements[] =
@@ -176,7 +140,7 @@ void MenuBackground::render(int width, int height)
     auto context = m_deviceResources->GetD3DDeviceContext();
 
     // 定数バッファ更新
-    MenuConstantBuffer cb;
+    MenuBackgroundCB cb = {};
     cb.Time = m_time;
     cb.Resolution = XMFLOAT2(static_cast<float>(width), static_cast<float>(height));
     cb.Speed = m_speed;
@@ -187,7 +151,7 @@ void MenuBackground::render(int width, int height)
     cb.ColorTint = m_colorTint;
     cb.VignetteStrength = m_vignetteStrength;
 
-    context->UpdateSubresource(m_constantBuffer.Get(), 0, nullptr, &cb, 0, 0);
+    RenderUtil::updateDynamicConstantBuffer(context, m_constantBuffer, cb);
 
     // パイプライン設定
     context->IASetInputLayout(m_inputLayout.Get());

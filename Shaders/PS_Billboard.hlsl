@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-//! @file   BillboardPS.hlsl
+//! @file   PS_Billboard.hlsl
 //! @brief  Simple texture sample for billboard quads
 //---------------------------------------------------------------------------
 

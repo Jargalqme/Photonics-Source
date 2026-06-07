@@ -35,7 +35,7 @@ private:
         DirectX::SimpleMath::Vector4 color;
     };
 
-    struct BulletRenderConstants
+    struct BulletRenderCB
     {
         DirectX::SimpleMath::Matrix viewProjection;
         DirectX::SimpleMath::Vector3 cameraPosition;

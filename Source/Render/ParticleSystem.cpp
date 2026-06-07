@@ -1,9 +1,9 @@
 ﻿#include "pch.h"
 #include "ParticleSystem.h"
+#include "Render/RenderUtil.h"
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
-using Microsoft::WRL::ComPtr;
 
 ParticleSystem::ParticleSystem(DX::DeviceResources* deviceResources)
     : m_deviceResources(deviceResources)
@@ -35,20 +35,11 @@ void ParticleSystem::initialize()
     DX::ThrowIfFailed(device->CreateShaderResourceView(m_particleBuffer.Get(), &srvDesc, m_particleSRV.ReleaseAndGetAddressOf()));
 
     // 定数バッファ
-    D3D11_BUFFER_DESC cbDesc = {};
-    cbDesc.ByteWidth = sizeof(ParticleCB);
-    cbDesc.Usage = D3D11_USAGE_DEFAULT;
-    cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    DX::ThrowIfFailed(device->CreateBuffer(&cbDesc, nullptr, m_constantBuffer.ReleaseAndGetAddressOf()));
+    m_constantBuffer = RenderUtil::createDynamicConstantBuffer<ParticleCB>(device);
 
     // シェーダー読み込み（VS + PS のみ、コンピュートなし）
-    ComPtr<ID3DBlob> vsBlob;
-    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"VS_Particle.cso").c_str(), vsBlob.GetAddressOf()));
-    DX::ThrowIfFailed(device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, m_vertexShader.ReleaseAndGetAddressOf()));
-
-    ComPtr<ID3DBlob> psBlob;
-    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"PS_Particle.cso").c_str(), psBlob.GetAddressOf()));
-    DX::ThrowIfFailed(device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, m_pixelShader.ReleaseAndGetAddressOf()));
+    m_vertexShader = RenderUtil::loadVS(device, L"VS_Particle.cso");
+    m_pixelShader = RenderUtil::loadPS(device, L"PS_Particle.cso");
 
     // ブレンドステート（加算合成）
     D3D11_BLEND_DESC blendDesc = {};
@@ -153,7 +144,7 @@ void ParticleSystem::render(
     cb.inverseView = view.Invert().Transpose();
     cb.viewProjection = (view * projection).Transpose();
 
-    context->UpdateSubresource(m_constantBuffer.Get(), 0, nullptr, &cb, 0, 0);
+    RenderUtil::updateDynamicConstantBuffer(context, m_constantBuffer, cb);
 
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     context->IASetInputLayout(nullptr);

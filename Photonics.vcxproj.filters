@@ -161,6 +161,9 @@
     <ClInclude Include="Source\Common\camera.h" />
     <ClInclude Include="Source\Gameplay\PlayerCamera.h" />
     <ClInclude Include="Source\Render\IndirectLight.h" />
+    <ClInclude Include="Source\Render\PrimitiveMesh.h" />
+    <ClInclude Include="Source\Render\PBRMaterialLoader.h" />
+    <ClInclude Include="Source\Render\SceneLighting.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Services\InputManager.cpp" />
@@ -278,6 +281,8 @@
     <ClCompile Include="Source\Common\camera.cpp" />
     <ClCompile Include="Source\Gameplay\PlayerCamera.cpp" />
     <ClCompile Include="Source\Render\IndirectLight.cpp" />
+    <ClCompile Include="Source\Render\PrimitiveMesh.cpp" />
+    <ClCompile Include="Source\Render\PBRMaterialLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
@@ -367,5 +372,6 @@
     <None Include="Shaders\Camera.hlsli" />
     <None Include="Shaders\BRDF.hlsli" />
     <None Include="Shaders\Includes\IBLCommon.hlsli" />
+    <None Include="Shaders\Includes\Lighting.hlsli" />
   </ItemGroup>
 </Project>

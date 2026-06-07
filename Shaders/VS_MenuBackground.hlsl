@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-//! @file   MenuBackgroundVS.hlsl
+//! @file   VS_MenuBackground.hlsl
 //! @brief  Passthrough vertex shader for menu background effects
 //---------------------------------------------------------------------------
 

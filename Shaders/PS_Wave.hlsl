@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-//! @file   WavePS.hlsl
+//! @file   PS_Wave.hlsl
 //! @brief  Iterative sine wave distortion menu background effect
 //---------------------------------------------------------------------------
 

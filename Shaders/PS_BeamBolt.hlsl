@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-//! @file   BeamBoltPS.hlsl
+//! @file   PS_BeamBolt.hlsl
 //! @brief  Fresnel rim glow + emissive surface for cylindrical bolt geometry
 //---------------------------------------------------------------------------
 

@@ -2,6 +2,7 @@
 
 #include "DeviceResources.h"
 #include "Source/Render/SceneRenderer.h"
+#include "Source/Render/SceneLighting.h"
 #include <memory>
 #include <string>
 #include <SpriteBatch.h>
@@ -34,7 +35,8 @@ public:
         const RenderCommandQueue& queue,
         const DirectX::SimpleMath::Matrix& view,
         const DirectX::SimpleMath::Matrix& projection,
-        const DirectX::SimpleMath::Vector3& cameraPosition);
+        const DirectX::SimpleMath::Vector3& cameraPosition,
+        const SceneLighting& lighting);
 
     void BeginViewmodelPass();
 
@@ -87,7 +89,8 @@ private:
         const ImportedModelCommand& command,
         const DirectX::SimpleMath::Matrix& view,
         const DirectX::SimpleMath::Matrix& projection,
-        const DirectX::SimpleMath::Vector3& cameraPosition);
+        const DirectX::SimpleMath::Vector3& cameraPosition,
+        const SceneLighting& lighting);
 
     // Device resources (not owned by this class)
     DX::DeviceResources* m_deviceResources;

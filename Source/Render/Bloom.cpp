@@ -1,8 +1,8 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Bloom.h"
+#include "Render/RenderUtil.h"
 
 using namespace DirectX;
-using Microsoft::WRL::ComPtr;
 
 Bloom::Bloom(DX::DeviceResources* deviceResources)
     : m_deviceResources(deviceResources)
@@ -16,36 +16,16 @@ void Bloom::createDeviceDependentResources()
     auto device = m_deviceResources->GetD3DDevice();
 
     // フルスクリーン三角形 頂点シェーダー
-    ComPtr<ID3DBlob> vsBlob;
-    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"VS_FullscreenTriangle.cso").c_str(),
-        vsBlob.GetAddressOf()));
-    DX::ThrowIfFailed(device->CreateVertexShader(
-        vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(),
-        nullptr, m_fullscreenVS.ReleaseAndGetAddressOf()));
+    m_fullscreenVS = RenderUtil::loadVS(device, L"VS_FullscreenTriangle.cso");
 
     // ピクセルシェーダー読み込み
-    auto loadPS = [&](const wchar_t* name, ComPtr<ID3D11PixelShader>& ps)
-        {
-            ComPtr<ID3DBlob> blob;
-            DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(name).c_str(),
-                blob.GetAddressOf()));
-            DX::ThrowIfFailed(device->CreatePixelShader(
-                blob->GetBufferPointer(), blob->GetBufferSize(),
-                nullptr, ps.ReleaseAndGetAddressOf()));
-        };
-
-    loadPS(L"PS_BloomPrefilter.cso", m_prefilterPS);
-    loadPS(L"PS_BloomDownsample.cso", m_downsamplePS);
-    loadPS(L"PS_BloomUpsample.cso", m_upsamplePS);
-    loadPS(L"PS_BloomComposite.cso", m_compositePS);
+    m_prefilterPS  = RenderUtil::loadPS(device, L"PS_BloomPrefilter.cso");
+    m_downsamplePS = RenderUtil::loadPS(device, L"PS_BloomDownsample.cso");
+    m_upsamplePS   = RenderUtil::loadPS(device, L"PS_BloomUpsample.cso");
+    m_compositePS  = RenderUtil::loadPS(device, L"PS_BloomComposite.cso");
 
     // 定数バッファ
-    D3D11_BUFFER_DESC cbDesc = {};
-    cbDesc.ByteWidth = sizeof(BloomParamsCB);
-    cbDesc.Usage = D3D11_USAGE_DEFAULT;
-    cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    DX::ThrowIfFailed(device->CreateBuffer(&cbDesc, nullptr,
-        m_constantBuffer.ReleaseAndGetAddressOf()));
+    m_constantBuffer = RenderUtil::createDynamicConstantBuffer<BloomParamsCB>(device);
 
     // サンプラー（リニアクランプ）
     D3D11_SAMPLER_DESC sampDesc = {};
@@ -219,7 +199,7 @@ void Bloom::render(ID3D11ShaderResourceView* sceneSRV)
 
     // --- パス1: プリフィルタ（シーン → mip[0]） ---
     cb.texelSize = XMFLOAT2(1.0f / sceneWidth, 1.0f / sceneHeight);
-    context->UpdateSubresource(m_constantBuffer.Get(), 0, nullptr, &cb, 0, 0);
+    RenderUtil::updateDynamicConstantBuffer(context, m_constantBuffer, cb);
 
     renderFullscreenPass(m_prefilterPS.Get(), m_mipRTVs[0].Get(),
         sceneSRV, nullptr,
@@ -229,7 +209,7 @@ void Bloom::render(ID3D11ShaderResourceView* sceneSRV)
     for (int i = 1; i < MIP_COUNT; i++)
     {
         cb.texelSize = XMFLOAT2(1.0f / m_mipWidths[i - 1], 1.0f / m_mipHeights[i - 1]);
-        context->UpdateSubresource(m_constantBuffer.Get(), 0, nullptr, &cb, 0, 0);
+        RenderUtil::updateDynamicConstantBuffer(context, m_constantBuffer, cb);
 
         renderFullscreenPass(m_downsamplePS.Get(), m_mipRTVs[i].Get(),
             m_mipSRVs[i - 1].Get(), nullptr,
@@ -242,7 +222,7 @@ void Bloom::render(ID3D11ShaderResourceView* sceneSRV)
     for (int i = MIP_COUNT - 2; i >= 0; i--)
     {
         cb.texelSize = XMFLOAT2(1.0f / m_mipWidths[i + 1], 1.0f / m_mipHeights[i + 1]);
-        context->UpdateSubresource(m_constantBuffer.Get(), 0, nullptr, &cb, 0, 0);
+        RenderUtil::updateDynamicConstantBuffer(context, m_constantBuffer, cb);
 
         renderFullscreenPass(m_upsamplePS.Get(), m_mipRTVs[i].Get(),
             m_mipSRVs[i + 1].Get(), nullptr,
@@ -254,7 +234,7 @@ void Bloom::render(ID3D11ShaderResourceView* sceneSRV)
 
     // --- パス10: 合成（シーン + ブルーム → 合成RT） ---
     cb.texelSize = XMFLOAT2(1.0f / m_mipWidths[0], 1.0f / m_mipHeights[0]);
-    context->UpdateSubresource(m_constantBuffer.Get(), 0, nullptr, &cb, 0, 0);
+    RenderUtil::updateDynamicConstantBuffer(context, m_constantBuffer, cb);
 
     renderFullscreenPass(m_compositePS.Get(), m_compositeRTV.Get(),
         sceneSRV, m_mipSRVs[0].Get(),

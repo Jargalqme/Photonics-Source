@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-//! @file   BloomPrefilterPS.hlsl
+//! @file   PS_BloomPrefilter.hlsl
 //! @brief  Bloom threshold + 13-tap downsample (scene to mip[0])
 //---------------------------------------------------------------------------
 

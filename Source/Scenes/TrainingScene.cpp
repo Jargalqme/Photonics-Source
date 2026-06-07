@@ -101,6 +101,10 @@ void TrainingScene::initialize(SceneContext& context)
 {
     Scene::initialize(context);
 
+    m_lighting.keyLight.directionToLight = Vector3(0.35f, 0.85f, -0.35f);
+    m_lighting.keyLight.color = Color(1.0f, 1.0f, 1.0f, 1.0f);
+    m_lighting.keyLight.intensity = 5.0f;
+
     // カメラ — アスペクト比はバックバッファではなくレンダー解像度から取る
     // （レンダーが 16:9、ウィンドウが 21:9 のとき投影は 16:9 のまま、合成側でレターボックス）
     m_camera = std::make_unique<PlayerCamera>(m_deviceResources);
@@ -154,6 +158,7 @@ void TrainingScene::initialize(SceneContext& context)
     m_debugUI->setBloom(m_renderer->GetSceneRenderer()->getBloom());
     m_debugUI->setExposurePtr(m_camera->exposurePtr());
     m_debugUI->setAudioManager(m_audioManager.get());
+    m_debugUI->setSceneLighting(&m_lighting);
 #endif
 }
 
@@ -335,11 +340,22 @@ void TrainingScene::renderWorld(const Matrix& view, const Matrix& proj, const Ve
 
     for (const PrimitiveLayoutPart& part : m_environmentLayout.parts)
     {
-        MeshCommand command;
-        command.mesh = part.primitive;
-        command.world = part.localTransform.getMatrix();
-        command.color = part.color;
-        m_renderQueue.submit(command);
+        if (part.importedModel)
+        {
+            ImportedModelCommand command;
+            command.model = part.importedModel;
+            command.world = part.localTransform.getMatrix();
+            command.color = part.color;
+            m_renderQueue.submit(command);
+        }
+        else
+        {
+            MeshCommand command;
+            command.mesh = part.primitive;
+            command.world = part.localTransform.getMatrix();
+            command.color = part.color;
+            m_renderQueue.submit(command);
+        }
     }
 
 #ifdef _DEBUG
@@ -359,7 +375,7 @@ void TrainingScene::renderWorld(const Matrix& view, const Matrix& proj, const Ve
     }
 #endif
 
-    m_renderer->ExecuteRenderCommands(m_renderQueue, view, proj, camPos);
+    m_renderer->ExecuteRenderCommands(m_renderQueue, view, proj, camPos, m_lighting);
 }
 
 void TrainingScene::renderEffects(const Matrix& view, const Matrix& proj, const Vector3& camPos)
@@ -375,7 +391,7 @@ void TrainingScene::renderViewmodel(const Matrix& view, const Vector3& camPos)
 
     m_renderQueue.clear();
     m_player->weapon().render(m_renderQueue, view);
-    m_renderer->ExecuteRenderCommands(m_renderQueue, view, m_camera->matViewmodelProj(), camPos);
+    m_renderer->ExecuteRenderCommands(m_renderQueue, view, m_camera->matViewmodelProj(), camPos, m_lighting);
 }
 
 void TrainingScene::renderUI(const Matrix& view, const Matrix& proj)

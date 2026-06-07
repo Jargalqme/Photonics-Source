@@ -14,6 +14,7 @@
 #include "Render/BulletRenderer.h"
 #include "Render/ParticleSystem.h"
 #include "Render/RenderCommandQueue.h"
+#include "Render/SceneLighting.h"
 #include "Render/Tracers.h"
 #include "Services/AudioManager.h"
 #include "Services/BeatTracker.h"
@@ -26,6 +27,7 @@
 #include <vector>
 
 class PlayerCamera;
+class ImportedModel;
 
 class BossScene : public Scene
 {
@@ -84,6 +86,7 @@ private:
     std::unique_ptr<BulletRenderer> m_bulletRenderer;
     std::unique_ptr<Tracers> m_tracers;
     RenderCommandQueue m_renderQueue;
+    SceneLighting m_lighting;
 
     std::unique_ptr<AudioManager> m_audioManager;
     std::unique_ptr<BeatTracker> m_beatTracker;
@@ -92,6 +95,10 @@ private:
     std::unique_ptr<ArenaFloor> m_arenaFloor;
     std::unique_ptr<Skybox> m_skybox;
     std::unique_ptr<IndirectLight> m_indirectLight;
+
+#ifdef _DEBUG
+    const ImportedModel* m_pbrSmokeModel = nullptr;
+#endif
 
     std::unique_ptr<GameUI> m_gameUI;
     std::unique_ptr<DebugUI> m_debugUI;

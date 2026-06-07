@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "Skybox.h"
+#include "Render/RenderUtil.h"
 #include "WICTextureLoader.h"
 
 using namespace DirectX;
@@ -85,19 +86,8 @@ void Skybox::initialize()
     DX::ThrowIfFailed(device->CreateSamplerState(&sampDesc, m_sampler.GetAddressOf()));
 
     // シェーダー読み込み
-    ComPtr<ID3DBlob> vsBlob;
-    DX::ThrowIfFailed(D3DReadFileToBlob(
-        GetShaderPath(L"VS_Skybox.cso").c_str(), vsBlob.GetAddressOf()));
-    DX::ThrowIfFailed(device->CreateVertexShader(
-        vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(),
-        nullptr, m_vertexShader.ReleaseAndGetAddressOf()));
-
-    ComPtr<ID3DBlob> psBlob;
-    DX::ThrowIfFailed(D3DReadFileToBlob(
-        GetShaderPath(L"PS_Skybox.cso").c_str(), psBlob.GetAddressOf()));
-    DX::ThrowIfFailed(device->CreatePixelShader(
-        psBlob->GetBufferPointer(), psBlob->GetBufferSize(),
-        nullptr, m_pixelShader.ReleaseAndGetAddressOf()));
+    m_vertexShader = RenderUtil::loadVS(device, L"VS_Skybox.cso");
+    m_pixelShader = RenderUtil::loadPS(device, L"PS_Skybox.cso");
 
     // 深度ステンシル：テストなし、書き込みなし
     D3D11_DEPTH_STENCIL_DESC dsDesc = {};

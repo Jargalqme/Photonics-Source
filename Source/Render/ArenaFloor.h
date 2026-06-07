@@ -27,7 +27,7 @@ private:
         DirectX::XMFLOAT3 position;
     };
 
-    struct ConstantBuffer
+    struct ArenaFloorCB
     {
         DirectX::XMFLOAT4X4 worldViewProjection;
         float time;

@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-//! @file   ParticleVS.hlsl
+//! @file   VS_Particle.hlsl
 //! @brief  GPU particle billboard rendering (StructuredBuffer + SV_VertexID)
 //---------------------------------------------------------------------------
 

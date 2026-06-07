@@ -30,7 +30,7 @@ void Grid::initialize()
 
     m_vertexBuffer   = RenderUtil::createStaticVertexBuffer(device, vertices, static_cast<UINT>(std::size(vertices)));
     m_indexBuffer    = RenderUtil::createStaticIndexBuffer (device, indices,  static_cast<UINT>(std::size(indices)));
-    m_constantBuffer = RenderUtil::createDynamicConstantBuffer<ConstantBuffer>(device);
+    m_constantBuffer = RenderUtil::createDynamicConstantBuffer<GridCB>(device);
 
     // シェーダー読み込み
     Microsoft::WRL::ComPtr<ID3DBlob> vsBlob;
@@ -82,7 +82,7 @@ void Grid::renderPlane(const Matrix& world, const Matrix& view, const Matrix& pr
     auto context = m_context->device->GetD3DDeviceContext();
 
     // 定数バッファ更新
-    ConstantBuffer cb;
+    GridCB cb;
     cb.worldViewProjection = (world * view * projection).Transpose();
     cb.gridParams = Vector4(m_lineWidthX, m_lineWidthY, m_gridScale, m_lineEmissiveIntensity);
     cb.lineColor = Vector4(m_finalColor.R(), m_finalColor.G(), m_finalColor.B(), m_finalColor.A());

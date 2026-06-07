@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-//! @file   BeamVS.hlsl
+//! @file   VS_Beam.hlsl
 //! @brief  Beam weapon vertex shader — camera-facing quad between start/end
 //---------------------------------------------------------------------------
 

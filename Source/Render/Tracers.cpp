@@ -31,7 +31,7 @@ void Tracers::initialize()
 
 	m_vertexShader = m_context->shaders->getVS(L"VS_Tracer.cso");
 	m_pixelShader = m_context->shaders->getPS(L"PS_Tracer.cso");
-	m_constantBuffer = RenderUtil::createDynamicConstantBuffer<CBData>(device);
+	m_constantBuffer = RenderUtil::createDynamicConstantBuffer<TracerCB>(device);
 
 	m_tracers.reserve(TRACER_RESERVE);
 }
@@ -124,19 +124,16 @@ void Tracers::render(const Matrix& view, const Matrix& projection, const Vector3
 		const Vector3 segmentStart = Vector3::Lerp(tracer.start, tracer.end, tailT);
 		const Vector3 segmentEnd = Vector3::Lerp(tracer.start, tracer.end, headT);
 
-		D3D11_MAPPED_SUBRESOURCE mapped;
-		context->Map(m_constantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+		TracerCB cb = {};
+		cb.viewProjection = viewProjection;
+		cb.beamStart = segmentStart;
+		cb.beamWidth = TRACER_WIDTH;
+		cb.beamEnd = segmentEnd;
+		cb.beamLife = tracer.life;
+		cb.beamColor = tracer.color;
+		cb.cameraPosition = cameraPos;
+		RenderUtil::updateDynamicConstantBuffer(context, m_constantBuffer, cb);
 
-		auto* cb = reinterpret_cast<CBData*>(mapped.pData);
-		cb->viewProjection = viewProjection;
-		cb->beamStart = segmentStart;
-		cb->beamWidth = TRACER_WIDTH;
-		cb->beamEnd = segmentEnd;
-		cb->beamLife = tracer.life;
-		cb->beamColor = tracer.color;
-		cb->cameraPosition = cameraPos;
-
-		context->Unmap(m_constantBuffer.Get(), 0);
 		context->Draw(6, 0);
 	}
 

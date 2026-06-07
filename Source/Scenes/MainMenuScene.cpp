@@ -157,7 +157,7 @@ void MainMenuScene::initialize(SceneContext& context)
             bool hasSelectedClip = !data.clips.empty();
             const size_t firstAppendedClipIndex = data.clips.size();
 
-            const auto dancePath = GetAssetPath(L"Characters/MenuGuy/dance1.fbx");
+            const auto dancePath = GetAssetPath(L"Characters/MenuGuy/dance.fbx");
             const int32_t appended =
                 SkinnedModelImporter::AppendClipsFromFile(dancePath, data);
             if (appended > 0)

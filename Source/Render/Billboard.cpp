@@ -8,8 +8,6 @@
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
-using Microsoft::WRL::ComPtr;
-
 Billboard::Billboard(SceneContext& context)
 	: m_context(&context)
 {
@@ -24,7 +22,7 @@ void Billboard::initialize(const std::wstring& texturePath)
 	m_vertexShader = m_context->shaders->getVS(L"VS_Billboard.cso");
 	m_pixelShader  = m_context->shaders->getPS(L"PS_Billboard.cso");
 
-	m_constantBuffer = RenderUtil::createDynamicConstantBuffer<CBData>(device);
+	m_constantBuffer = RenderUtil::createDynamicConstantBuffer<BillboardCB>(device);
 
 	DX::ThrowIfFailed(CreateWICTextureFromFile(
 		device, texturePath.c_str(),
@@ -55,15 +53,13 @@ void Billboard::render(
 	Vector3 cameraUp   (view._12, view._22, view._32);
 
 	// 定数バッファ更新
-	D3D11_MAPPED_SUBRESOURCE mapped;
-	context->Map(m_constantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
-	CBData* cb = reinterpret_cast<CBData*>(mapped.pData);
-	cb->viewProjection = (view * projection).Transpose();
-	cb->worldPosition  = position;
-	cb->billboardSize  = size;
-	cb->cameraRight    = cameraRight;
-	cb->cameraUp       = cameraUp;
-	context->Unmap(m_constantBuffer.Get(), 0);
+	BillboardCB cb = {};
+	cb.viewProjection = (view * projection).Transpose();
+	cb.worldPosition  = position;
+	cb.billboardSize  = size;
+	cb.cameraRight    = cameraRight;
+	cb.cameraUp       = cameraUp;
+	RenderUtil::updateDynamicConstantBuffer(context, m_constantBuffer, cb);
 
 	// パイプライン設定
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);

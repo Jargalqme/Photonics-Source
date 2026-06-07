@@ -3,12 +3,14 @@
 //! @brief  Physically based (Cook-Torrance) shading for imported models.
 //---------------------------------------------------------------------------
 
-#include "BRDF.hlsli"
+#include "Includes/Lighting.hlsli"
 
 Texture2D    BaseColorTexture  : register(t0);
 Texture2D    NormalTexture     : register(t1);
 Texture2D    MetalRoughTexture : register(t2);
 TextureCube  IrradianceCube    : register(t3);
+Texture2D    MetalnessTexture  : register(t4);
+Texture2D    AOTexture         : register(t5);
 SamplerState BaseColorSampler  : register(s0);
 
 cbuffer ImportedModelCB : register(b0)
@@ -22,6 +24,7 @@ cbuffer ImportedModelCB : register(b0)
     float4   CameraPosition;
     float4   MaterialParams;
     float4   MaterialFlags;
+    float4   MaterialFlags2;
 };
 
 struct PS_INPUT
@@ -39,8 +42,8 @@ float4 main(PS_INPUT input) : SV_TARGET
     float3 N = normalize(input.normal);
     if (MaterialParams.z > 0.5)   // hasNormalMap
     {
-        float3 T = normalize(input.tangent - N * dot(N, input.tangent)); // Gram-Schmidt
-        float3 B = cross(N, T);
+        float3 T  = normalize(input.tangent - N * dot(N, input.tangent)); // Gram-Schmidt
+        float3 B  = cross(N, T);
         float3 tn = NormalTexture.Sample(BaseColorSampler, input.texCoord).xyz * 2.0 - 1.0;
         N = normalize(mul(tn, float3x3(T, B, N))); // tangent -> world
     }
@@ -51,36 +54,60 @@ float4 main(PS_INPUT input) : SV_TARGET
         base *= BaseColorTexture.Sample(BaseColorSampler, input.texCoord); // sRGB -> linear
     float3 albedo = base.rgb;
 
-    float metallic = MaterialParams.x;
+    float metallic  = MaterialParams.x;
     float roughness = MaterialParams.y;
-    if (MaterialParams.w > 0.5)   // hasMRMap
+    bool hasStandaloneMetalnessMap = MaterialFlags.z > 0.5;
+    bool hasStandaloneRoughnessMap = MaterialFlags.w > 0.5;
+    
+    if (MaterialParams.w > 0.5)
     {
-        float2 mr = MetalRoughTexture.Sample(BaseColorSampler, input.texCoord).gb; // G=rough, B=metal
-        roughness *= mr.x;
-        metallic *= mr.y;
+        float4 mr = MetalRoughTexture.Sample(BaseColorSampler, input.texCoord);
+        
+        if (hasStandaloneRoughnessMap)
+        {
+            roughness *= mr.r;
+        }
+        else
+        {
+            roughness *= mr.g;
+            
+            if (!hasStandaloneMetalnessMap)
+            {
+                metallic *= mr.b;
+            }
+        }
     }
+    
+    if (hasStandaloneMetalnessMap)
+    {
+        metallic *= MetalnessTexture.Sample(BaseColorSampler, input.texCoord).r;
+    }
+
     roughness = clamp(roughness, 0.04, 1.0);
 
-    // --- direct lighting (Cook-Torrance) ---
+    DirectionalLightData keyLight;
+    keyLight.directionToLight = LightDirectionAndAmbient.xyz;
+    keyLight.intensity = 1.0;
+    keyLight.color = LightColor.rgb;
+    keyLight.pad0 = 0.0;
+    
     float3 V = normalize(CameraPosition.xyz - input.worldPos);
-    float3 L = normalize(-LightDirectionAndAmbient.xyz); // toward the light
-    float NoL = saturate(dot(N, L));
-
-    float3 F0 = lerp((float3) 0.04, albedo, metallic); // dielectric ~4%, metal = albedo
-    float3 specular = CookTorranceSpecular(N, V, L, roughness, F0);
-
-    float3 H = normalize(V + L);
-    float3 F = F_Schlick(max(dot(H, V), 0.0), F0);
-    float3 kD = (1.0 - F) * (1.0 - metallic); // metals have no diffuse
-    float3 diffuse = kD * albedo / PI;
-
-    float3 Lo = (diffuse + specular) * LightColor.rgb * NoL;
+    float3 Lo = EvaluateDirectionalPBR(N, V, albedo, metallic, roughness, keyLight);
 
     // --- placeholder ambient until IBL (Stage 2) ---
     float3 irradiance = IrradianceCube.Sample(BaseColorSampler, N).rgb;
-    float3 ambient = irradiance * albedo * (1.0 - metallic);
-    float emissive = MaterialFlags.y;
-    float3 color = Lo + ambient + albedo * emissive;
+
+    float ao = 1.0;
+    if (MaterialFlags2.x > 0.5)
+    {
+        ao = AOTexture.Sample(BaseColorSampler, input.texCoord).r;
+    }
+
+    float ambientIntensity = LightDirectionAndAmbient.w;
+    float3 ambient = irradiance * albedo * (1.0 - metallic) * ao * ambientIntensity;
+    
+    float  emissive = MaterialFlags.y;
+    float3 color    = Lo + ambient + albedo * emissive;
 
     return float4(color, base.a); // linear HDR; ACES tonemapper finishes it
 }

@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "ImportedModel.h"
+#include "Render/RenderUtil.h"
 #include "WICTextureLoader.h"
 
 namespace
@@ -20,9 +21,15 @@ namespace
             return srv;
         }
 
-        const auto loadFlags = texture.srgb
+        DirectX::WIC_LOADER_FLAGS loadFlags = texture.srgb
             ? DirectX::WIC_LOADER_FORCE_SRGB
             : DirectX::WIC_LOADER_IGNORE_SRGB;
+
+        if (texture.forceRGBA32)
+        {
+            loadFlags = static_cast<DirectX::WIC_LOADER_FLAGS>(
+                loadFlags | DirectX::WIC_LOADER_FORCE_RGBA32);
+        }
 
         const HRESULT hr = DirectX::CreateWICTextureFromMemoryEx(
             device,
@@ -116,31 +123,14 @@ bool ImportedModel::initialize(ID3D11Device* device, ImportedModelData data)
         return false;
     }
 
-    D3D11_BUFFER_DESC vertexDesc = {};
-    vertexDesc.ByteWidth = static_cast<UINT>(vertexBufferBytes);
-    vertexDesc.Usage = D3D11_USAGE_DEFAULT;
-    vertexDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-
-    D3D11_SUBRESOURCE_DATA vertexData = {};
-    vertexData.pSysMem = data.vertices.data();
-
-    DX::ThrowIfFailed(device->CreateBuffer(
-        &vertexDesc,
-        &vertexData,
-        m_vertexBuffer.ReleaseAndGetAddressOf()));
-
-    D3D11_BUFFER_DESC indexDesc = {};
-    indexDesc.ByteWidth = static_cast<UINT>(indexBufferBytes);
-    indexDesc.Usage = D3D11_USAGE_DEFAULT;
-    indexDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-
-    D3D11_SUBRESOURCE_DATA indexData = {};
-    indexData.pSysMem = data.indices.data();
-
-    DX::ThrowIfFailed(device->CreateBuffer(
-        &indexDesc,
-        &indexData,
-        m_indexBuffer.ReleaseAndGetAddressOf()));
+    m_vertexBuffer = RenderUtil::createStaticVertexBuffer(
+        device,
+        data.vertices.data(),
+        static_cast<UINT>(data.vertices.size()));
+    m_indexBuffer = RenderUtil::createStaticIndexBuffer(
+        device,
+        data.indices.data(),
+        static_cast<UINT>(data.indices.size()));
 
     m_textureSRVs.resize(data.textures.size());
     for (size_t i = 0; i < data.textures.size(); ++i)

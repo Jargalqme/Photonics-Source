@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "SkinnedModel.h"
 
+#include "Render/RenderUtil.h"
 #include "WICTextureLoader.h"
 
 namespace
@@ -95,27 +96,14 @@ bool SkinnedModel::initialize(ID3D11Device* device, SkinnedModelData data)
         return false;
     }
 
-    D3D11_BUFFER_DESC vbDesc = {};
-    vbDesc.ByteWidth = static_cast<UINT>(vertexBytes);
-    vbDesc.Usage     = D3D11_USAGE_DEFAULT;
-    vbDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-
-    D3D11_SUBRESOURCE_DATA vbInit = {};
-    vbInit.pSysMem = data.vertices.data();
-
-    DX::ThrowIfFailed(device->CreateBuffer(&vbDesc, &vbInit,
-        m_vertexBuffer.ReleaseAndGetAddressOf()));
-
-    D3D11_BUFFER_DESC ibDesc = {};
-    ibDesc.ByteWidth = static_cast<UINT>(indexBytes);
-    ibDesc.Usage     = D3D11_USAGE_DEFAULT;
-    ibDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-
-    D3D11_SUBRESOURCE_DATA ibInit = {};
-    ibInit.pSysMem = data.indices.data();
-
-    DX::ThrowIfFailed(device->CreateBuffer(&ibDesc, &ibInit,
-        m_indexBuffer.ReleaseAndGetAddressOf()));
+    m_vertexBuffer = RenderUtil::createStaticVertexBuffer(
+        device,
+        data.vertices.data(),
+        static_cast<UINT>(data.vertices.size()));
+    m_indexBuffer = RenderUtil::createStaticIndexBuffer(
+        device,
+        data.indices.data(),
+        static_cast<UINT>(data.indices.size()));
 
     m_textureSRVs.resize(data.textures.size());
     for (size_t i = 0; i < data.textures.size(); ++i)

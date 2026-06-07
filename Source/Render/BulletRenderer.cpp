@@ -2,12 +2,12 @@
 #include "BulletRenderer.h"
 
 #include "Gameplay/BulletPool.h"
+#include "Render/RenderUtil.h"
 
 #include <cstring>
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
-using Microsoft::WRL::ComPtr;
 
 BulletRenderer::BulletRenderer(DX::DeviceResources* deviceResources)
     : m_deviceResources(deviceResources)
@@ -33,27 +33,10 @@ void BulletRenderer::initialize()
     srvDesc.Buffer.NumElements = MAX_BULLETS_TO_RENDER;
     DX::ThrowIfFailed(device->CreateShaderResourceView(m_bulletBuffer.Get(), &srvDesc, m_bulletSRV.ReleaseAndGetAddressOf()));
 
-    D3D11_BUFFER_DESC constantDesc = {};
-    constantDesc.ByteWidth = sizeof(BulletRenderConstants);
-    constantDesc.Usage = D3D11_USAGE_DEFAULT;
-    constantDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    DX::ThrowIfFailed(device->CreateBuffer(&constantDesc, nullptr, m_constantBuffer.ReleaseAndGetAddressOf()));
+    m_constantBuffer = RenderUtil::createDynamicConstantBuffer<BulletRenderCB>(device);
 
-    ComPtr<ID3DBlob> vertexShaderBlob;
-    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"VS_Orb.cso").c_str(), vertexShaderBlob.GetAddressOf()));
-    DX::ThrowIfFailed(device->CreateVertexShader(
-        vertexShaderBlob->GetBufferPointer(),
-        vertexShaderBlob->GetBufferSize(),
-        nullptr,
-        m_vertexShader.ReleaseAndGetAddressOf()));
-
-    ComPtr<ID3DBlob> pixelShaderBlob;
-    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"PS_Orb.cso").c_str(), pixelShaderBlob.GetAddressOf()));
-    DX::ThrowIfFailed(device->CreatePixelShader(
-        pixelShaderBlob->GetBufferPointer(),
-        pixelShaderBlob->GetBufferSize(),
-        nullptr,
-        m_pixelShader.ReleaseAndGetAddressOf()));
+    m_vertexShader = RenderUtil::loadVS(device, L"VS_Orb.cso");
+    m_pixelShader = RenderUtil::loadPS(device, L"PS_Orb.cso");
 
     D3D11_BLEND_DESC blendDesc = {};
     blendDesc.RenderTarget[0].BlendEnable = TRUE;
@@ -121,14 +104,14 @@ void BulletRenderer::render(
     std::memcpy(mapped.pData, m_bulletData, sizeof(BulletRenderData) * bulletCount);
     context->Unmap(m_bulletBuffer.Get(), 0);
 
-    BulletRenderConstants constants = {};
+    BulletRenderCB constants = {};
     constants.viewProjection = (view * projection).Transpose();
     constants.cameraPosition = cameraPosition;
     constants.time = m_time;
     constants.boltLength = 0.0f;
     constants.boltWidth = BULLET_ORB_RADIUS;
     constants.boltCount = bulletCount;
-    context->UpdateSubresource(m_constantBuffer.Get(), 0, nullptr, &constants, 0, 0);
+    RenderUtil::updateDynamicConstantBuffer(context, m_constantBuffer, constants);
 
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     context->IASetInputLayout(nullptr);

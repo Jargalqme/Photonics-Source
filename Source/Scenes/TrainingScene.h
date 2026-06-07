@@ -12,6 +12,7 @@
 #include "Render/LayoutLoader.h"
 #include "Render/ParticleSystem.h"
 #include "Render/RenderCommandQueue.h"
+#include "Render/SceneLighting.h"
 #include "Render/Tracers.h"
 #include "Services/AudioManager.h"
 #include "UI/GameUI.h"
@@ -68,6 +69,7 @@ private:
     std::unique_ptr<BulletRenderer> m_bulletRenderer;
     std::unique_ptr<Tracers> m_tracers;
     RenderCommandQueue m_renderQueue;
+    SceneLighting m_lighting;
     std::unique_ptr<AudioManager> m_audioManager;
 
     std::unique_ptr<Grid> m_grid;

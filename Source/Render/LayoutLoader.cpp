@@ -1,9 +1,12 @@
 #include "pch.h"
 #include "Render/LayoutLoader.h"
+#include "Render/ImportedModelCache.h"
 #include "Render/MeshCache.h"
 #include "Services/SceneContext.h"
 #include "ThirdParty/json.hpp"
 #include <cctype>
+#include <cstddef>
+#include <filesystem>
 #include <fstream>
 #include <initializer_list>
 
@@ -59,12 +62,13 @@ namespace
 
     const nlohmann::json* findArrayField(
         const nlohmann::json& object,
-        std::initializer_list<const char*> fieldNames)
+        std::initializer_list<const char*> fieldNames,
+        std::size_t minSize = 3)
     {
         for (const char* fieldName : fieldNames)
         {
             const auto it = object.find(fieldName);
-            if (it != object.end() && it->is_array() && it->size() >= 3)
+            if (it != object.end() && it->is_array() && it->size() >= minSize)
             {
                 return &(*it);
             }
@@ -87,6 +91,22 @@ namespace
             (*values)[0].get<float>(),
             (*values)[1].get<float>(),
             (*values)[2].get<float>());
+    }
+
+    Vector2 readVector2(
+        const nlohmann::json& object,
+        std::initializer_list<const char*> fieldNames,
+        const Vector2& fallback)
+    {
+        const nlohmann::json* values = findArrayField(object, fieldNames, 2);
+        if (!values || values->size() < 2)
+        {
+            return fallback;
+        }
+
+        return Vector2(
+            (*values)[0].get<float>(),
+            (*values)[1].get<float>());
     }
 
     Color readColor(const nlohmann::json& object)
@@ -235,6 +255,16 @@ namespace
         outLayout.markers.push_back(std::move(marker));
     }
 
+    std::filesystem::path resolvePBRMaterialDirectory(const std::string& materialName)
+    {
+        if (materialName.empty())
+        {
+            return {};
+        }
+
+        return std::filesystem::path(GetAssetPath(L"Textures/PBR")) / materialName;
+    }
+
     void appendPrimitiveObject(
         SceneContext& context,
         const nlohmann::json& object,
@@ -285,6 +315,20 @@ namespace
         part.type = semanticType.empty() ? binding.canonicalType : semanticType;
         part.primitiveType = binding.canonicalType;
         part.collidable = readBool(object, "collidable", true);
+
+        const std::string pbrMaterial = readString(object, "pbr_material");
+        if (!pbrMaterial.empty() && binding.canonicalType == "box" && context.importedModels)
+        {
+            const Vector2 uvTiling = readVector2(
+                object,
+                { "pbr_uv_tiling", "uv_tiling", "texture_tiling" },
+                Vector2(1.0f, 1.0f));
+
+            part.importedModel = context.importedModels->getPBRBoxWithAmbientCGMaterial(
+                resolvePBRMaterialDirectory(pbrMaterial),
+                uvTiling);
+        }
+
         outLayout.parts.push_back(std::move(part));
     }
 

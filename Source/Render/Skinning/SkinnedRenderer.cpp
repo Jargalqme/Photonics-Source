@@ -132,11 +132,7 @@ void SkinnedRenderer::draw(
     tcb.tintColor                = tintColor;
     tcb.lightDirectionAndAmbient = lightDirectionAndAmbient;
 
-    D3D11_MAPPED_SUBRESOURCE mapped = {};
-    DX::ThrowIfFailed(context->Map(
-        m_transformCB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped));
-    *reinterpret_cast<SkinnedTransformCB*>(mapped.pData) = tcb;
-    context->Unmap(m_transformCB.Get(), 0);
+    RenderUtil::updateDynamicConstantBuffer(context, m_transformCB, tcb);
 
     // ------ Palette cbuffer (b1) ------
     SkinnedPaletteCB pcb = {};
@@ -154,10 +150,7 @@ void SkinnedRenderer::draw(
         pcb.bones[i] = identity;
     }
 
-    DX::ThrowIfFailed(context->Map(
-        m_paletteCB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped));
-    std::memcpy(mapped.pData, &pcb, sizeof(SkinnedPaletteCB));
-    context->Unmap(m_paletteCB.Get(), 0);
+    RenderUtil::updateDynamicConstantBuffer(context, m_paletteCB, pcb);
 
     // ------ Pipeline ------
     UINT stride = model.vertexStride();
@@ -213,10 +206,7 @@ void SkinnedRenderer::draw(
         tcbSub.tintColor    = mtlTint;
         tcbSub.materialFlags = mtlFlags;
 
-        DX::ThrowIfFailed(context->Map(
-            m_transformCB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped));
-        *reinterpret_cast<SkinnedTransformCB*>(mapped.pData) = tcbSub;
-        context->Unmap(m_transformCB.Get(), 0);
+        RenderUtil::updateDynamicConstantBuffer(context, m_transformCB, tcbSub);
 
         context->PSSetShaderResources(0, 1, &srv);
 

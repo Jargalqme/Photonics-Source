@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-//! @file   ImportedModelVS.hlsl
+//! @file   VS_ImportedModel.hlsl
 //! @brief  Vertex shader for imported Assimp model buffers.
 //---------------------------------------------------------------------------
 
@@ -14,6 +14,7 @@ cbuffer ImportedModelCB : register(b0)
     float4 CameraPosition;
     float4 MaterialParams;
     float4 MaterialFlags;
+    float4 MaterialFlags2;
 };
 
 struct VS_INPUT

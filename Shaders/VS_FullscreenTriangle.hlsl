@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-//! @file   FullscreenTriangleVS.hlsl
+//! @file   VS_FullscreenTriangle.hlsl
 //! @brief  Fullscreen triangle from SV_VertexID (no vertex buffer)
 //---------------------------------------------------------------------------
 

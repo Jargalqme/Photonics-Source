@@ -215,6 +215,9 @@ xcopy /Y /D "$(ProjectDir)ThirdParty\Assimp\bin\x64\Release\*.dll" "$(TargetDir)
     <ClInclude Include="Source\Render\AssimpModelImporter.h" />
     <ClInclude Include="Source\Render\FinalCompositePass.h" />
     <ClInclude Include="Source\Render\IndirectLight.h" />
+    <ClInclude Include="Source\Render\PBRMaterialLoader.h" />
+    <ClInclude Include="Source\Render\PrimitiveMesh.h" />
+    <ClInclude Include="Source\Render\SceneLighting.h" />
     <ClInclude Include="Source\Render\Skinning\SkinnedVertex.h" />
     <ClInclude Include="Source\Render\Skinning\SkinnedModelData.h" />
     <ClInclude Include="Source\Render\Skinning\SkinnedModelImporter.h" />
@@ -317,6 +320,8 @@ xcopy /Y /D "$(ProjectDir)ThirdParty\Assimp\bin\x64\Release\*.dll" "$(TargetDir)
     <ClCompile Include="Source\Render\AssimpModelImporter.cpp" />
     <ClCompile Include="Source\Render\FinalCompositePass.cpp" />
     <ClCompile Include="Source\Render\IndirectLight.cpp" />
+    <ClCompile Include="Source\Render\PBRMaterialLoader.cpp" />
+    <ClCompile Include="Source\Render\PrimitiveMesh.cpp" />
     <ClCompile Include="Source\Render\Skinning\SkinnedModelImporter.cpp" />
     <ClCompile Include="Source\Render\Skinning\SkinnedModel.cpp" />
     <ClCompile Include="Source\Render\Skinning\SkinnedRenderer.cpp" />
@@ -728,6 +733,10 @@ xcopy /Y /D "$(ProjectDir)ThirdParty\Assimp\bin\x64\Release\*.dll" "$(TargetDir)
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
     <None Include="Shaders\Includes\IBLCommon.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="Shaders\Includes\Lighting.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>

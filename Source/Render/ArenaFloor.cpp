@@ -31,7 +31,7 @@ void ArenaFloor::initialize()
 
     m_vertexBuffer   = RenderUtil::createStaticVertexBuffer(device, vertices, static_cast<UINT>(std::size(vertices)));
     m_indexBuffer    = RenderUtil::createStaticIndexBuffer (device, indices,  static_cast<UINT>(std::size(indices)));
-    m_constantBuffer = RenderUtil::createDynamicConstantBuffer<ConstantBuffer>(device);
+    m_constantBuffer = RenderUtil::createDynamicConstantBuffer<ArenaFloorCB>(device);
 
     Microsoft::WRL::ComPtr<ID3DBlob> vsBlob;
     m_vertexShader = RenderUtil::loadVS(device, L"VS_WaveWorld.cso", &vsBlob);
@@ -75,7 +75,7 @@ void ArenaFloor::render(const Matrix& view, const Matrix& projection)
 
     // 定数バッファ更新
     Matrix world = Matrix::Identity;
-    ConstantBuffer cb;
+    ArenaFloorCB cb;
     XMStoreFloat4x4(&cb.worldViewProjection,
         (world * view * projection).Transpose());
     cb.time = m_time;

@@ -6,11 +6,13 @@
 #include <string>
 #include <vector>
 
+class ImportedModel;
 struct SceneContext;
 
 struct PrimitiveLayoutPart
 {
     DirectX::DX11::GeometricPrimitive* primitive = nullptr;
+    const ImportedModel* importedModel = nullptr;
     Transform localTransform;
     DirectX::SimpleMath::Color color = DirectX::SimpleMath::Color(1.0f, 1.0f, 1.0f, 1.0f);
     std::string name;

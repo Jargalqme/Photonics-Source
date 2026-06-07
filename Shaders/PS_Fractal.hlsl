@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-//! @file   FractalPS.hlsl
+//! @file   PS_Fractal.hlsl
 //! @brief  Kishimisu fractal (Shadertoy port) + cosine palette + vignette
 //---------------------------------------------------------------------------
 

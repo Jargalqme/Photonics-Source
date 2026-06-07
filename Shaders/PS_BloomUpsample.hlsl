@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-//! @file   BloomUpsamplePS.hlsl
+//! @file   PS_BloomUpsample.hlsl
 //! @brief  9-tap tent upsample (mip[i+1] to mip[i], additive blend)
 //---------------------------------------------------------------------------
 

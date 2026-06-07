@@ -47,7 +47,7 @@ private:
     };
 
     // HLSL 定数バッファと一致（48バイト、アラインメント済み）
-    struct MenuConstantBuffer
+    struct MenuBackgroundCB
     {
         float Time;
         DirectX::XMFLOAT2 Resolution;

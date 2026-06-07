@@ -12,6 +12,7 @@ class InputManager;
 class BulletPool;
 class Boss;
 class Bloom;
+struct SceneLighting;
 
 class DebugUI
 {
@@ -31,6 +32,7 @@ public:
     void setBoss(Boss* boss) { m_boss = boss; }
     void setBloom(Bloom* bloom) { m_bloom = bloom; }
     void setExposurePtr(float* exposure) { m_exposure = exposure; }
+    void setSceneLighting(SceneLighting* lighting) { m_lighting = lighting; }
 
     /// @brief デバッグパネルを描画する
     void render();
@@ -49,6 +51,7 @@ private:
     Boss* m_boss = nullptr;
     Bloom* m_bloom = nullptr;
     float* m_exposure = nullptr;
+    SceneLighting* m_lighting = nullptr;
 
     bool m_showThirds = false;
 };

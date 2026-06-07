@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-//! @file   WaveWorldPS.hlsl
+//! @file   PS_WaveWorld.hlsl
 //! @brief  Arena floor wave effect — animated sine distortion
 //---------------------------------------------------------------------------
 

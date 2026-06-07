@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-//! @file   SkyboxVS.hlsl
+//! @file   VS_Skybox.hlsl
 //! @brief  Fullscreen triangle at depth=1 with world direction from inverse VP
 //---------------------------------------------------------------------------
 #include "Camera.hlsli"

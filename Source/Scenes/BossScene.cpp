@@ -7,6 +7,7 @@
 #include "Renderer.h"
 #include "Render/Bloom.h"
 #include "Render/SceneRenderer.h"
+#include "Render/ImportedModelCache.h"
 #include "Gameplay/Weapon/WeaponShot.h"
 #include "Gameplay/EventTypes.h"
 #include "Gameplay/Weapon/PlayerWeapon.h"
@@ -50,6 +51,10 @@ BossScene::~BossScene()
 void BossScene::initialize(SceneContext& context)
 {
     Scene::initialize(context);
+
+    m_lighting.keyLight.directionToLight = Vector3(0.35f, 0.85f, -0.35f);
+    m_lighting.keyLight.color = Color(1.0f, 1.0f, 1.0f, 1.0f);
+    m_lighting.keyLight.intensity = 5.0f;
 
     // カメラ — アスペクト比はバックバッファではなくレンダー解像度から取る
     // （レンダーが 16:9、ウィンドウが 21:9 のとき投影は 16:9 のまま、合成側でレターボックス）
@@ -101,11 +106,28 @@ void BossScene::initialize(SceneContext& context)
     m_arenaFloor = std::make_unique<ArenaFloor>(*m_context);
     m_arenaFloor->initialize();
 
+    m_arenaFloor->setBrightness(1.0f);
+    m_arenaFloor->setAlpha(1.0f);
+
     m_skybox = std::make_unique<Skybox>(m_deviceResources);
     m_skybox->initialize();
 
     m_indirectLight = std::make_unique<IndirectLight>(m_deviceResources);
     m_indirectLight->initialize(m_skybox->cubeSRV(), m_context->commonStates->LinearClamp());
+
+#ifdef _DEBUG
+    {
+        m_pbrSmokeModel = m_context->importedModels
+            ? m_context->importedModels->getWithAmbientCGMaterial(
+                "Assets/Weapons/Rifle/rifle.glb",
+                GetAssetPath(L"Textures/PBR/Stone"))
+            : nullptr;
+        if (!m_pbrSmokeModel)
+        {
+            OutputDebugStringA("[BossScene] Failed to load PBR smoke model.\n");
+        }
+    }
+#endif
 
     // UI
     m_gameUI = std::make_unique<GameUI>();
@@ -126,6 +148,7 @@ void BossScene::initialize(SceneContext& context)
     m_debugUI->setBoss(m_boss.get());
     m_debugUI->setBloom(m_renderer->GetSceneRenderer()->getBloom());
     m_debugUI->setExposurePtr(m_camera->exposurePtr());
+    m_debugUI->setSceneLighting(&m_lighting);
 #endif
 }
 
@@ -246,6 +269,10 @@ void BossScene::finalize()
     if (m_bulletRenderer) { m_bulletRenderer->finalize(); }
     if (m_tracers)        { m_tracers->finalize(); }
     m_camera->finalize();
+
+#ifdef _DEBUG
+    m_pbrSmokeModel = nullptr;
+#endif
 
     // オブジェクト破棄
     m_particleSystem.reset();
@@ -372,12 +399,26 @@ void BossScene::renderWorld(const Matrix& view, const Matrix& proj, const Vector
 {
     // ArenaFloor は将来用に保持（現状未使用）
     m_skybox->render();
-    //m_arenaFloor->render(view, proj);
+    m_arenaFloor->render(view, proj);
     m_grid->render(view, proj);
 
     m_renderQueue.clear();
     m_boss->submitRender(m_renderQueue);
-    m_renderer->ExecuteRenderCommands(m_renderQueue, view, proj, camPos);
+
+#ifdef _DEBUG
+    if (m_pbrSmokeModel)
+    {
+        ImportedModelCommand command;
+        command.model = m_pbrSmokeModel;
+        command.world =
+            Matrix::CreateScale(4.0f)
+            * Matrix::CreateRotationY(XMConvertToRadians(180.0f))
+            * Matrix::CreateTranslation(0.0f, 1.5f, 6.0f);
+        command.color = Color(1.0f, 1.0f, 1.0f, 1.0f);
+        m_renderQueue.submit(command);
+    }
+#endif
+    m_renderer->ExecuteRenderCommands(m_renderQueue, view, proj, camPos, m_lighting);
 }
 
 void BossScene::renderEffects(const Matrix& view, const Matrix& proj, const Vector3& camPos)
@@ -393,7 +434,7 @@ void BossScene::renderViewmodel(const Matrix& view, const Vector3& camPos)
 
     m_renderQueue.clear();
     m_player->weapon().render(m_renderQueue, view);
-    m_renderer->ExecuteRenderCommands(m_renderQueue, view, m_camera->matViewmodelProj(), camPos);
+    m_renderer->ExecuteRenderCommands(m_renderQueue, view, m_camera->matViewmodelProj(), camPos, m_lighting);
 }
 
 void BossScene::renderUI(const Matrix& view, const Matrix& proj)

@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-//! @file   PristineGridVS.hlsl
+//! @file   VS_PristineGrid.hlsl
 //! @brief  Grid floor vertex transform — passes world XZ to pixel shader
 //---------------------------------------------------------------------------
 

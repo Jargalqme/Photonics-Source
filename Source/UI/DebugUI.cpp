@@ -10,6 +10,7 @@
 #include "Gameplay/BulletPool.h"
 #include "Gameplay/Boss.h"
 #include "Render/Bloom.h"
+#include "Render/SceneLighting.h"
 #include "Services/InputManager.h"
 #include <imgui.h>
 
@@ -131,6 +132,27 @@ void DebugUI::render()
         else
         {
             DrawUnavailable("Exposure");
+        }
+
+        ImGui::Spacing();
+        if (m_lighting)
+        {
+            DirectionalLight& keyLight = m_lighting->keyLight;
+
+            ImGui::Text("Directional Light");
+            if (ImGui::SliderFloat3("Direction To Light", &keyLight.directionToLight.x, -1.0f, 1.0f, "%.2f"))
+            {
+                if (keyLight.directionToLight.LengthSquared() > 0.0001f)
+                {
+                    keyLight.directionToLight.Normalize();
+                }
+            }
+            ImGui::ColorEdit3("Light Color", &keyLight.color.x);
+            ImGui::SliderFloat("Light Intensity", &keyLight.intensity, 0.0f, 20.0f);
+        }
+        else
+        {
+            DrawUnavailable("Scene lighting");
         }
 
         ImGui::Spacing();

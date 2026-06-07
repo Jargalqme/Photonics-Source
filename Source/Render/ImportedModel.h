@@ -12,8 +12,8 @@ inline constexpr int32_t IMPORTED_TEXTURE_NONE = -1;
 struct ImportedModelVertex
 {
     DirectX::SimpleMath::Vector3 position = DirectX::SimpleMath::Vector3::Zero;
-    DirectX::SimpleMath::Vector3 normal = DirectX::SimpleMath::Vector3::UnitY;
-    DirectX::SimpleMath::Vector3 tangent = DirectX::SimpleMath::Vector3::UnitX;
+    DirectX::SimpleMath::Vector3 normal   = DirectX::SimpleMath::Vector3::UnitY;
+    DirectX::SimpleMath::Vector3 tangent  = DirectX::SimpleMath::Vector3::UnitX;
     DirectX::SimpleMath::Vector2 texcoord = DirectX::SimpleMath::Vector2::Zero;
 };
 
@@ -28,15 +28,19 @@ struct ImportedSubmesh
 
 struct ImportedMaterial
 {
-    std::string name;
     DirectX::SimpleMath::Color baseColor = DirectX::SimpleMath::Color(1.0f, 1.0f, 1.0f, 1.0f);
+    std::string name;
     std::string baseColorTexture;
     std::string diffuseTexture;
-    int32_t baseColorTextureIndex = IMPORTED_TEXTURE_NONE;
     float metallicFactor  = 0.0f;
     float roughnessFactor = 1.0f;
+    int32_t baseColorTextureIndex         = IMPORTED_TEXTURE_NONE;
     int32_t normalTextureIndex            = IMPORTED_TEXTURE_NONE;
     int32_t metallicRoughnessTextureIndex = IMPORTED_TEXTURE_NONE;
+    int32_t roughnessTextureIndex         = IMPORTED_TEXTURE_NONE;
+    int32_t metalnessTextureIndex         = IMPORTED_TEXTURE_NONE;
+    int32_t ambientOcclusionTextureIndex  = IMPORTED_TEXTURE_NONE;
+    int32_t heightTextureIndex            = IMPORTED_TEXTURE_NONE;
 };
 
 struct ImportedTextureData
@@ -49,6 +53,7 @@ struct ImportedTextureData
     uint32_t height = 0;
     bool compressed = true;
     bool srgb = false;
+    bool forceRGBA32 = false;
 };
 
 struct ImportedModelNode

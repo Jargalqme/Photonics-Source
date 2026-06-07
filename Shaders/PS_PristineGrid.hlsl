@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-//! @file   PristineGridPS.hlsl
+//! @file   PS_PristineGrid.hlsl
 //! @brief  Anti-aliased procedural grid lines (Ben Golus pristine grid)
 //---------------------------------------------------------------------------
 

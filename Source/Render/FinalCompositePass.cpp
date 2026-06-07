@@ -2,8 +2,6 @@
 #include "Render/FinalCompositePass.h"
 #include "Render/RenderUtil.h"
 
-using Microsoft::WRL::ComPtr;
-
 FinalCompositePass::FinalCompositePass(DX::DeviceResources* deviceResources)
     : m_deviceResources(deviceResources)
 {
@@ -14,22 +12,10 @@ void FinalCompositePass::createDeviceDependentResources()
     auto device = m_deviceResources->GetD3DDevice();
 
     // Shared fullscreen-triangle VS (SV_VertexID-driven, no vertex buffer).
-    ComPtr<ID3DBlob> vsBlob;
-    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"VS_FullscreenTriangle.cso").c_str(), vsBlob.GetAddressOf()));
-    DX::ThrowIfFailed(device->CreateVertexShader(
-        vsBlob->GetBufferPointer(),
-        vsBlob->GetBufferSize(),
-        nullptr,
-        m_vertexShader.ReleaseAndGetAddressOf()));
+    m_vertexShader = RenderUtil::loadVS(device, L"VS_FullscreenTriangle.cso");
 
     // Final output PS: exposure, tonemap, gamma, then write to backbuffer.
-    ComPtr<ID3DBlob> psBlob;
-    DX::ThrowIfFailed(D3DReadFileToBlob(GetShaderPath(L"PS_FinalComposite.cso").c_str(), psBlob.GetAddressOf()));
-    DX::ThrowIfFailed(device->CreatePixelShader(
-        psBlob->GetBufferPointer(),
-        psBlob->GetBufferSize(),
-        nullptr,
-        m_pixelShader.ReleaseAndGetAddressOf()));
+    m_pixelShader = RenderUtil::loadPS(device, L"PS_FinalComposite.cso");
 
     // Linear clamp sampler. Backbuffer write never wraps.
     D3D11_SAMPLER_DESC sampDesc = {};

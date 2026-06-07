@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-//! @file   BillboardVS.hlsl
+//! @file   VS_Billboard.hlsl
 //! @brief  Camera-facing quad billboard (SV_VertexID, 4 corners)
 //---------------------------------------------------------------------------
 

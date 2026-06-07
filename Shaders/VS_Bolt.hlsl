@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-//! @file   BoltVS.hlsl
+//! @file   VS_Bolt.hlsl
 //! @brief  Cylindrical mesh generation for Returnal-style projectiles
 //---------------------------------------------------------------------------
 

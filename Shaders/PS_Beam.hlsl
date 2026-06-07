@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-//! @file   BeamPS.hlsl
+//! @file   PS_Beam.hlsl
 //! @brief  Beam weapon pixel shader — core/inner/outer glow layers + pulse
 //---------------------------------------------------------------------------
 

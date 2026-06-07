@@ -436,10 +436,7 @@ namespace
                         false,
                         textureIndexByPath);
 
-                    if (importedMaterial.metallicRoughnessTextureIndex == IMPORTED_TEXTURE_NONE)
-                    {
-                        importedMaterial.metallicRoughnessTextureIndex = roughnessTextureIndex;
-                    }
+                    importedMaterial.roughnessTextureIndex = roughnessTextureIndex;
                 }
 
             }

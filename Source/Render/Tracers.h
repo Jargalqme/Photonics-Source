@@ -48,7 +48,7 @@ private:
 	std::vector<Tracer> m_tracers;
 
 	// TracerVS/TracerPS と一致する CB レイアウト（128 bytes）
-	struct alignas(16) CBData
+	struct alignas(16) TracerCB
 	{
 		DirectX::SimpleMath::Matrix  viewProjection;   // 64 bytes
 		DirectX::SimpleMath::Vector3 beamStart;        // 12 bytes

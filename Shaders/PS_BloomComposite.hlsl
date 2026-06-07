@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-//! @file   BloomCompositePS.hlsl
+//! @file   PS_BloomComposite.hlsl
 //! @brief  HDR bloom composite: scene + tent-upsampled bloom.
 //---------------------------------------------------------------------------
 

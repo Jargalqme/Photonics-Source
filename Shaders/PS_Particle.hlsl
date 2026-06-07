@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-//! @file   ParticlePS.hlsl
+//! @file   PS_Particle.hlsl
 //! @brief  Soft glowing particle circles with lifetime fade
 //---------------------------------------------------------------------------
 
