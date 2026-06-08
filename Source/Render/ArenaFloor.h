@@ -2,6 +2,8 @@
 
 #include "DeviceResources.h"
 
+#include <SimpleMath.h>
+
 struct SceneContext;
 
 class ArenaFloor
@@ -16,6 +18,10 @@ public:
     void render(const DirectX::SimpleMath::Matrix& view,
                 const DirectX::SimpleMath::Matrix& projection);
 
+    void setTransform(
+        const DirectX::SimpleMath::Vector3& position,
+        const DirectX::SimpleMath::Vector3& rotationDegrees,
+        const DirectX::SimpleMath::Vector3& scale);
     void setSize(float size) { m_size = size; }
     void setSpeed(float speed) { m_speed = speed; }
     void setBrightness(float b) { m_brightness = b; }
@@ -50,4 +56,7 @@ private:
     float m_speed = 0.8f;
     float m_brightness = 0.6f;
     float m_alpha = 0.8f;
+    DirectX::SimpleMath::Vector3 m_position = DirectX::SimpleMath::Vector3::Zero;
+    DirectX::SimpleMath::Vector3 m_rotationDegrees = DirectX::SimpleMath::Vector3::Zero;
+    DirectX::SimpleMath::Vector3 m_scale = DirectX::SimpleMath::Vector3::One;
 };

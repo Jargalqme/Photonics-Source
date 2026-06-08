@@ -67,6 +67,16 @@ void ArenaFloor::update(float deltaTime)
     m_time += deltaTime;
 }
 
+void ArenaFloor::setTransform(
+    const Vector3& position,
+    const Vector3& rotationDegrees,
+    const Vector3& scale)
+{
+    m_position = position;
+    m_rotationDegrees = rotationDegrees;
+    m_scale = scale;
+}
+
 // === 描画 ===
 
 void ArenaFloor::render(const Matrix& view, const Matrix& projection)
@@ -74,7 +84,13 @@ void ArenaFloor::render(const Matrix& view, const Matrix& projection)
     auto context = m_context->device->GetD3DDeviceContext();
 
     // 定数バッファ更新
-    Matrix world = Matrix::Identity;
+    const Matrix world =
+        Matrix::CreateScale(m_scale) *
+        Matrix::CreateFromYawPitchRoll(
+            XMConvertToRadians(m_rotationDegrees.y),
+            XMConvertToRadians(m_rotationDegrees.x),
+            XMConvertToRadians(m_rotationDegrees.z)) *
+        Matrix::CreateTranslation(m_position);
     ArenaFloorCB cb;
     XMStoreFloat4x4(&cb.worldViewProjection,
         (world * view * projection).Transpose());
@@ -100,7 +116,7 @@ void ArenaFloor::render(const Matrix& view, const Matrix& projection)
 
     auto* states = m_context->commonStates;
     float blendFactor[4] = { 0, 0, 0, 0 };
-    context->OMSetBlendState(states->Opaque(), blendFactor, 0xffffffff);
+    context->OMSetBlendState(states->NonPremultiplied(), blendFactor, 0xffffffff);
     context->OMSetDepthStencilState(states->DepthRead(), 0);
     context->RSSetState(states->CullNone());
 

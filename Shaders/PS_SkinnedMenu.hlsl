@@ -26,12 +26,6 @@ struct PS_INPUT
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
-    float3 normal = normalize(input.normal);
-    float3 lightDirection = normalize(-LightDirectionAndAmbient.xyz);
-    float ambient = LightDirectionAndAmbient.w;
-    float diffuse = saturate(dot(normal, lightDirection));
-    float lighting = saturate(ambient + diffuse * 0.85);
-
     float4 baseColor = TintColor;
     if (MaterialFlags.x > 0.5)
     {
@@ -39,5 +33,5 @@ float4 main(PS_INPUT input) : SV_TARGET
     }
 
     float emissiveIntensity = MaterialFlags.y;
-    return float4(baseColor.rgb * lighting * (1.0 + emissiveIntensity), baseColor.a);
+    return float4(baseColor.rgb * (1.0 + emissiveIntensity), baseColor.a);
 }

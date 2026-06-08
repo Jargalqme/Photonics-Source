@@ -28,6 +28,12 @@ namespace
     using TextureIndexMap = std::unordered_map<std::string, int32_t>;
     using BoneIndexMap    = std::unordered_map<std::string, int32_t>;
 
+    void TraceLine(const std::string& text)
+    {
+        OutputDebugStringA(text.c_str());
+        OutputDebugStringA("\n");
+    }
+
     void ConfigureImporter(Assimp::Importer& importer)
     {
         importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, false);
@@ -236,6 +242,9 @@ namespace
 
         if (!ReadBinaryFile(path, tex.bytes))
         {
+            TraceLine("[SkinnedModelImporter] Failed to read texture: "
+                + path.generic_string()
+                + " (ref: " + ref + ")");
             return SKINNED_TEXTURE_NONE;
         }
 

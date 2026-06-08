@@ -5,7 +5,7 @@
 #pragma once
 
 #include <cstdint>
-#include <memory>
+#include <memory>in
 
 //===========================================================================
 //! @name   基本型定義

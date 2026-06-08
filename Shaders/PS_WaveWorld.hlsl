@@ -29,15 +29,16 @@ float4 main(PS_INPUT input) : SV_TARGET
         uv.y += 0.6 / i * cos(i * 1.5 * uv.x + Time * Speed);
     }
 
-    // Clamp denominator to prevent infinity spikes (white flashes)
-    float val = Brightness / max(abs(sin(Time * Speed - uv.y - uv.x)), 0.05);
-
-    float hue = input.uv.x * 0.02 + input.uv.y * 0.02 + Time * 0.2;
-    float3 col = val * float3(
-          sin(hue) * 0.5 + 0.5,
-          sin(hue + 2.094) * 0.5 + 0.5,
-          sin(hue + 4.189) * 0.5 + 0.5
-      );
+    // Keep the original menu wave color language: restrained magenta/cyan,
+    // not full rainbow hue cycling.
+    float t = Time * Speed;
+    float val = (0.1 * Brightness) / max(abs(sin(t - uv.y - uv.x)), 0.05);
+    float3 color1 = float3(0.7, 0.0, 0.5);
+    float3 color2 = float3(0.0, 0.6, 0.9);
+    float kick = pow(saturate(sin(t * 9.4)), 8.0);
+    float blend = sin(uv.y * 2.0 + t * 0.3) * 0.5 + 0.5;
+    blend = lerp(blend, 1.0, kick * 0.6);
+    float3 col = val * lerp(color1, color2, blend);
 
     return float4(col, Alpha);
 }

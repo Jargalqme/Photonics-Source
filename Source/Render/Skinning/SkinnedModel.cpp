@@ -6,6 +6,12 @@
 
 namespace
 {
+    void TraceLine(const std::string& text)
+    {
+        OutputDebugStringA(text.c_str());
+        OutputDebugStringA("\n");
+    }
+
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> CreateCompressedSRV(
         ID3D11Device* device,
         const SkinnedTextureData& tex)
@@ -32,6 +38,7 @@ namespace
 
         if (FAILED(hr))
         {
+            TraceLine("[SkinnedModel] Failed to decode texture: " + tex.name);
             return {};
         }
         return srv;
@@ -69,11 +76,13 @@ namespace
         Microsoft::WRL::ComPtr<ID3D11Texture2D> texture2d;
         if (FAILED(device->CreateTexture2D(&desc, &init, texture2d.ReleaseAndGetAddressOf())))
         {
+            TraceLine("[SkinnedModel] Failed to create raw texture: " + tex.name);
             return srv;
         }
         if (FAILED(device->CreateShaderResourceView(texture2d.Get(), nullptr,
             srv.ReleaseAndGetAddressOf())))
         {
+            TraceLine("[SkinnedModel] Failed to create raw texture SRV: " + tex.name);
             return {};
         }
         return srv;
