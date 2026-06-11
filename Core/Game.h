@@ -2,7 +2,7 @@
 
 #include "DeviceResources.h"
 #include "StepTimer.h"
-#include "Renderer.h"
+#include "Render/Pipeline/Renderer.h"
 
 #include "Source/Services/SceneContext.h"
 #include "Source/Services/InputManager.h"

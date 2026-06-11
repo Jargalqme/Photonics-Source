@@ -2,7 +2,7 @@
 #include "Scenes/VictoryScene.h"
 #include "Scenes/SceneManager.h"
 #include "Services/InputManager.h"
-#include "Renderer.h"
+#include "Render/Pipeline/Renderer.h"
 
 // === 生成・破棄 ===
 

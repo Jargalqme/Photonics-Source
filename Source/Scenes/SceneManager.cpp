@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
 #include "Scenes/SceneManager.h"
 #include "Scenes/Scene.h"
-#include "Renderer.h"
+#include "Render/Pipeline/Renderer.h"
 #include "Services/SceneContext.h"
 #include <cassert>
 

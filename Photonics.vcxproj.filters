@@ -85,7 +85,7 @@
     <ClInclude Include="Core\StepTimer.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Renderer.h">
+    <ClInclude Include="Source\Render\Pipeline\Renderer.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\pch.h">
@@ -217,7 +217,7 @@
     <ClCompile Include="Core\Game.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Renderer.cpp">
+    <ClCompile Include="Source\Render\Pipeline\Renderer.cpp">
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="Core\pch.cpp">

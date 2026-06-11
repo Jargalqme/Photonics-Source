@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
 #include "Scenes/IntroScene.h"
 #include "Scenes/SceneManager.h"
-#include "Renderer.h"
+#include "Render/Pipeline/Renderer.h"
 
 // === 生成・破棄 ===
 

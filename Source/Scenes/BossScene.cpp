@@ -4,7 +4,7 @@
 #include "DeviceResources.h"
 #include "Gameplay/EventBus.h"
 #include "Services/InputManager.h"
-#include "Renderer.h"
+#include "Render/Pipeline/Renderer.h"
 #include "Render/Pipeline/Bloom.h"
 #include "Render/Pipeline/SceneRenderer.h"
 #include "Render/Assets/ImportedModelCache.h"

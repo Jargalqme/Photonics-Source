@@ -2,7 +2,7 @@
 #include "Scenes/MainMenuScene.h"
 #include "Scenes/SceneManager.h"
 #include "Services/InputManager.h"
-#include "Renderer.h"
+#include "Render/Pipeline/Renderer.h"
 #include "Game.h"
 
 #include "Render/Pipeline/Bloom.h"

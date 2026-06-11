@@ -6,7 +6,7 @@
 #include "Gameplay/EventBus.h"
 #include "Gameplay/EventTypes.h"
 #include "Gameplay/Weapon/PlayerWeapon.h"
-#include "Renderer.h"
+#include "Render/Pipeline/Renderer.h"
 #include "Render/Pipeline/Bloom.h"
 #include "Render/Pipeline/SceneRenderer.h"
 #include "Services/InputManager.h"
