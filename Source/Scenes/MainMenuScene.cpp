@@ -5,9 +5,9 @@
 #include "Renderer.h"
 #include "Game.h"
 
-#include "Render/Bloom.h"
-#include "Render/Grid.h"
-#include "Render/SceneRenderer.h"
+#include "Render/Pipeline/Bloom.h"
+#include "Render/Visuals/Grid.h"
+#include "Render/Pipeline/SceneRenderer.h"
 #include "Render/Skinning/AnimationPlayer.h"
 #include "Render/Skinning/SkinnedModel.h"
 #include "Render/Skinning/SkinnedModelImporter.h"

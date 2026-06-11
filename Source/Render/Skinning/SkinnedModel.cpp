@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "SkinnedModel.h"
 
-#include "Render/RenderUtil.h"
+#include "Render/Pipeline/RenderUtil.h"
 #include "WICTextureLoader.h"
 
 namespace

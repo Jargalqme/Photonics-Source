@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "Scenes/Scene.h"
-#include "Scenes/MenuBackground.h"
+#include "Render/Visuals/MenuBackground.h"
 
 class SceneManager;
 

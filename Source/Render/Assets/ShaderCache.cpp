@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
-#include "ShaderCache.h"
-#include "RenderUtil.h"
+#include "Render/Assets/ShaderCache.h"
+#include "Render/Pipeline/RenderUtil.h"
 
 using Microsoft::WRL::ComPtr;
 

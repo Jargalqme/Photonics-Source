@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
-#include "IndirectLight.h"
-#include "RenderUtil.h"
+#include "Render/Lighting/IndirectLight.h"
+#include "Render/Pipeline/RenderUtil.h"
 
 IndirectLight::IndirectLight(DX::DeviceResources* deviceResources)
 	: m_deviceResources(deviceResources)

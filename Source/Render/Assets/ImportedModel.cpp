@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
-#include "ImportedModel.h"
-#include "Render/RenderUtil.h"
+#include "Render/Assets/ImportedModel.h"
+#include "Render/Pipeline/RenderUtil.h"
 #include "WICTextureLoader.h"
 
 namespace

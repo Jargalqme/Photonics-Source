@@ -4,10 +4,10 @@
 #include "Gameplay/EventBus.h"
 #include "Gameplay/EventTypes.h"
 #include "Gameplay/PlayerCamera.h"
-#include "Render/ParticleSystem.h"
+#include "Render/Visuals/ParticleSystem.h"
 #include "Services/SceneContext.h"
-#include "Render/MeshCache.h"
-#include "Render/RenderCommandQueue.h"
+#include "Render/Assets/MeshCache.h"
+#include "Render/Pipeline/RenderCommandQueue.h"
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;

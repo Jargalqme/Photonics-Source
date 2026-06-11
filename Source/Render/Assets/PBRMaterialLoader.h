@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "ImportedModel.h"
+#include "Render/Assets/ImportedModel.h"
 
 #include <filesystem>
 #include <string>

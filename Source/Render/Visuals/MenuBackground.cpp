@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
-#include "Scenes/MenuBackground.h"
-#include "Render/RenderUtil.h"
+#include "Render/Visuals/MenuBackground.h"
+#include "Render/Pipeline/RenderUtil.h"
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;

@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
-#include "ParticleSystem.h"
-#include "Render/RenderUtil.h"
+#include "Render/Visuals/ParticleSystem.h"
+#include "Render/Pipeline/RenderUtil.h"
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;

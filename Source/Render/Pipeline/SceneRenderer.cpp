@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
-#include "Render/SceneRenderer.h"
-#include "Render/Bloom.h"
-#include "Render/FinalCompositePass.h"
+#include "Render/Pipeline/SceneRenderer.h"
+#include "Render/Pipeline/Bloom.h"
+#include "Render/Pipeline/FinalCompositePass.h"
 #include "Gameplay/PlayerCamera.h"
 
 SceneRenderer::SceneRenderer(DX::DeviceResources* deviceResources)

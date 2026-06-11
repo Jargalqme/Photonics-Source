@@ -1,5 +1,5 @@
 ﻿#include "pch.h"
-#include "PrimitiveMesh.h"
+#include "Render/Assets/PrimitiveMesh.h"
 
 #include <algorithm>
 #include <iterator>

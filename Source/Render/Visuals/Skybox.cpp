@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
-#include "Skybox.h"
-#include "Render/RenderUtil.h"
+#include "Render/Visuals/Skybox.h"
+#include "Render/Pipeline/RenderUtil.h"
 #include "WICTextureLoader.h"
 
 using namespace DirectX;

@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
 #include "Game.h"
-#include "Source/Render/AssimpModelImporter.h"
+#include "Render/Assets/AssimpModelImporter.h"
 
 #include <algorithm>
 #include <cwchar>

@@ -15,9 +15,9 @@
 #include "Source/Scenes/VictoryScene.h"
 #include "Source/Scenes/GameOverScene.h"
 
-#include "Source/Render/ShaderCache.h"
-#include "Source/Render/MeshCache.h"
-#include "Source/Render/ImportedModelCache.h"
+#include "Render/Assets/ShaderCache.h"
+#include "Render/Assets/MeshCache.h"
+#include "Render/Assets/ImportedModelCache.h"
 #include <memory>
 
 class Game final : public DX::IDeviceNotify

@@ -3,14 +3,14 @@
 #include "Gameplay/PlayerCamera.h"
 #include "Gameplay/Player.h"
 #include "Gameplay/Weapon/PlayerWeapon.h"
-#include "Render/Grid.h"
-#include "Render/Skybox.h"
+#include "Render/Visuals/Grid.h"
+#include "Render/Visuals/Skybox.h"
 #include "Services/AudioManager.h"
 #include "Services/BeatTracker.h"
 #include "Gameplay/BulletPool.h"
 #include "Gameplay/Boss.h"
-#include "Render/Bloom.h"
-#include "Render/SceneLighting.h"
+#include "Render/Pipeline/Bloom.h"
+#include "Render/Lighting/SceneLighting.h"
 #include "Services/InputManager.h"
 #include <imgui.h>
 

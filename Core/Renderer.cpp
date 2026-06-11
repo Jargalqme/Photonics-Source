@@ -1,9 +1,9 @@
 ﻿#include "pch.h"
 #include "Renderer.h"
-#include "Source/Render/RenderCommandQueue.h"
-#include "Source/Render/Billboard.h"
-#include "Source/Render/ImportedModel.h"
-#include "Source/Render/RenderUtil.h"
+#include "Render/Pipeline/RenderCommandQueue.h"
+#include "Render/Visuals/Billboard.h"
+#include "Render/Assets/ImportedModel.h"
+#include "Render/Pipeline/RenderUtil.h"
 
 #include <cstddef>
 

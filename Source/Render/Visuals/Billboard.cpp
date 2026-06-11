@@ -1,10 +1,10 @@
 ﻿#include "pch.h"
-#include "Billboard.h"
+#include "Render/Visuals/Billboard.h"
 #include "WICTextureLoader.h"
 #include "DeviceResources.h"
 #include "Services/SceneContext.h"
-#include "Render/ShaderCache.h"
-#include "Render/RenderUtil.h"
+#include "Render/Assets/ShaderCache.h"
+#include "Render/Pipeline/RenderUtil.h"
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;

@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-#include "ImportedModel.h"
+#include "Render/Assets/ImportedModel.h"
 
 namespace PrimitiveMesh
 {

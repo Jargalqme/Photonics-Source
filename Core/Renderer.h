@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "DeviceResources.h"
-#include "Source/Render/SceneRenderer.h"
-#include "Source/Render/SceneLighting.h"
+#include "Render/Pipeline/SceneRenderer.h"
+#include "Render/Lighting/SceneLighting.h"
 #include <memory>
 #include <string>
 #include <SpriteBatch.h>

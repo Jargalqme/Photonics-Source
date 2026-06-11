@@ -1,9 +1,9 @@
 ﻿#include "pch.h"
-#include "Tracers.h"
+#include "Render/Visuals/Tracers.h"
 
 #include "DeviceResources.h"
-#include "Render/RenderUtil.h"
-#include "Render/ShaderCache.h"
+#include "Render/Pipeline/RenderUtil.h"
+#include "Render/Assets/ShaderCache.h"
 #include "Services/SceneContext.h"
 
 using namespace DirectX;

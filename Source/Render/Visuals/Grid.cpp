@@ -1,46 +1,45 @@
 ﻿#include "pch.h"
-#include "ArenaFloor.h"
-#include "RenderUtil.h"
+#include "Render/Visuals/Grid.h"
+#include "Render/Pipeline/RenderUtil.h"
 #include "DeviceResources.h"
 #include "Services/SceneContext.h"
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
 
-ArenaFloor::ArenaFloor(SceneContext& context) : m_context(&context) {}
+Grid::Grid(SceneContext& context) : m_context(&context) {}
 
-// === 初期化 ===
+// === 初期化・終了 ===
 
-void ArenaFloor::initialize()
+void Grid::initialize()
 {
     auto device = m_context->device->GetD3DDevice();
 
-    float halfWidth = m_size * 0.5f;
-    float bottomY = -1.0f;
-    float topY = 80.0f;
-    float z = 80.0f;
-
+    // ジオメトリ作成（頂点・インデックスバッファ）
+    float half = m_gridSize;
     Vertex vertices[4] = {
-        { XMFLOAT3(-halfWidth, bottomY, z)},
-        { XMFLOAT3(-halfWidth, topY, z)},
-        { XMFLOAT3(halfWidth, bottomY,z)},
-        { XMFLOAT3(halfWidth, topY, z)}
+        { XMFLOAT3(-half, 0, -half) },
+        { XMFLOAT3(-half, 0,  half) },
+        { XMFLOAT3(half, 0, -half) },
+        { XMFLOAT3(half, 0,  half) }
     };
-
-    uint16_t indices[6] = { 0, 1, 2, 2, 1, 3 };
+    uint16_t indices[6] = {
+        0, 1, 2,
+        2, 1, 3
+    };
 
     m_vertexBuffer   = RenderUtil::createStaticVertexBuffer(device, vertices, static_cast<UINT>(std::size(vertices)));
     m_indexBuffer    = RenderUtil::createStaticIndexBuffer (device, indices,  static_cast<UINT>(std::size(indices)));
-    m_constantBuffer = RenderUtil::createDynamicConstantBuffer<ArenaFloorCB>(device);
+    m_constantBuffer = RenderUtil::createDynamicConstantBuffer<GridCB>(device);
 
+    // シェーダー読み込み
     Microsoft::WRL::ComPtr<ID3DBlob> vsBlob;
-    m_vertexShader = RenderUtil::loadVS(device, L"VS_WaveWorld.cso", &vsBlob);
-    m_pixelShader = RenderUtil::loadPS(device, L"PS_WaveWorld.cso");
+    m_vertexShader = RenderUtil::loadVS(device, L"VS_PristineGrid.cso", &vsBlob);
+    m_pixelShader  = RenderUtil::loadPS(device, L"PS_PristineGrid.cso");
 
     // 入力レイアウト
     D3D11_INPUT_ELEMENT_DESC layout[] = {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
-          D3D11_INPUT_PER_VERTEX_DATA, 0 }
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 }
     };
     DX::ThrowIfFailed(device->CreateInputLayout(
         layout, 1,
@@ -48,9 +47,7 @@ void ArenaFloor::initialize()
         m_inputLayout.ReleaseAndGetAddressOf()));
 }
 
-// === 終了処理 ===
-
-void ArenaFloor::finalize()
+void Grid::finalize()
 {
     m_vertexBuffer.Reset();
     m_indexBuffer.Reset();
@@ -62,43 +59,35 @@ void ArenaFloor::finalize()
 
 // === 更新 ===
 
-void ArenaFloor::update(float deltaTime)
+void Grid::update()
 {
-    m_time += deltaTime;
-}
-
-void ArenaFloor::setTransform(
-    const Vector3& position,
-    const Vector3& rotationDegrees,
-    const Vector3& scale)
-{
-    m_position = position;
-    m_rotationDegrees = rotationDegrees;
-    m_scale = scale;
+    // ビートパルス効果（現在は無効 — ライン色をそのまま使用）
+    m_finalColor = Color(
+        m_lineColor.R(),
+        m_lineColor.G(),
+        m_lineColor.B(),
+        m_lineColor.A()
+    );
 }
 
 // === 描画 ===
 
-void ArenaFloor::render(const Matrix& view, const Matrix& projection)
+void Grid::render(const Matrix& view, const Matrix& projection)
+{
+    renderPlane(m_worldFloor, view, projection);
+}
+
+void Grid::renderPlane(const Matrix& world, const Matrix& view, const Matrix& projection)
 {
     auto context = m_context->device->GetD3DDeviceContext();
 
     // 定数バッファ更新
-    const Matrix world =
-        Matrix::CreateScale(m_scale) *
-        Matrix::CreateFromYawPitchRoll(
-            XMConvertToRadians(m_rotationDegrees.y),
-            XMConvertToRadians(m_rotationDegrees.x),
-            XMConvertToRadians(m_rotationDegrees.z)) *
-        Matrix::CreateTranslation(m_position);
-    ArenaFloorCB cb;
-    XMStoreFloat4x4(&cb.worldViewProjection,
-        (world * view * projection).Transpose());
-    cb.time = m_time;
-    cb.speed = m_speed;
-    cb.brightness = m_brightness;
-    cb.alpha = m_alpha;
-    RenderUtil::updateDynamicConstantBuffer(context,m_constantBuffer, cb);
+    GridCB cb;
+    cb.worldViewProjection = (world * view * projection).Transpose();
+    cb.gridParams = Vector4(m_lineWidthX, m_lineWidthY, m_gridScale, m_lineEmissiveIntensity);
+    cb.lineColor = Vector4(m_finalColor.R(), m_finalColor.G(), m_finalColor.B(), m_finalColor.A());
+    cb.baseColor = Vector4(m_baseColor.R(), m_baseColor.G(), m_baseColor.B(), m_baseColor.A());
+    RenderUtil::updateDynamicConstantBuffer(context, m_constantBuffer, cb);
 
     // パイプライン設定
     context->IASetInputLayout(m_inputLayout.Get());

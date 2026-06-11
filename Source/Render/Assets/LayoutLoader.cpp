@@ -1,7 +1,7 @@
 #include "pch.h"
-#include "Render/LayoutLoader.h"
-#include "Render/ImportedModelCache.h"
-#include "Render/MeshCache.h"
+#include "Render/Assets/LayoutLoader.h"
+#include "Render/Assets/ImportedModelCache.h"
+#include "Render/Assets/MeshCache.h"
 #include "Services/SceneContext.h"
 #include "ThirdParty/json.hpp"
 #include <cctype>

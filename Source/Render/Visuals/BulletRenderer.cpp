@@ -1,8 +1,8 @@
 ﻿#include "pch.h"
-#include "BulletRenderer.h"
+#include "Render/Visuals/BulletRenderer.h"
 
 #include "Gameplay/BulletPool.h"
-#include "Render/RenderUtil.h"
+#include "Render/Pipeline/RenderUtil.h"
 
 #include <cstring>
 

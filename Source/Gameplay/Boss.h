@@ -4,7 +4,7 @@
 #include "Gameplay/ICombatTarget.h"
 #include "Common/StateMachine.h"
 #include "Common/Transform.h"
-#include "Render/Billboard.h"
+#include "Render/Visuals/Billboard.h"
 
 class BulletPool;
 class ParticleSystem;

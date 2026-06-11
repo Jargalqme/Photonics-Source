@@ -7,10 +7,10 @@
 #include "Gameplay/EventTypes.h"
 #include "Gameplay/Weapon/PlayerWeapon.h"
 #include "Renderer.h"
-#include "Render/Bloom.h"
-#include "Render/SceneRenderer.h"
+#include "Render/Pipeline/Bloom.h"
+#include "Render/Pipeline/SceneRenderer.h"
 #include "Services/InputManager.h"
-#include "Render/ImportedModelCache.h"
+#include "Render/Assets/ImportedModelCache.h"
 #include <imgui.h>
 #include <filesystem>
 #include <limits>

@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
-#include "AssimpModelImporter.h"
+#include "Render/Assets/AssimpModelImporter.h"
 
-#include "ImportedModel.h"
+#include "Render/Assets/ImportedModel.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/material.h>

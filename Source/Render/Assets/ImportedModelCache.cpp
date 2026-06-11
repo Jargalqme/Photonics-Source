@@ -1,9 +1,9 @@
 ﻿#include "pch.h"
-#include "ImportedModelCache.h"
+#include "Render/Assets/ImportedModelCache.h"
 
-#include "AssimpModelImporter.h"
-#include "PBRMaterialLoader.h"
-#include "PrimitiveMesh.h"
+#include "Render/Assets/AssimpModelImporter.h"
+#include "Render/Assets/PBRMaterialLoader.h"
+#include "Render/Assets/PrimitiveMesh.h"
 
 namespace
 {

@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
-#include "Render/FinalCompositePass.h"
-#include "Render/RenderUtil.h"
+#include "Render/Pipeline/FinalCompositePass.h"
+#include "Render/Pipeline/RenderUtil.h"
 
 FinalCompositePass::FinalCompositePass(DX::DeviceResources* deviceResources)
     : m_deviceResources(deviceResources)

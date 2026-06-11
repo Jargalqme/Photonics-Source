@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
-#include "Bloom.h"
-#include "Render/RenderUtil.h"
+#include "Render/Pipeline/Bloom.h"
+#include "Render/Pipeline/RenderUtil.h"
 
 using namespace DirectX;
 

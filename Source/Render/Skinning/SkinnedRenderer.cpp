@@ -2,7 +2,7 @@
 #include "SkinnedRenderer.h"
 
 #include "SkinnedModel.h"
-#include "Render/RenderUtil.h"
+#include "Render/Pipeline/RenderUtil.h"
 
 namespace
 {

@@ -3,7 +3,7 @@
 #include "Gameplay/Weapon/WeaponShot.h"
 #include "Gameplay/Weapon/Weapon.h"
 #include "Gameplay/Weapon/WeaponRifle.h"
-#include "Render/RenderCommandQueue.h"
+#include "Render/Pipeline/RenderCommandQueue.h"
 #include "Services/SceneContext.h"
 
 using namespace DirectX;

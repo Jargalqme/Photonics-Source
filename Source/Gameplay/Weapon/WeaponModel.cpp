@@ -1,8 +1,8 @@
 ﻿#include "pch.h"
 #include "Gameplay/Weapon/WeaponModel.h"
-#include "Render/ImportedModel.h"
-#include "Render/ImportedModelCache.h"
-#include "Render/RenderCommandQueue.h"
+#include "Render/Assets/ImportedModel.h"
+#include "Render/Assets/ImportedModelCache.h"
+#include "Render/Pipeline/RenderCommandQueue.h"
 #include "Services/SceneContext.h"
 #include <limits>
 

@@ -3,8 +3,8 @@
 #include "Gameplay/EventBus.h"
 #include "Gameplay/EventTypes.h"
 #include "GeometricPrimitive.h"
-#include "Render/MeshCache.h"
-#include "Render/RenderCommandQueue.h"
+#include "Render/Assets/MeshCache.h"
+#include "Render/Pipeline/RenderCommandQueue.h"
 #include "Services/SceneContext.h"
 
 using namespace DirectX;
