@@ -88,6 +88,9 @@
     <ClInclude Include="Source\Render\Pipeline\Renderer.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Render\Pipeline\UIRenderer.h">
+      <Filter>Core</Filter>
+    </ClInclude>
     <ClInclude Include="Core\pch.h">
       <Filter>Core</Filter>
     </ClInclude>
@@ -218,6 +221,9 @@
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="Source\Render\Pipeline\Renderer.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Render\Pipeline\UIRenderer.cpp">
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="Core\pch.cpp">

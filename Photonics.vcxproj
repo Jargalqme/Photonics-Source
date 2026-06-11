@@ -195,6 +195,7 @@ xcopy /Y /D "$(ProjectDir)ThirdParty\Assimp\bin\x64\Release\*.dll" "$(TargetDir)
     <ClInclude Include="Core\Game.h" />
     <ClInclude Include="Core\pch.h" />
     <ClInclude Include="Source\Render\Pipeline\Renderer.h" />
+    <ClInclude Include="Source\Render\Pipeline\UIRenderer.h" />
     <ClInclude Include="Core\StepTimer.h" />
     <ClInclude Include="ImGui\imconfig.h" />
     <ClInclude Include="ImGui\imgui.h" />
@@ -284,6 +285,7 @@ xcopy /Y /D "$(ProjectDir)ThirdParty\Assimp\bin\x64\Release\*.dll" "$(TargetDir)
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Source\Render\Pipeline\Renderer.cpp" />
+    <ClCompile Include="Source\Render\Pipeline\UIRenderer.cpp" />
     <ClCompile Include="ImGui\imgui.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>

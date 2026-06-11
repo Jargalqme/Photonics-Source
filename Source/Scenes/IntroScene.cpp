@@ -121,14 +121,15 @@ void IntroScene::render()
         float centerX = (size.right - size.left) * 0.5f;
         float centerY = (size.bottom - size.top) * 0.9f;
 
-        m_renderer->BeginUI();
-        m_renderer->DrawTextCentered(
+        UIRenderer* ui = m_renderer->GetUI();
+        ui->begin();
+        ui->drawTextCentered(
             m_quoteText,
             XMFLOAT2(centerX, centerY),
             Colors::White,
             m_quoteAlpha,
             FontType::Quote
         );
-        m_renderer->EndUI();
+        ui->end();
     }
 }

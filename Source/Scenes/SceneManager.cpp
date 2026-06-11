@@ -206,10 +206,10 @@ void SceneManager::render()
     // フェードオーバーレイ描画
     if (m_fadeAlpha > 0.0f)
     {
-        Renderer* renderer = m_context->renderer;
-        renderer->BeginUI();
-        renderer->DrawRect(renderer->GetFullscreenRect(), DirectX::Colors::Black, m_fadeAlpha);
-        renderer->EndUI();
+        UIRenderer* ui = m_context->renderer->GetUI();
+        ui->begin();
+        ui->drawRect(ui->fullscreenRect(), DirectX::Colors::Black, m_fadeAlpha);
+        ui->end();
     }
 }
 
